@@ -27,6 +27,5 @@
     }
   }
 
-
   sails.lift(rc('sails'));
 })();
