@@ -6,7 +6,9 @@ module.exports = {
 
     email: {
       type: 'string',
-      required: true
+      required: true,
+      unique: true,
+      email: true
     },
 
     devices: {
@@ -16,15 +18,18 @@ module.exports = {
 
     first_name: {
       type: 'string',
+      required: true
     },
 
     last_name: {
-      type: 'string'
+      type: 'string',
+      required: true
     },
 
     password: {
       type: 'string',
-      required: true
+      required: true,
+      minLength: 6
     },
 
     tracks: {
