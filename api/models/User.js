@@ -2,8 +2,6 @@ var bcrypt = require('bcrypt');
 
 module.exports = {
 
-  migrate: 'drop',
-
   attributes: {
 
     email: {
@@ -12,13 +10,26 @@ module.exports = {
     },
 
     devices: {
-      collection: 'device',
-      via: 'owner'
+      collection: 'DevicePermissions',
+      via: 'user'
+    },
+
+    first_name: {
+      type: 'string',
+    },
+
+    last_name: {
+      type: 'string'
     },
 
     password: {
       type: 'string',
       required: true
+    },
+
+    tracks: {
+      collection: 'track',
+      via: 'users'
     },
 
     toJSON: function() {
