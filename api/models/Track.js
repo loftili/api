@@ -7,13 +7,14 @@ module.exports = {
       required: true
     },
 
-    ip_addr: {
-      type: 'string',
-      regex: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
+    artist: {
+      model: 'artist'
     },
 
-    owner: {
-      model: 'user'
+    users: {
+      collection: 'user',
+      via: 'tracks',
+      dominant: true
     }
 
   }
