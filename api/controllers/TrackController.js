@@ -1,5 +1,4 @@
 var fs = require('fs'),
-    jsftp = require('jsftp'),
     path = require('path'),
     id3 = require('id3js');
 
@@ -43,7 +42,7 @@ module.exports = {
 
     function afterCopy(err) {
       if(err) 
-        res.status(400).send('bad upload');
+        return res.status(400).send('couldn\'t upload: ' + err);
 
       id3({file: file_path, type: id3.OPEN_LOCAL}, loadedTags);
     }
@@ -52,14 +51,10 @@ module.exports = {
       if(err) 
         return res.status(400).send('bad');
 
-      var ftp = new jsftp({
-            host: process.env['STORAGE_HOST'],
-            user: process.env['STORAGE_USER'],
-            pass: process.env['STORAGE_PASS']
-          }),
-          ftp_path = path.join('/media', [track_props.bucket_name, track_props.type].join('.'));
+      var storage_filename = [track_props.bucket_name, track_props.type].join('.'),
+          storage_path = path.join('/tracks', storage_filename);
 
-      ftp.put(data, ftp_path, afterCopy);
+      MediaUploadService.upload(data, storage_path, afterCopy);
     }
 
     function startCopy(file) {

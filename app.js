@@ -1,7 +1,9 @@
 (function() {
-  var sails;
+  var sails, dotenv;
   try {
     sails = require('sails');
+    dotenv = require('dotenv');
+    dotenv.load();
   } catch (e) {
     console.error('To run an app using `node app.js`, you usually need to have a version of `sails` installed in the same directory as your app.');
     console.error('To do that, run `npm install sails`');
