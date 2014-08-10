@@ -1,24 +1,28 @@
-module.exports.http = {
+module.exports.http = (function(){
+
+  return {
+
+    middleware: {
+
+      order: [
+        'startRequestTimer',
+        'cookieParser',
+        'session',
+        'bodyParser',
+        'handleBodyParserError',
+        'compress',
+        'methodOverride',
+        '$custom',
+        'router',
+        'www',
+        'favicon',
+        '404',
+        '500'
+      ],
+
+    }
+
+  };
   
-  middleware: {
-
-    order: [
-      'startRequestTimer',
-      'cookieParser',
-      'session',
-      'bodyParser',
-      'handleBodyParserError',
-      'compress',
-      'methodOverride',
-      '$custom',
-      'router',
-      'www',
-      'favicon',
-      '404',
-      '500'
-    ]
-
-  }
-
   // cache: 31557600000
-};
+})();
