@@ -36,6 +36,7 @@ module.exports = {
       return startCopy(files[0]);
     }
 
+    sails.log(req.files);
     req.file('file').upload(callback);
   },
 
