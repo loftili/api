@@ -1,44 +1,88 @@
 var fs = require('fs'),
     jsftp = require('jsftp'),
-    path = require('path');
+    path = require('path'),
+    id3 = require('id3js');
 
 module.exports = {
 
-  upload: function(req, res) {
-    var name = null,
-        type = null;
+  index: function(req, res, next) {
+    if(req.method !== 'GET') 
+      return next();
 
-    function afterCopy(err) {
-      if(err) res.status(400).send('bad upload');
+    function finish(err, tracks) {
+      if(err) return res.status(404).send('');
+      return res.json(tracks);
+    }
+
+    function populate(err, user) {
+      if(err || !user || !user.length > 0) return res.status(401).send('');
+      return res.json(user[0].tracks);
+    }
+
+    var user = User.find().where({id: req.session.user}).populate('tracks').exec(populate);
+  },
+
+  upload: function(req, res) {
+    var track_props = {},
+        file_path  = null;
+
+    function totallyDone(err, created) {
+      if(err) 
+        return res.status(422).json(err);
+
       return res.status(200).send('yay!');
     }
 
+    function loadedTags(err, tags) {
+      if(err) 
+        return res.status(422).json(err);
+
+      track_props = Track.parseTags(track_props, tags);
+      Track.create(track_props).exec(totallyDone);
+    }
+
+    function afterCopy(err) {
+      if(err) 
+        res.status(400).send('bad upload');
+
+      id3({file: file_path, type: id3.OPEN_LOCAL}, loadedTags);
+    }
+
     function doCopy(err, data) {
-      if(err) return res.status(400).send('bad');
+      if(err) 
+        return res.status(400).send('bad');
 
       var ftp = new jsftp({
             host: process.env['STORAGE_HOST'],
             user: process.env['STORAGE_USER'],
             pass: process.env['STORAGE_PASS']
           }),
-          ftp_path = path.join('/media', [name, type].join('.'));
+          ftp_path = path.join('/media', [track_props.bucket_name, track_props.type].join('.'));
 
       ftp.put(data, ftp_path, afterCopy);
     }
 
     function startCopy(file) {
-      sails.log(file);
-
       if(!file.fd)
         return res.status(422).send('')
 
-      var matches = file.fd.match(/^.*\/uploads\/(.*)\.(\w+)$/);
+      var matches = file.fd.match(/^.*\/uploads\/(.*)\.(\w+)$/),
+          type_match = file.type.match(/^audio\/(\w+)$/);
+
       if(!matches || matches.length < 3)
         return res.status(422).send('');
 
-      name = matches[1];
-      type = matches[2];
+      if(!type_match || type_match.length < 2)
+        return res.status(422).send('unsupported media type');
 
+      track_props.bucket_name = matches[1];
+      track_props.type = type_match[1];
+      track_props.users = [req.session.user];
+      file_path = file.fd;
+
+      if(Track.supported_types.indexOf(track_props.type) < 0)
+        return res.status(422).send('unsupported media type');
+      
       fs.readFile(file.fd, doCopy);
     }
 
