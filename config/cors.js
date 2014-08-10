@@ -1,9 +1,12 @@
-module.exports.cors = {
+var dotenv = require('dotenv');
 
-  allRoutes: true,
-  origin: 'http://local-ui.lofti.li',
-  credentials: true,
-  methods: 'GET, POST, PUT, DELETE, OPTIONS, HEAD'
-  // headers: 'content-type'
+module.exports.cors = (function() {
 
-};
+  return {
+    allRoutes: true,
+    origin: '', // handled via cors policy
+    credentials: true,
+    methods: 'GET, POST, PUT, DELETE, OPTIONS, HEAD'
+  };
+
+})();
