@@ -20,7 +20,10 @@ module.exports = {
     }
 
     function startCopy(file) {
-      fs.readFile(file.fd, doCopy);
+      sails.log(file);
+      if(!file.fd)
+        return res.status(422).send('')
+      fs.readFile(file.fd || file.path, doCopy);
     }
 
     function callback(err, files) {
