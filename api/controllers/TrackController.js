@@ -8,12 +8,18 @@ module.exports = {
     var track_props = {},
         file_path  = null;
 
-    function totallyDone(err, created) {
+    function done(err, uploaded_track) {
+      if(err)
+        return res.status(422).send('');
+
+      return res.json(uploaded_track);
+    }
+
+    function createCb(err, created) {
       if(err) 
         return res.status(422).json(err);
 
-      sails.log(created);
-      return res.status(200).json(created);
+      Track.findOne({id: created.id}).populate('artist').exec(done);
     }
 
     function loadedTags(err, tags) {
@@ -21,7 +27,7 @@ module.exports = {
         return res.status(422).json(err);
 
       track_props = Track.parseTags(track_props, tags);
-      Track.create(track_props).exec(totallyDone);
+      Track.create(track_props).exec(createCb);
     }
 
     function afterCopy(err) {
