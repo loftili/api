@@ -27,8 +27,7 @@ module.exports = {
 
     users: {
       collection: 'user',
-      via: 'tracks',
-      dominant: true
+      via: 'tracks'
     }
 
   },
@@ -59,7 +58,8 @@ module.exports = {
       if(err) 
         cb(err);
 
-      values.artist = artist.id;
+      if(artist)
+        values.artist = artist.id;
 
       cb();
     }

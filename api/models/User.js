@@ -34,13 +34,8 @@ module.exports = {
 
     tracks: {
       collection: 'track',
-      via: 'users'
-    },
-
-    toJSON: function() {
-      var a = this.toObject();
-      delete a['password']
-      return a;
+      via: 'users',
+      dominant: true
     }
 
   },

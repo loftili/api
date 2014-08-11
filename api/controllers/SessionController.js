@@ -18,7 +18,7 @@ module.exports = {
 
   logout: function(req, res) {
     req.session.user = null;
-    res.status(201).send();
+    return res.status(201).send();
   },
 
   login: function(req, res) {

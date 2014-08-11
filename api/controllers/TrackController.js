@@ -4,23 +4,6 @@ var fs = require('fs'),
 
 module.exports = {
 
-  index: function(req, res, next) {
-    if(req.method !== 'GET') 
-      return next();
-
-    function finish(err, tracks) {
-      if(err) return res.status(404).send('');
-      return res.json(tracks);
-    }
-
-    function populate(err, user) {
-      if(err || !user || !user.length > 0) return res.status(401).send('');
-      return res.json(user[0].tracks);
-    }
-
-    var user = User.find().where({id: req.session.user}).populate('tracks').exec(populate);
-  },
-
   upload: function(req, res) {
     var track_props = {},
         file_path  = null;
@@ -29,7 +12,8 @@ module.exports = {
       if(err) 
         return res.status(422).json(err);
 
-      return res.status(200).send('yay!');
+      sails.log(created);
+      return res.status(200).json(created);
     }
 
     function loadedTags(err, tags) {

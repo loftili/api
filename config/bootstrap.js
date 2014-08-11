@@ -4,8 +4,6 @@ module.exports.bootstrap = function(cb) {
     if(err) 
       cb(err);
 
-    sails.log(user);
-
     cb();
   }
 
