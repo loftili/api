@@ -12,7 +12,7 @@ module.exports = {
     },
 
     devices: {
-      collection: 'DevicePermissions',
+      collection: 'devicepermission',
       via: 'user'
     },
 
@@ -36,6 +36,12 @@ module.exports = {
       collection: 'track',
       via: 'users',
       dominant: true
+    },
+
+    toJSON: function() {
+      var obj = this.toObject();
+      delete obj['password'];
+      return obj;
     }
 
   },

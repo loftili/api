@@ -20,8 +20,9 @@ module.exports = {
       regex: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
     },
 
-    owner: {
-      model: 'user'
+    permissions: {
+      collection: 'devicepermission',
+      via: 'device'
     }
 
   }

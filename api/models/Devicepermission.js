@@ -2,16 +2,16 @@ module.exports = {
 
   attributes: {
 
-    device: {
-      model: 'device'
-    },
-
     user: {
       model: 'user'
     },
 
+    device: {
+      model: 'device'
+    },
+
     level: {
-      type: 'int'
+      type: 'integer'
     }
 
   }
