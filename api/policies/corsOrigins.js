@@ -4,11 +4,12 @@ module.exports = function(req, res, next) {
         'http://app.lofti.li',
         'http://beta.app.lofti.li'
       ],
-      origin_header = req.headers.origin,
+      origin_header = req.get('Origin'),
       origin_index = allowed_origins.indexOf(origin_header),
       is_allowed = origin_index >= 0;
 
-  res.setHeader('Access-Control-Allow-Origin', allowed_origins[origin_index]);
+  res.setHeader('Access-Control-Allow-Origin', allowed_origins[origin_index] || allowed_origins[0]);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, UNLINK, LINK, PATCH, PUT');
 
   next();
 };

@@ -12,7 +12,12 @@ module.exports = {
     },
 
     status: {
-      type: 'boolean'
+      type: 'boolean',
+      defaultsTo: false
+    },
+
+    last_checked: {
+      type: 'datetime'
     },
 
     ip_addr: {
