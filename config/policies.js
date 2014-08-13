@@ -1,3 +1,3 @@
 module.exports.policies = {
-  '*': ['isLoggedIn', 'corsOrigins']
+  '*': ['isLoggedIn', 'corsHeaders']
 };

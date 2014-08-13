@@ -4,6 +4,19 @@ module.exports.http = (function(){
 
     middleware: {
 
+      corsOptions: function(req, res, next) {
+        if(req.method !== 'OPTIONS')
+          next();
+        else {
+          CorsHeaderService.add(req, res);
+          res.status(200).send();
+        }
+      },
+
+      authorization: function(req, res, next) {
+        next();
+      },
+
       order: [
         'startRequestTimer',
         'cookieParser',
@@ -12,6 +25,8 @@ module.exports.http = (function(){
         'handleBodyParserError',
         'compress',
         'methodOverride',
+        'authorization',
+        'corsOptions',
         '$custom',
         'router',
         'www',
