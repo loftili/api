@@ -22,7 +22,8 @@
     "skipper": "^0.5.3",
     "waterline": "^0.10.6",
     "id3js": "^1.1.3",
-    "aws-sdk": "^2.0.11"
+    "aws-sdk": "^2.0.11",
+    "namejs": "1.2.2"
   },
   "scripts": {
     "start": "node app.js",

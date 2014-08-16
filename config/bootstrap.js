@@ -11,7 +11,8 @@ module.exports.bootstrap = function(cb) {
     email: 'danny@dadleyy.com',
     password: 'password',
     first_name: 'danny',
-    last_name: 'hadley'
+    last_name: 'hadley',
+    username: 'dadleyy'
   }, added);
 
 };

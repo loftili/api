@@ -25,6 +25,10 @@ module.exports = {
       regex: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
     },
 
+    port: {
+      type: 'integer'
+    },
+
     permissions: {
       collection: 'devicepermission',
       via: 'device'

@@ -3,5 +3,5 @@ module.exports.routes = {
   'GET /auth': 'SessionController.index',
   'POST /auth': 'SessionController.login',
   'GET /logout': 'SessionController.logout',
-  'PUT /devices/:id/register': 'DeviceController.register'
+  'POST /dns': 'DnsController.create'
 };
