@@ -27,6 +27,7 @@ module.exports = {
 
     function doLogin(user, hash) {
       req.session.user = user.id;
+      req.session.username = user.username;
       var active_user = user.toJSON();
       return res.json(active_user);
     }

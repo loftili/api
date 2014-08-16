@@ -26,7 +26,8 @@ module.exports = {
     },
 
     port: {
-      type: 'integer'
+      type: 'integer',
+      defaultsTo: '80'
     },
 
     permissions: {
@@ -34,10 +35,6 @@ module.exports = {
       via: 'device'
     }
 
-  },
-
-  registerDomain: function(cb, user) {
-    sails.log(this.name);
   },
 
   beforeDestroy: function(criteria, cb) {
