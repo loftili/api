@@ -14,10 +14,16 @@ module.exports = (function() {
       return res.status(400).send('missing track id');
 
 
-    sails.log('[PlaybackController.start] ' + fn + ' playback on ' + device_id);
+    sails.log('[PlaybackController.' + fn + '] ' + fn + ' playback on ' + device_id);
 
-    function finish() {
-      return res.status(202).send('');
+    function finish(error, d_response, d_body) {
+      if(error)
+        return res.status(400).send(error);
+
+      sails.log('[PlaybackController.finish] Successfully executed ' + fn + ' on  ' + device_id + ' STATUS[' + d_response.statusCode + ']');
+      return res.status(202).json({
+        body: d_body
+      });
     }
 
     function foundDevice(err, permission) {
