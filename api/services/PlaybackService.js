@@ -51,6 +51,7 @@ module.exports = (function() {
     }
 
     request = http.request(options, requestHandler);
+    request.setTimeout(2000);
     request.on('error', errorHandler);
     request.end();
   }
