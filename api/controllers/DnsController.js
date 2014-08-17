@@ -4,47 +4,6 @@ var namejs = require('namejs'),
 module.exports = (function() {
 
   dotenv.load();
-	
-  var client = new namejs.Client({
-        token: process.env['NAMEAPI_TOKEN'],
-        username: process.env['NAMEAPI_USER']
-      }),
-      name_domain = 'lofti.li';
-
-  function registerDomain(user, device, callback) {
-    var subdomain = [device.name, user.username].join('.'),
-        ip_addr = device.ip_addr;
-
-    function success() {
-      sails.log('successfully created: ' + subdomain);
-      callback(false, 'ok!');
-    }
-
-    function fail(err) {
-      sails.log('failed creating: ' + subdomain + ' -> ' + err);
-      callback('failed', false);
-    }
-
-    sails.log('creating a new subdomain: ' + subdomain + ' -> ' + ip_addr);
-    client.createSubdomain(name_domain, subdomain, ip_addr).then(success, fail);
-  }
-
-  function deleteSubdomain(user, device, callback) {
-    var subdomain = [device.name, user.username].join('.');
-
-    function success() {
-      sails.log('successfully deleted: ' + subdomain);
-      callback(false, 'ok!');
-    }
-
-    function fail(err) {
-      sails.log('failed deleting: ' + subdomain + ' -> ' + err);
-      callback('failed', false);
-    }
-
-    sails.log('deleting a subdomain: ' + subdomain);
-    client.deleteSubdomain(name_domain, subdomain).then(success, fail);
-  }
 
   return {
 
@@ -67,7 +26,7 @@ module.exports = (function() {
         if(errored)
           return res.status(400).send('');
 
-        registerDomain(_user, _device, fin);
+        DnsManagerSerice.createRecord(_user, _device, fin);
       }
 
       function foundDevice(err, device) {
@@ -113,7 +72,7 @@ module.exports = (function() {
         if(errored)
           return res.status(400).send('');
 
-        deleteSubdomain(_user, _device, fin);
+        DnsManagerSerice.deleteRecord(_user, _device, fin);
       }
 
       function foundDevice(err, device) {
