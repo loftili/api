@@ -1,3 +1,5 @@
+var domains = require('../../config/domain');
+
 module.exports = (function() {
   var methods = [
     'OPTIONS',
@@ -13,11 +15,7 @@ module.exports = (function() {
     'Accept',
     'Authorization'
   ],
-  allowed_origins = [
-    'http://local-ui.lofti.li',
-    'http://app.lofti.li',
-    'http://beta.app.lofti.li'
-  ];
+  allowed_origins = domains.allowed_origins;
   
   return {
 

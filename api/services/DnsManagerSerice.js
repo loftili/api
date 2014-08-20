@@ -1,5 +1,6 @@
 var namejs = require('namejs'),
-    dotenv = require('dotenv');
+    dotenv = require('dotenv'),
+    domain = require('../../config/domain');
 
 module.exports = (function() {
 
@@ -9,7 +10,7 @@ module.exports = (function() {
         token: process.env['NAMEAPI_TOKEN'],
         username: process.env['NAMEAPI_USER']
       }),
-      name_domain = 'lofti.li';
+      name_domain = domain.subdomain_parent;
 
   return {
 

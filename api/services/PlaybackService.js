@@ -1,9 +1,10 @@
-var http = require('http');
+var http = require('http'),
+    domains = require('../../config/domain');
 
 module.exports = (function() {
 
   function send(method, user, device, track, callback) {
-    var hostname = [device.name, user.username, 'lofti.li'].join('.'),
+    var hostname = [device.name, user.username, domains.subdomain_parent].join('.'),
         port = device.port,
         options = {
           hostname: hostname,
