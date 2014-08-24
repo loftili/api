@@ -35,7 +35,7 @@ module.exports = (function() {
       else
         sails.log('[PlaybackController.stop] Found device, stopping ' + permission.device.name);
 
-      PlaybackService[fn](permission.user, permission.device, track_id, finish);
+      DeviceControlService[fn](permission.user, permission.device, track_id, finish);
     }
 
     Devicepermission.findOne({
