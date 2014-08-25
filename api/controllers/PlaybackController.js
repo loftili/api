@@ -27,7 +27,7 @@ module.exports = (function() {
     }
 
     function foundDevice(err, permission) {
-      if(err || !permission.user || !permission.device)
+      if(err || !permission || !permission.user || !permission.device)
         return res.status(404).send('unable to find device');
 
       if(fn === 'start')

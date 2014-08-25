@@ -11,6 +11,9 @@ module.exports = (function() {
           port: port,
           path: ('/' + method),
           method: 'GET',
+          headers: {
+            "x-loftili-auth": user.username
+          }
         },
         request = null,
         device_response = '',
@@ -42,8 +45,16 @@ module.exports = (function() {
     }
 
     function requestHandler(res) {
+      if(sent)
+        return;
+
       res.setEncoding('utf8');
       response_obj = res;
+      sails.log('[DeviceControlService.send.requestHandler] receiving response: ' + JSON.stringify(res.headers));
+
+      if(!res.headers['x-loftili-version'])
+        return errorHandler('missing loftili core header');
+
       res.on('data', receiveData);
       res.on('end', finish);
     }
@@ -54,7 +65,7 @@ module.exports = (function() {
 
       sails.log('[DeviceControlService.send.error] Errored device com request ' + e);
       request.abort();
-      callback('errored request to device', false);
+      callback('errored request to device [' + e + ']', false);
       sent = true;
     }
 
