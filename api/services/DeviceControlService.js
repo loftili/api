@@ -33,8 +33,8 @@ module.exports = (function() {
     }
 
     function finish() {
-      if(device_response_overflow || sent)
-        return errorHandler();
+      if(device_response_overflow)
+        return errorHandler('device response buffer overflow');
 
       sails.log('[DeviceControlService.send.finish] Finished receiving response from device');
       sails.log('----------------------------------------');
@@ -64,9 +64,9 @@ module.exports = (function() {
         return;
 
       sails.log('[DeviceControlService.send.error] Errored device com request ' + e);
+      sent = true;
       request.abort();
       callback('errored request to device [' + e + ']', false);
-      sent = true;
     }
 
     function socketOpened(socket) {
@@ -123,10 +123,8 @@ module.exports = (function() {
 
 
       function finish(error, res, body) {
-        if(error) {
+        if(error)
           sails.log('[DeviceControlService.ping.error] Errored ping request ERROR[' + error + ']');
-          return callback(true, res, body);
-        }
 
         callback(error, res, body);
       }
