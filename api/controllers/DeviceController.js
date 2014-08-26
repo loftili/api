@@ -6,9 +6,9 @@ module.exports = {
     var device_id = req.params.id,
         user_id = req.session.user,
         username = req.session.username,
+        failed = false,
         found_device = null,
-        found_user = null,
-        failed = false;
+        attempt;
 
     if(!user_id)
       return res.status(401).send('');
@@ -21,7 +21,7 @@ module.exports = {
         sails.log("[DeviceController][finishing] - devicecontrollerservice failed ping");
         found_device.status = false;
         found_device.save();
-        return res.status(404).json(found_device);
+        return res.status(408).json(found_device);
       }
 
       found_device.status = true;
@@ -38,34 +38,17 @@ module.exports = {
       return res.status(404).send('');
     }
 
-    function sendPing() {
-      if(found_user === null || found_device == null || failed)
-        return;
-
-      sails.log("[DeviceController][sendPing] - Found user and device for request, sending ping");
-      DeviceControlService.ping(found_user, found_device, finish);
-    }
-
-    function foundUser(err, user) {
-      if(err)
-        return missing();
-
-      sails.log("[DeviceController][foundUser] - found user");
-      found_user = user;
-      sendPing();
-    }
-
-    function foundDevice(err, device) {
-      if(err)
-        return missing();
+    function lookupCb(err, permission) {
+      if(err || !permission || !permission.user || !permission.device)
+        return res.status(404).send('unable to find device');
 
       sails.log("[DeviceController][foundDevice] - found device");
-      found_device = device;
-      sendPing();
+      found_device = permission.device;
+      DeviceControlService.ping(permission.user, permission.device, finish);
     }
 
-    Device.findOne({id: device_id}).populate('permissions').exec(foundDevice);
-    User.findOne({id: user_id}).exec(foundUser);
+    attempt = Devicepermission.findOne({device: device_id, user: req.session.user});
+    attempt.populate('device').populate('user').exec(lookupCb);
   }
 
 };

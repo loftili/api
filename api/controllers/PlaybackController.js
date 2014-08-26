@@ -2,7 +2,8 @@ module.exports = (function() {
 
   function action(fn, req, res) {
     var device_id = req.body.device,
-        track_id = req.body.track;
+        track_id = req.body.track,
+        attempt;
 
     if(!req.session.user)
       return res.status(401).send('');
@@ -13,20 +14,17 @@ module.exports = (function() {
     if(fn === 'start' && !track_id)
       return res.status(400).send('missing track id');
 
-
     sails.log('[PlaybackController.' + fn + '] ' + fn + ' playback on ' + device_id);
 
     function finish(error, d_response, d_body) {
       if(error)
-        return res.status(400).send(error);
+        return res.status(408).send(error);
 
       sails.log('[PlaybackController.finish] Successfully executed ' + fn + ' on  ' + device_id + ' STATUS[' + d_response.statusCode + ']');
-      return res.status(202).json({
-        body: d_body
-      });
+      return res.status(202).json({body: d_body});
     }
 
-    function foundDevice(err, permission) {
+    function lookupCb(err, permission) {
       if(err || !permission || !permission.user || !permission.device)
         return res.status(404).send('unable to find device');
 
@@ -38,12 +36,8 @@ module.exports = (function() {
       DeviceControlService[fn](permission.user, permission.device, track_id, finish);
     }
 
-    Devicepermission.findOne({
-        device: device_id, 
-        user: req.session.user
-      }).populate('device')
-      .populate('user')
-      .exec(foundDevice);
+    attempt = Devicepermission.findOne({device: device_id, user: req.session.user});
+    attempt.populate('device').populate('user').exec(lookupCb);
   }
 
   return {
