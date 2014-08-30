@@ -11,6 +11,8 @@ module.exports.routes = {
 
   'GET /devices/:id/ping': 'DeviceController.ping',
 
+  'POST /registration': 'RegistrationController.register',
+
   'POST /playback/start': 'PlaybackController.start',
   'POST /playback/stop': 'PlaybackController.stop'
 };
