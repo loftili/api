@@ -15,7 +15,7 @@ module.exports = (function() {
   return {
 
     deleteRecord: function(user, device, callback) {
-      var subdomain = [device.name, user.username].join('.');
+      var subdomain = [device.name, user.username].join('.').toLowerCase();
 
       function success() {
         sails.log('[DnsManagerSerice.deleteRecord.success] successfully deleted: ' + subdomain);
@@ -32,7 +32,7 @@ module.exports = (function() {
     },
 
     createRecord: function(user, device, callback) {
-      var subdomain = [device.name, user.username].join('.'),
+      var subdomain = [device.name, user.username].join('.').toLowerCase(),
           ip_addr = device.ip_addr;
 
       function success() {
@@ -50,7 +50,7 @@ module.exports = (function() {
     },
 
     updateRecord: function(user, device, callback) {
-      var record_name = [device.name, user.username].join('.'),
+      var record_name = [device.name, user.username].join('.').toLowerCase(),
           ip_addr = device.ip_addr;
 
       function finish() {
