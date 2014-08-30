@@ -18,12 +18,12 @@ module.exports = (function() {
       var subdomain = [device.name, user.username].join('.');
 
       function success() {
-        sails.log('[DnsManagerSerice.deleteRecord.success] Successfully deleted: ' + subdomain);
+        sails.log('[DnsManagerSerice.deleteRecord.success] successfully deleted: ' + subdomain);
         callback(false, 'ok!');
       }
 
       function fail(err) {
-        sails.log('[DnsManagerSerice.deleteRecord.fail] Failed deleting: ' + subdomain + ' -> ' + err);
+        sails.log('[DnsManagerSerice.deleteRecord.fail] failed deleting: ' + subdomain + ' -> ' + err);
         callback('failed', false);
       }
 
@@ -36,16 +36,16 @@ module.exports = (function() {
           ip_addr = device.ip_addr;
 
       function success() {
-        sails.log('[DnsManagerSerice.createRecord.success] Successfully created: ' + subdomain);
+        sails.log('[DnsManagerSerice.createRecord.success] successfully created: ' + subdomain);
         callback(false, 'ok!');
       }
 
       function fail(err) {
-        sails.log('[DnsManagerSerice.createRecord.failed] Failed creating: ' + subdomain + ' -> ' + err);
+        sails.log('[DnsManagerSerice.createRecord.failed] failed creating: ' + subdomain + ' -> ' + err);
         callback('failed', false);
       }
 
-      sails.log('[DnsManagerSerice.createRecord] Creating a new subdomain: ' + subdomain + ' -> ' + ip_addr);
+      sails.log('[DnsManagerSerice.createRecord] creating a new subdomain: ' + subdomain + ' -> ' + ip_addr);
       client.createSubdomain(name_domain, subdomain, ip_addr).then(success, fail);
     },
 
@@ -54,20 +54,21 @@ module.exports = (function() {
           ip_addr = device.ip_addr;
 
       function finish() {
-        sails.log('[DnsManagerSerice.updateRecord] Recreated record for ' + record_name + ' -> ' + ip_addr);
+        sails.log('[DnsManagerSerice.updateRecord] recreated record for ' + record_name + ' -> ' + ip_addr);
         callback();
       }
 
       function create() {
-        sails.log('[DnsManagerSerice.updateRecord] Deleted record for ' + record_name + ' -> ' + ip_addr);
+        sails.log('[DnsManagerSerice.updateRecord] deleted record for ' + record_name + ' -> ' + ip_addr);
         client.createSubdomain(name_domain, record_name, ip_addr).then(finish, fail);
       }
 
       function fail() {
+        sails.log('[DnsManagerSerice.updateRecord] failed deleting record for ' + record_name + ' -> ' + ip_addr);
         callback();
       }
 
-      sails.log('[DnsManagerSerice.updateRecord] Updating record for ' + record_name + ' -> ' + ip_addr);
+      sails.log('[DnsManagerSerice.updateRecord] updating record for ' + record_name + ' -> ' + ip_addr);
       client.deleteSubdomain(name_domain, record_name).then(create, fail);
     }
 

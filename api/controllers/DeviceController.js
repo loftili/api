@@ -49,6 +49,10 @@ module.exports = {
 
     attempt = Devicepermission.findOne({device: device_id, user: req.session.user});
     attempt.populate('device').populate('user').exec(lookupCb);
+  },
+
+  missing: function(req, res) {
+    res.status(404).send('not found');
   }
 
 };
