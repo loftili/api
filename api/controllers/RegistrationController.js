@@ -27,20 +27,20 @@ module.exports = {
 
     function finish() {
       var hostname = [devicename, username].join('.'),
-          params = {name: devicename, ip_addr: remote_ip, hostname: hostname};
+          params = {name: devicename, ip_addr: remote_ip, hostname: hostname, port: port};
 
       sails.log('[RegistrationController.register] user authenticated, creating: ' + devicename + '[' + remote_ip + ']');
       Device.create(params).exec(createdDevice);
     }
 
     function authCheck(err, hash) {
-      return (err || !hash) ? res.status(401).send() : finish();
+      return (err || !hash) ? res.status(401).send('unable to authenticate') : finish();
     }
 
     function foundUser(err, user) {
       if(err || !user) {
         sails.log('[RegistrationController.register] errored looking up user: ' + username);
-        return res.status(404).send('');
+        return res.status(401).send('unable to authenticate');
       }
 
       found_user = user;
@@ -52,7 +52,7 @@ module.exports = {
       sails.log('[RegistrationController.register] looking up user: ' + username);
       User.findOne({username: username}).exec(foundUser);
     } else {
-      return res.status(400).send('');
+      return res.status(400).send('missing registration parameters');
     }
   }
 
