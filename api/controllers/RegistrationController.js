@@ -17,12 +17,16 @@ module.exports = {
     }
 
     function createdDevice(err, device) {
-      var params = {device: device.id, user: found_user.id, level: 1};
+      if(err) {
+        sails.log(err);
+        return res.status(400).send(err);
+      }
 
+      var params = {device: device.id, user: found_user.id, level: 1};
       created_device = device;
       sails.log('[RegistrationController.register] creating permission for new device');
       DnsManagerSerice.createRecord(found_user, device, function(){})
-      Devicepermission.create(params).exec(createdPermission);
+      Devicepermission.findOrCreate(params, params, createdPermission);
     }
 
     function finish() {
@@ -30,7 +34,7 @@ module.exports = {
           params = {name: devicename, ip_addr: remote_ip, hostname: hostname, port: port};
 
       sails.log('[RegistrationController.register] user authenticated, creating: ' + devicename + '[' + remote_ip + ']');
-      Device.create(params).exec(createdDevice);
+      Device.findOrCreate(params, params, createdDevice);
     }
 
     function authCheck(err, hash) {
