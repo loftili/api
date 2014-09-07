@@ -20,13 +20,15 @@ module.exports = (function() {
   return {
 
     add: function(req, res) {
-      var origin_header = req.get('Origin');
-          origin_index = allowed_origins.indexOf(origin_header);
+      var origin_header = req.get('Origin'),
+          is_allowed = allowed_origins.test(origin_header);
 
-      res.setHeader('Access-Control-Allow-Credentials', true);
-      res.setHeader('Access-Control-Allow-Origin', allowed_origins[origin_index] || allowed_origins[0]);
-      res.setHeader('Access-Control-Allow-Methods', methods.join());
-      res.setHeader('Access-Control-Allow-Headers', headers.join());
+      if(is_allowed) {
+        res.setHeader('Access-Control-Allow-Credentials', true);
+        res.setHeader('Access-Control-Allow-Origin', origin_header);
+        res.setHeader('Access-Control-Allow-Methods', methods.join());
+        res.setHeader('Access-Control-Allow-Headers', headers.join());
+      }
     }
 
   };
