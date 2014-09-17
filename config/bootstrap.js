@@ -1,37 +1,30 @@
 module.exports.bootstrap = function(cb) {
   var completed = 0,
-      errored = false;
+      errored = false,
+      initial_users = [{
+        email: 'danny@dadleyy.com',
+        password: 'password',
+        first_name: 'danny',
+        last_name: 'hadley',
+        username: 'dadleyy'
+      }];
 
-  function added(err, user) {
-    if(errored)
-      return false;
-
-    if(err) {
-      errored = true;
-      return cb(err);
-    }
-
-    completed++;
-    if(completed === 2)
-      cb();
+  function finished() {
+    cb();
   }
 
-  var danny = User.create({
-    email: 'danny@dadleyy.com',
-    password: 'password',
-    first_name: 'danny',
-    last_name: 'hadley',
-    username: 'dadleyy'
-  }, added);
+  User.query('DELETE FROM user whre id > 0', clearExisting);
 
+  function addNext() {
+    if(initial_users.length < 1)
+      return finished();
 
-  var test1 = User.create({
-    email: 'test@loftili.com',
-    password: 'password',
-    first_name: 'test',
-    last_name: 'test',
-    username: 'test1'
-  }, added);
+    var next = initial_users.pop();
+    User.create(next, addNext);
+  }
 
+  function clearExisting(err, users) {
+    addNext();
+  }
 
 };
