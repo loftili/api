@@ -1,5 +1,7 @@
 (function() {
 
+  process.env.NODE_ENV = 'test';
+
   function Response() {
     this.properties = {
       status: 200,

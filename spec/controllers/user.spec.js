@@ -3,7 +3,7 @@ var Sails = require('sails/lib/app'),
     assert = require('assert'),
     helpers = require('../helpers');
 
-describe('The Session (Auth) Controller', function () {
+describe('The User Controller', function () {
 
   var app = Sails(),
       lift_params = {
@@ -18,6 +18,9 @@ describe('The Session (Auth) Controller', function () {
   }
 
   function lifted(err, sails) {
+    if(err)
+      console.log(err);
+
     app.config.bootstrap(finished_lift);
   }
 
@@ -30,21 +33,21 @@ describe('The Session (Auth) Controller', function () {
     app.lower(done);
   });
 
-  it('should return a 401 when no user', function(done) {
+  it('should return a 404 when no user', function(done) {
     var response = new helpers.Response(),
         code = null;
 
     function finish() {
       code = response.get('status');
-      assert.equal(code, 401);
+      assert.equal(code, 404);
       done();
     }
 
     response.then(finish);
-    app.controllers.session.index({session: {}}, response);
+    app.controllers.user.search({query: {q: 'asdasda'}}, response);
   });
 
-  it('should return a 200 user found in session', function(done) {
+  it('should return an array with two users found', function(done) {
     var response = new helpers.Response(),
         code = null, data = null;
 
@@ -52,12 +55,12 @@ describe('The Session (Auth) Controller', function () {
       code = response.get('status');
       data = response.get('data');
       assert.equal(code, 200);
-      assert.equal(data.username, 'dadleyy');
+      assert.equal(data.length, 2);
       done();
     }
 
     response.then(finish);
-    app.controllers.session.index({session: {user: 1}}, response);
+    app.controllers.user.search({query: {q: 'test'}}, response);
   });
 
 });
