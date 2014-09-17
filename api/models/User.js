@@ -21,9 +21,9 @@ module.exports = {
       required: true
     },
 
-    private_flag: {
-      type: 'boolean',
-      defaultsTo: false
+    privacy_level: {
+      type: 'integer',
+      defaultsTo: 1
     },
 
     last_name: {

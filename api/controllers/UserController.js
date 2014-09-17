@@ -27,10 +27,10 @@ module.exports = {
           matching.push(user);
       }
 
-      return res.status(200).json(matching);
+      return matching.length > 0 ? res.status(200).json(matching) : res.status(404).send('');
     }
 
-    User.query('SELECT username, email FROM user WHERE private_flag = false', callback);
+    User.query('SELECT username, email FROM user WHERE privacy_level < 5', callback);
   }
 	
 };

@@ -7,6 +7,25 @@ module.exports.bootstrap = function(cb) {
         first_name: 'danny',
         last_name: 'hadley',
         username: 'dadleyy'
+      }, {
+        email: 'test1@loftili.com',
+        password: 'password',
+        first_name: 'test',
+        last_name: 'test',
+        username: 'test1'
+      }, {
+        email: 'test2@loftili.com',
+        password: 'password',
+        first_name: 'test',
+        last_name: 'test',
+        username: 'test2'
+      }, {
+        email: 'test2@loftili.com',
+        password: 'password',
+        first_name: 'test',
+        last_name: 'test',
+        username: 'test2',
+        privacy_level: 5
       }];
 
   function finished() {
@@ -19,7 +38,7 @@ module.exports.bootstrap = function(cb) {
     if(initial_users.length < 1)
       return finished();
 
-    var next = initial_users.pop();
+    var next = initial_users.shift();
     User.create(next, addNext);
   }
 
