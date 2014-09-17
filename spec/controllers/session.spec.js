@@ -1,6 +1,5 @@
 var sinon = require('sinon'),
-    assert = require('assert'),
-
+    assert = require('assert');
 
 describe('The Session (Auth) Controller', function () {
 

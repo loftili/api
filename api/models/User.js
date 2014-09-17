@@ -21,6 +21,11 @@ module.exports = {
       required: true
     },
 
+    private_flag: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
     last_name: {
       type: 'string',
       required: true
