@@ -20,11 +20,11 @@ module.exports.bootstrap = function(cb) {
         last_name: 'test',
         username: 'test2'
       }, {
-        email: 'test2@loftili.com',
+        email: 'test3@loftili.com',
         password: 'password',
         first_name: 'test',
         last_name: 'test',
-        username: 'test2',
+        username: 'test3',
         privacy_level: 5
       }];
 
