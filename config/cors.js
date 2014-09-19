@@ -6,7 +6,7 @@ module.exports.cors = (function() {
     allRoutes: true,
     origin: '', // handled via cors policy
     credentials: true,
-    methods: 'GET, POST, PUT, DELETE, OPTIONS, HEAD, LINK'
+    methods: 'GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD, LINK'
   };
 
 })();

@@ -57,16 +57,27 @@ module.exports = {
 
   },
 
+  beforeUpdate: function(values, cb) {
+    function finish(err, ok) {
+      console.log(values);
+      if(err)
+        cb(err);
+      else
+        cb();
+    }
+
+    HashService(values, 'password', finish);
+  },
+
   beforeCreate: function(values, cb) {
+    function finish(err, ok) {
+      if(err)
+        cb(err);
+      else
+        cb();
+    }
 
-    bcrypt.hash(values.password, 10, function(err, hash) {
-      if(err) 
-        return cb(err);
-
-      values.password = hash;
-      cb();
-    });
-
+    HashService(values, 'password', finish);
   }
 
 };
