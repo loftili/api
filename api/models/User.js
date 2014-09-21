@@ -43,6 +43,11 @@ module.exports = {
       minLength: 6
     },
 
+    reset_token: {
+      type: 'string',
+      defaultsTo: null
+    },
+
     tracks: {
       collection: 'track',
       via: 'users',
@@ -59,7 +64,6 @@ module.exports = {
 
   beforeUpdate: function(values, cb) {
     function finish(err, ok) {
-      console.log(values);
       if(err)
         cb(err);
       else
