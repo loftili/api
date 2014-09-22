@@ -3,7 +3,7 @@ var bcrypt = require('bcrypt');
 module.exports = {
 
   index: function(req, res) {
-    if(!req.session.user)
+    if(!req.session.userid)
       return res.status(401).send('');
 
     function finish(err, user) {
@@ -13,11 +13,11 @@ module.exports = {
       return res.json(user.toJSON());
     }
 
-    var user = User.findOne({id: req.session.user}).exec(finish);
+    var user = User.findOne({id: req.session.userid}).exec(finish);
   },
 
   logout: function(req, res) {
-    req.session.user = null;
+    req.session.userid = null;
     return res.status(201).send();
   },
 
@@ -26,8 +26,10 @@ module.exports = {
         password = req.body.password;
 
     function doLogin(user, hash) {
-      req.session.user = user.id;
+      req.session.userid = user.id;
       req.session.username = user.username;
+      req.session.role = user.role;
+
       var active_user = user.toJSON();
       return res.json(active_user);
     }

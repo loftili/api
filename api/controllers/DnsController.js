@@ -67,7 +67,7 @@ module.exports = (function() {
           _device = false, _user = false,
           errored = false;
 
-      if(user_id != req.session.user)
+      if(user_id != req.session.userid)
         return res.status(401).send('');
 
       if(!user_id || !device_id)

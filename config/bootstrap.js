@@ -6,7 +6,8 @@ module.exports.bootstrap = function(cb) {
         password: 'password',
         first_name: 'danny',
         last_name: 'hadley',
-        username: 'dadleyy'
+        username: 'dadleyy',
+        role: 10
       }, {
         email: 'test1@loftili.com',
         password: 'password',

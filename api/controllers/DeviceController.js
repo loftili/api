@@ -4,7 +4,7 @@ module.exports = {
 
   ping: function(req, res, next) {
     var device_id = req.params.id,
-        user_id = req.session.user,
+        user_id = req.session.userid,
         username = req.session.username,
         failed = false,
         found_device = null,
@@ -47,7 +47,7 @@ module.exports = {
       DeviceControlService.ping(permission.user, permission.device, finish);
     }
 
-    attempt = Devicepermission.findOne({device: device_id, user: req.session.user});
+    attempt = Devicepermission.findOne({device: device_id, user: req.session.userid});
     attempt.populate('device').populate('user').exec(lookupCb);
   },
 
