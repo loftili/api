@@ -26,6 +26,11 @@ module.exports = {
       defaultsTo: 1
     },
 
+    role: {
+      type: 'integer',
+      defaultsTo: 1
+    },
+
     last_name: {
       type: 'string',
       required: true

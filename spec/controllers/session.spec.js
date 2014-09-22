@@ -57,7 +57,29 @@ describe('The Session (Auth) Controller', function () {
     }
 
     response.then(finish);
-    app.controllers.session.index({session: {user: 1}}, response);
+    app.controllers.session.index({session: {userid: 1}}, response);
+  });
+
+  it('should set the username, user and role attributes in the session hash', function(done) {
+    var response = new helpers.Response(),
+        request = {
+          session: {},
+          body: {
+            email: 'test1@loftili.com',
+            password: 'password'
+          }
+        };
+
+    assert.equal(request.session.role, undefined);
+
+    function finish() {
+      assert.equal(request.session.username, 'test1');
+      assert.equal(request.session.role, 1);
+      done();
+    }
+
+    response.then(finish);
+    app.controllers.session.login(request, response);
   });
 
 });

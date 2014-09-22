@@ -5,7 +5,7 @@ module.exports = (function() {
         track_id = req.body.track,
         attempt;
 
-    if(!req.session.user)
+    if(!req.session.userid)
       return res.status(401).send('');
 
     if(!device_id)
@@ -36,7 +36,7 @@ module.exports = (function() {
       DeviceControlService[fn](permission.user, permission.device, track_id, finish);
     }
 
-    attempt = Devicepermission.findOne({device: device_id, user: req.session.user});
+    attempt = Devicepermission.findOne({device: device_id, user: req.session.userid});
     attempt.populate('device').populate('user').exec(lookupCb);
   }
 

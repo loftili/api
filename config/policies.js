@@ -1,3 +1,9 @@
 module.exports.policies = {
-  '*': ['isLoggedIn', 'corsHeaders']
+
+  '*': ['isLoggedIn', 'corsHeaders'],
+
+  DevicepermissionController: {
+    find: ['isLoggedIn', 'corsHeaders', 'modelPermission']
+  }
+
 };

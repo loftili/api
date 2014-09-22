@@ -62,7 +62,7 @@ module.exports = {
 
       track_props.bucket_name = matches[1];
       track_props.type = type_match[1];
-      track_props.users = [req.session.user];
+      track_props.users = [req.session.userid];
       file_path = file.fd;
 
       if(Track.supported_types.indexOf(track_props.type) < 0)
