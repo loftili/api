@@ -1,7 +1,8 @@
 module.exports = function(req, res, next) {
   var allowed_routes = [
         '/auth',
-        '/registration'
+        '/registration',
+        '/passwordreset'
       ],
       auth_needed = allowed_routes.indexOf(req.url) < 0;
 

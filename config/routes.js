@@ -4,6 +4,7 @@ module.exports.routes = {
   'GET /auth': 'SessionController.index',
   'POST /auth': 'SessionController.login',
 
+  'POST /passwordreset': 'UserController.passwordReset',
   'GET /users/search': 'UserController.search',
 
   'GET /logout': 'SessionController.logout',

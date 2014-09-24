@@ -31,6 +31,22 @@ module.exports = {
     }
 
     User.query('SELECT username, email FROM user WHERE privacy_level < 5', callback);
+  },
+
+  passwordReset: function(req, res, next) {
+    var user = req.body.user;
+
+    if(!user)
+      return res.status(400).send('');
+
+    function finish(err, user) {
+      if(err)
+        return res.status(400).send(err);
+
+      return res.status(200).json(user);
+    }
+
+    PasswordResetService.reset(user, finish);
   }
 	
 };
