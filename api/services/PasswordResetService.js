@@ -16,6 +16,34 @@ module.exports = (function() {
     return token;
   }
 
+  PasswordResetService.finish = function(reset_token, new_password, callback) {
+    var found_user = null;
+
+    function saved(err, user) {
+      if(err)
+        return callback(err, false);
+      
+      sails.log("[PasswordResetService][finish] completely finished updating user");
+      return callback(false, user);
+    }
+
+    function found(err, user) {
+      if(err)
+        return callback(err, false);
+
+      if(!user)
+        return callback('missing', false);
+
+      sails.log("[PasswordResetService][finish] user found, proceeding to update of model");
+      user.password = new_password;
+      user.reset_token = null;
+      user.save(saved);
+    }
+
+    sails.log("[PasswordResetService][finish] attempting to finish password reset based on: " + reset_token);
+    User.findOne({reset_token: reset_token}).exec(found);
+  };
+
   PasswordResetService.reset = function(user_id, callback) {
     var found_user = null,
         is_email = /^\S+@\S+\.\S+$/.test(user_id),

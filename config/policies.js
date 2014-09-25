@@ -1,9 +1,19 @@
-module.exports.policies = {
+module.exports.policies = (function() {
 
-  '*': ['isLoggedIn', 'corsHeaders'],
+  var defaults = ['isLoggedIn', 'corsHeaders'];
 
-  DevicepermissionController: {
-    find: ['isLoggedIn', 'corsHeaders', 'modelPermission']
-  }
+  return {
 
-};
+    '*': defaults,
+
+    DevicepermissionController: {
+      find: defaults.concat(['modelPermission'])
+    },
+
+    UserController: {
+      update: defaults.slice(1).concat(['userUpdatePermission'])
+    }
+
+  };
+
+})();

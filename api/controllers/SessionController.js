@@ -18,6 +18,8 @@ module.exports = {
 
   logout: function(req, res) {
     req.session.userid = null;
+    req.session.role = null;
+    req.session.username = null;
     return res.status(201).send();
   },
 
