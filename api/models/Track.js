@@ -12,7 +12,7 @@ module.exports = {
       required: true
     },
 
-    bucket_name: {
+    uuid: {
       type: 'string',
       required: true
     },
@@ -28,41 +28,16 @@ module.exports = {
     users: {
       collection: 'user',
       via: 'tracks'
+    },
+
+    toJSON: function() {
+      var obj = this.toObject(),
+          url_base = process.env['STORAGE_URL'];
+
+      obj.steaming_url = [url_base, obj.uuid].join('/');
+      return obj;
     }
 
-  },
-
-  supported_types: ['mp3'],
-
-  parseTags: function(model, tags) {
-    var name = tags.title,
-        name_cleaner = /^(.*)\.[mp3|wav|mp4]+$/;
-
-    model.name = name.replace(name_cleaner, '$1');
-    model.year = tags.year;
-    model.artist_name = tags.artist;
-    return model;
-  },
-
-  beforeCreate: function(values, cb) {
-    var artist_name = values.artist_name;
-
-    if(!artist_name)
-      cb();
-
-    Artist.findOrCreate({
-      'name': artist_name
-    }, {name: artist_name}, artist);
-
-    function artist(err, artist) {
-      if(err) 
-        cb(err);
-
-      if(artist)
-        values.artist = artist.id;
-
-      cb();
-    }
   }
 
 
