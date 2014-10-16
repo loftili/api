@@ -103,7 +103,25 @@ module.exports = {
   },
 
   update: function(req, res) {
-    return res.json({});
+    var track_id = req.params.id,
+        track_title = req.body.title;
+
+    function updated(err, track) {
+      if(err)
+        return res.status(422).send('');
+
+      return res.json(track);
+    }
+
+    function found(err, track) {
+      if(err || !track)
+        return res.status(404).send('');
+
+      track.title = track_title;
+      track.save(updated);
+    }
+
+    Track.findOne({id: track_id}).exec(found);
   },
 
   missing: function(req, res) {
