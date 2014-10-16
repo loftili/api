@@ -30,4 +30,8 @@ describe('The Devicepermission Controller', function () {
     app.lower(done);
   });
 
+  it('should handle the find stuff ok', function(done) {
+    done();
+  });
+
 });

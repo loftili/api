@@ -2,14 +2,12 @@ module.exports = {
 
   attributes: {
 
-    name: {
+    title: {
       type: 'string',
-      required: true
     },
 
     type: {
       type: 'string',
-      required: true
     },
 
     uuid: {
@@ -34,6 +32,7 @@ module.exports = {
       var obj = this.toObject(),
           url_base = process.env['STORAGE_URL'];
 
+      delete obj.users;
       obj.steaming_url = [url_base, obj.uuid].join('/');
       return obj;
     }
