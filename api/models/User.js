@@ -2,6 +2,14 @@ var bcrypt = require('bcrypt');
 
 module.exports = {
 
+  writable: [
+    'email', 
+    'password', 
+    'first_name', 
+    'last_name', 
+    'username'
+  ],
+
   attributes: {
 
     email: {

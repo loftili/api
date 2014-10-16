@@ -6,10 +6,6 @@ module.exports.policies = (function() {
 
     '*': defaults,
 
-    DevicepermissionController: {
-      find: defaults.concat(['modelPermission'])
-    },
-
     UserController: {
       update: defaults.slice(1).concat(['userUpdatePermission'])
     }

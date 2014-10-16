@@ -23,7 +23,7 @@ module.exports = (function() {
 
     function receiveData(data) {
       if(device_response_overflow)
-        callback('device response overflow', false);
+        return callback('device response overflow', false);
 
       sails.log('[DeviceControlService.send.receiveData] Received data: ' + data);
       device_response += data;
