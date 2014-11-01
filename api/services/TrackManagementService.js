@@ -124,7 +124,7 @@ module.exports = (function() {
       track_info.title = tags.title;
       track_info.year = tags.year;
       track_info.type = 'audio/mp3';
-      sails.log('[TrackManagementService][upload] successfully loaded mp3 tags: ['+JSON.stringify(tags)+']');
+      sails.log('[TrackManagementService][upload] successfully loaded mp3 tags');
 
       if(tags.artist)
         Artist.findOrCreate({'name': tags.artist}, {name: tags.artist}, associate);

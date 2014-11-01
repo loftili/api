@@ -35,6 +35,34 @@ module.exports = {
     User.findOne(user_id).exec(found);
   },
 
+  addTrack: function(req, res) {
+    var user_id = parseInt(req.params.id, 10),
+        session_user = parseInt(req.session.userid, 10),
+        track_id = req.body && req.body.track ? parseInt(req.body.track, 10) : false;
+
+    if(user_id !== session_user || !(track_id >= 0))
+      return res.status(404).send('');
+
+    function finish(err, done) {
+      if(err) {
+        sails.log('[UserController][addTrack] failed adding track['+track_id+'] err['+err+']');
+        return res.status(404).send('');
+      }
+      return res.json(done);
+    }
+
+    function found(err, user) {
+      if(err) {
+        sails.log('[UserController][addTrack] unable to find the user sent via put...');
+        return res.status(404).send('');
+      }
+      user.tracks.add(track_id);
+      user.save(finish);
+    }
+
+    User.findOne(user_id).exec(found);
+  },
+
   tracks: function(req, res) {
     var user_id = parseInt(req.params.id, 10),
         session_user = parseInt(req.session.userid, 10);
