@@ -7,6 +7,7 @@ module.exports.routes = {
   /* User information*/
   'GET /users/search': 'UserController.search',
   'GET /users/:id/tracks': 'UserController.tracks',
+  'PUT /users/:id/tracks': 'UserController.addTrack',
   'PUT /users/:id': 'UserController.update',
   'POST /passwordreset': 'UserController.passwordReset',
   

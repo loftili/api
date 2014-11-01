@@ -21,11 +21,12 @@ module.exports = {
         var track = tracks[i],
             t_title = track.track_title,
             a_name = track.artist_name,
+            t_id = track.track_id,
             artist_match = a_name && (a_name.toLowerCase().indexOf(track_query) >= 0),
             track_match = t_title && (t_title.toLowerCase().indexOf(track_query) >= 0);
 
         if(artist_match || track_match)
-          matching.push({id: track.id, title: t_title, artist: {name: a_name}});
+          matching.push({id: t_id, title: t_title, artist: {name: a_name}});
       }
       
       return res.status(200).json(matching);
