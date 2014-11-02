@@ -37,25 +37,6 @@ module.exports = {
 
   },
 
-  afterUpdate: function(device, cb) {
-    sails.log('[device.afterUpdate] - Updating new dns records based on device\'s ip address: ' + device.ip_addr);
-
-    function foundOwner(err, permission) {
-      if(err || !permission)
-        return cb();
-
-      sails.log('[device.afterUpdate] - Found the user who owns ' + device.name);
-
-      function finish() {
-        return cb();
-      }
-
-      DnsManagerSerice.updateRecord(permission.user, device, finish)
-    }
-
-    Devicepermission.findOne({device: device.id, level: 1}).populate('user').exec(foundOwner);
-  },
-
   beforeDestroy: function(criteria, cb) {
     var id = criteria.where.id;
 

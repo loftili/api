@@ -4,7 +4,7 @@ var http = require('http'),
 module.exports = (function() {
 
   function send(method, user, device, track, callback) {
-    var hostname = [device.name, user.username, domains.subdomain_parent].join('.'),
+    var hostname = device.ip_addr,
         port = device.port,
         options = {
           hostname: hostname,
@@ -118,10 +118,6 @@ module.exports = (function() {
     },
 
     ping: function(user, device, callback) {
-      var hostname = [device.name, user.username, 'lofti.li'].join('.'),
-          port = device.port;
-
-
       function finish(error, res, body) {
         if(error)
           sails.log('[DeviceControlService.ping.error] Errored ping request ERROR[' + error + ']');
@@ -129,7 +125,6 @@ module.exports = (function() {
         callback(error, res, body);
       }
 
-      sails.log('[DeviceControlService.ping] Requesting ping on ' + hostname + ':' + port);
       send('ping', user, device, null, finish);
     }
 

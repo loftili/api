@@ -2,6 +2,24 @@ var net = require('net');
 
 module.exports = {
 
+  findOne: function(req, res, next) {
+    var device_id = parseInt(req.params.id, 10);
+
+    function finish(err, device) {
+      if(err) {
+        sails.log('[DeviceController][findOne] errored finding device: ' + err);
+        return rest.status(404).send('');
+      }
+
+      return device ? res.json(device) : res.status(404).send('');
+    }
+
+    if(device_id >= 0)
+      Device.findOne(device_id).exec(finish);
+    else
+      return res.status(404).send('');
+  },
+
   ping: function(req, res, next) {
     var device_id = req.params.id,
         user_id = req.session.userid,

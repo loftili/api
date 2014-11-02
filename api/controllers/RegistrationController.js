@@ -25,7 +25,7 @@ module.exports = {
       var params = {device: device.id, user: found_user.id, level: 1};
       created_device = device;
       sails.log('[RegistrationController.register] creating permission for new device');
-      DnsManagerSerice.createRecord(found_user, device, function(){})
+      //DnsManagerSerice.createRecord(found_user, device, function(){})
       Devicepermission.findOrCreate(params, params, createdPermission);
     }
 
