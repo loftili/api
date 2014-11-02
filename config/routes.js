@@ -17,7 +17,10 @@ module.exports.routes = {
 
   /* Device & Device management */
   'GET /devices/:id/ping': 'DeviceController.ping',
+  'GET /devices/:id': 'DeviceController.findOne',
+
   'POST /registration': 'RegistrationController.register',
+
   'POST /playback/start': 'PlaybackController.start',
   'POST /playback/stop': 'PlaybackController.stop',
 
