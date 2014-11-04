@@ -26,6 +26,7 @@ module.exports.routes = {
 
   /* Device visibility */
   'GET /devicepermissions': 'DevicepermissionController.find',
+  'POST /devicepermissions': 'DevicepermissionController.create',
 
   /* Tracks */
   'GET /tracks/scout': 'TrackController.scout',

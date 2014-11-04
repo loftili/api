@@ -85,7 +85,7 @@ module.exports = {
 
   search: function(req, res) {
     var query = req.query,
-        user_query = query ? (query.q||'').toLowerCase() : false;
+        user_query = query && query.q ? (query.q+'').toLowerCase() : false;
 
     if(!user_query)
       return res.status(404).send('Not found');
@@ -99,21 +99,20 @@ module.exports = {
 
       var matching = [],
           index = [],
-          user, username, email;
+          user, username;
 
       for(var index = 0; index < users.length; index++) {
         user = users[index];
         username = user.username.toLowerCase();
-        email = user.email.toLowerCase();
 
-        if(email.indexOf(user_query) > -1 || username.indexOf(user_query) > -1)
+        if(username.indexOf(user_query) > -1)
           matching.push(user);
       }
 
       return matching.length > 0 ? res.status(200).json(matching) : res.status(404).send('');
     }
 
-    User.query('SELECT username, email FROM user WHERE privacy_level < 5', callback);
+    User.query('SELECT id, username FROM user WHERE privacy_level < 5', callback);
   },
 
   passwordReset: function(req, res, next) {

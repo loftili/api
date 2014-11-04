@@ -3,15 +3,18 @@ module.exports = {
   attributes: {
 
     user: {
-      model: 'user'
+      model: 'user',
+      required: true
     },
 
     device: {
-      model: 'device'
+      model: 'device',
+      required: true
     },
 
     level: {
-      type: 'integer'
+      type: 'integer',
+      required: true
     }
 
   }
