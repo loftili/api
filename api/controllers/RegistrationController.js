@@ -22,11 +22,17 @@ module.exports = {
         return res.status(400).send(err);
       }
 
-      var params = {device: device.id, user: found_user.id, level: 1};
+      var params = {
+        device: device.id,
+        target: found_user.id,
+        level: DeviceShareService.LEVELS.DEVICE_OWNER,
+        force: true
+      };
+
       created_device = device;
       sails.log('[RegistrationController.register] creating permission for new device');
-      //DnsManagerSerice.createRecord(found_user, device, function(){})
-      Devicepermission.findOrCreate(params, params, createdPermission);
+
+      DeviceShareService.share(params, createdPermission);
     }
 
     function finish() {
