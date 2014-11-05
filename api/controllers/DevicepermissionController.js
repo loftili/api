@@ -4,9 +4,7 @@ module.exports = {
     var session_user = req.session.userid,
         device_query = req.query.device,
         user_query = req.query.user,
-        where_clause = {
-          user: session_user
-        };
+        where_clause = { };
 
     function found(err, permissions) {
       if(err)
@@ -18,7 +16,13 @@ module.exports = {
     if(device_query)
       where_clause.device = device_query;
 
-    Devicepermission.find(where_clause).populate('device').exec(found);
+    if(user_query)
+      where_clause.user = user_query;
+
+    if(!where_clause.user && !where_clause.device)
+      return res.status(404).send('missing parameters');
+
+    Devicepermission.find(where_clause).populate('user').populate('device').exec(found);
   },
 
 
