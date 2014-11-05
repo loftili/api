@@ -33,18 +33,35 @@ module.exports.bootstrap = function(cb) {
     cb();
   }
 
+  function addPermission() {
+    Devicepermission.create({
+      user: 1,
+      device: 1,
+      level: 1
+    }, finished);
+  }
+
+  function addDevice() {
+    Device.create({
+      name: 'testing',
+      hostname: '',
+      ip_addr: '127.0.0.1',
+      port: 80
+    }, addPermission);
+  }
+
   User.query('DELETE FROM user whre id > 0', clearExisting);
 
-  function addNext() {
+  function addUser() {
     if(initial_users.length < 1)
-      return finished();
+      return addDevice();
 
     var next = initial_users.shift();
-    User.create(next, addNext);
+    User.create(next, addUser);
   }
 
   function clearExisting(err, users) {
-    addNext();
+    addUser();
   }
 
 };
