@@ -1,5 +1,47 @@
 module.exports = {
 
+  destroy: function(req, res) {
+    var session_user = parseInt(req.session.userid, 10),
+        permission_id = parseInt(req.params.id, 10),
+        found_permission = null;
+
+    function finish(err, deleted) {
+      if(err) {
+        sails.log('[DevicepermissionController][destroy] unable to destroy [' + err + ']');
+        return res.status(404).send('');
+      }
+
+      return res.status(200).send('');
+    }
+
+    function check(err, current_permission) {
+      if(err || !current_permission || current_permission.length < 1) {
+        sails.log('[DevicepermissionController][destroy] unable to find owner permission based on current owner [' + err + ']');
+        return res.status(404).send('');
+      }
+
+      sails.log('[DevicepermissionController][destroy] found the permission with current user: [' + current_permission[0].level + ']');
+
+      if(current_permission[0].level !== DeviceShareService.LEVELS.DEVICE_OWNER)
+        res.status(404).send('');
+      else
+        Devicepermission.destroy({id: permission_id}, finish);
+    }
+
+    function found(err, permission) {
+      if(err) {
+        sails.log('[DevicepermissionController][destroy] could not delete record: ' + err);
+        return res.status(404).send('');
+      }
+
+      found_permission = permission;
+      sails.log('[DevicepermissionController][destroy] found a valid permission based on param, checking permission to delete');
+      Devicepermission.find({user: session_user}).exec(check);
+    }
+
+    Devicepermission.findOne(permission_id, found);
+  },
+
   find: function(req, res) {
     var session_user = req.session.userid,
         device_query = req.query.device,
@@ -39,10 +81,18 @@ module.exports = {
         };
 
     function finish(err, record) {
-      return err ? res.status(404).send(err) : res.json(record);
+      return err ? res.status(404).send(err) : res.status(202).json(record);
     }
 
-    DeviceShareService.share(params, finish);
+    function populate(record) {
+      Devicepermission.findOne(record.id).populate('user').exec(finish);
+    }
+
+    function added(err, record) {
+      return err ? res.status(404).send(err) : populate(record);
+    }
+
+    DeviceShareService.share(params, added);
   }
 
 };
