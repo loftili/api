@@ -18,6 +18,7 @@ module.exports.routes = {
   /* Device & Device management */
   'GET /devices/:id/ping': 'DeviceController.ping',
   'GET /devices/:id': 'DeviceController.findOne',
+  'DELETE /devices/:id': 'DeviceController.destroy',
 
   'POST /registration': 'RegistrationController.register',
 
