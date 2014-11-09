@@ -25,7 +25,7 @@ module.exports = (function() {
       if(device_response_overflow)
         return callback('device response overflow', false);
 
-      sails.log('[DeviceControlService.send.receiveData] Received data: ' + data);
+      sails.log('[DeviceControlService.send.receiveData] Received data');
       device_response += data;
 
       if(device_response.length > 1e6)
@@ -125,7 +125,7 @@ module.exports = (function() {
         callback(error, res, body);
       }
 
-      send('ping', user, device, null, finish);
+      send('status', user, device, null, finish);
     }
 
   };
