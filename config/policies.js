@@ -1,6 +1,6 @@
 module.exports.policies = (function() {
 
-  var defaults = ['isLoggedIn', 'corsHeaders'];
+  var defaults = ['corsHeaders'];
 
   return {
 

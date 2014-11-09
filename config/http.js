@@ -13,10 +13,6 @@ module.exports.http = (function(){
         }
       },
 
-      authorization: function(req, res, next) {
-        next();
-      },
-
       order: [
         'startRequestTimer',
         'cookieParser',
@@ -25,7 +21,6 @@ module.exports.http = (function(){
         'handleBodyParserError',
         'compress',
         'methodOverride',
-        'authorization',
         'corsOptions',
         '$custom',
         'router',
