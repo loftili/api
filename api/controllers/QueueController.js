@@ -12,8 +12,14 @@ module.exports = {
       return res.status(200).json(queue);
     }
 
+    var device_auth = req.headers["x-loftili-device-auth"],
+        auth_info = {
+          user: user_id,
+          device: device_auth
+        };
+        
     sails.log('[QueueController][findOne] finding the queue belonging to device[' + device_id + ']');
-    DeviceQueueService.find(device_id, user_id, finish);
+    DeviceQueueService.find(device_id, auth_info, finish);
   },
 
   move: function(req, res, next) {

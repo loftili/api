@@ -12,8 +12,9 @@ module.exports = {
         created_device;
 
     function createdPermission(err, permission) {
+      var device_token = created_device.token;
       sails.log('[RegistrationController.register] finished creating permission for new device');
-      return res.status(200).json(created_device);
+      return res.status(200).json({"status": "ok", "token": device_token, "id": created_device.id});
     }
 
     function createdDevice(err, device) {
@@ -37,7 +38,15 @@ module.exports = {
 
     function finish() {
       var hostname = [devicename, username].join('.'),
-          params = {name: devicename, ip_addr: remote_ip, hostname: hostname, port: port};
+          device_secret = process.env['DEVICE_SECRET'],
+          token_unhashed = [device_secret, devicename].join(':'),
+          params = {
+            name: devicename, 
+            ip_addr: remote_ip, 
+            hostname: hostname, 
+            port: port,
+            token: DeviceTokenService.generate(devicename)
+          };
 
       sails.log('[RegistrationController.register] user authenticated, creating: ' + devicename + '[' + remote_ip + ']');
       Device.findOrCreate(params, params, createdDevice);

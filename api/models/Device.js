@@ -25,6 +25,10 @@ module.exports = {
       regex: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
     },
 
+    token: {
+      type: 'string'
+    },
+
     port: {
       type: 'integer',
       defaultsTo: '80'
@@ -33,6 +37,12 @@ module.exports = {
     permissions: {
       collection: 'devicepermission',
       via: 'device'
+    },
+
+    toJSON: function() {
+      var obj = this.toObject();
+      delete obj['token'];
+      return obj;
     }
 
   },

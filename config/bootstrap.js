@@ -1,3 +1,5 @@
+var uuid = require('node-uuid');
+
 module.exports.bootstrap = function(cb) {
   var completed = 0,
       errored = false,
@@ -33,12 +35,21 @@ module.exports.bootstrap = function(cb) {
     cb();
   }
 
+  function addTrack() {
+    var temp_uuid = uuid.v4();
+
+    Track.create({
+      title: 'Test',
+      uuid: temp_uuid
+    }, finished);
+  }
+
   function addPermission() {
     Devicepermission.create({
       user: 1,
       device: 1,
       level: 1
-    }, finished);
+    }, addTrack);
   }
 
   function addDevice() {

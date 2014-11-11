@@ -31,7 +31,10 @@ module.exports = (function() {
     return client;
   }
 
-  function validatePermission(device_id, user_id, callback) {
+  function validatePermission(device_id, auth_info, callback) {
+    var user_id = auth_info.user || auth_info,
+        device_key = auth_info.device;
+
     function foundDevice(err, device) {
       if(err) {
         sails.log('[DeviceQueueService][validatePermission] failed getting device['+device_id+']');
@@ -44,6 +47,13 @@ module.exports = (function() {
       }
       
       sails.log('[DeviceQueueService][validatePermission] found device, checking permissions device[' + device.name + ']');
+
+      if(device_key) {
+        var expected = DeviceTokenService.generate(device.name);
+        sails.log('[DeviceQueueService][validatePermission] validating permission based on the device\'s token...');
+        sails.log('[DeviceQueueService][validatePermission] expected['+expected+'] actual['+device_key+']');
+        return callback(null, device);
+      }
 
       var permissions = device.permissions,
           levels = DeviceShareService.LEVELS,
