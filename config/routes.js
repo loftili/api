@@ -22,10 +22,10 @@ module.exports.routes = {
 
   'POST /registration': 'RegistrationController.register',
 
-  'GET /queue/:id': 'QueueController.findOne',
-  'POST /queue/:id/move': 'QueueController.move',
-  'POST /queue/:id': 'QueueController.enqueue',
-  'POST /queue/:id/remove': 'QueueController.dequeue',
+  'GET /queues/:id': 'QueueController.findOne',
+  'POST /queues/:id/move': 'QueueController.move',
+  'POST /queues/:id': 'QueueController.enqueue',
+  'POST /queues/:id/remove': 'QueueController.dequeue',
 
   'POST /playback/start': 'PlaybackController.start',
   'POST /playback/stop': 'PlaybackController.stop',
@@ -36,6 +36,7 @@ module.exports.routes = {
   'DELETE /devicepermissions/:id': 'DevicepermissionController.destroy',
 
   /* Tracks */
+  'GET /tracks': 'TrackController.find',
   'GET /tracks/scout': 'TrackController.scout',
   'GET /tracks/search': 'TrackController.search',
   'POST /tracks/upload': 'TrackController.upload',

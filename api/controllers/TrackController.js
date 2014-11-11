@@ -39,6 +39,21 @@ module.exports = {
     Track.query(sql_query, callback);
   },
 
+  find: function(req, res, next) {
+    var user_id = req.session.userid;
+
+    function finish(err, tracks) {
+      if(err) {
+        sails.log('[TrackController][find] errored getting track list: ' + err);
+        return res.status(404).send('');
+      }
+      return res.status(200).json(tracks);
+    }
+
+    sails.log('[TrackController][find] getting whole list of tracks');
+    Track.find().populate('artist').exec(finish);
+  },
+
   scout: function(req, res) {
     var query = req.query,
         url = query && query.url ? query.url : false;
