@@ -32,6 +32,9 @@ module.exports = {
         track_id = parseInt(req.body.track, 10),
         valid_id = track_id >= 0;
 
+    if(!user_id)
+      return res.status(404).send('');
+
     if(!valid_id)
       return res.status(404).send('missing track id');
 
