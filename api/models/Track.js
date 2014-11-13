@@ -33,7 +33,7 @@ module.exports = {
           url_base = process.env['STORAGE_URL'];
 
       delete obj.users;
-      obj.steaming_url = [url_base, obj.uuid].join('/');
+      obj.streaming_url = [url_base, obj.uuid].join('/');
       return obj;
     }
 
