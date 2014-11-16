@@ -156,6 +156,58 @@ module.exports = (function() {
     client = getClient(connected);
   };
 
+  DeviceQueueService.pop = function(device_id, requester, callback) {
+    function foundTrack(err, track) {
+      if(err) {
+        sails.log('[DeviceQueueService][pop] unable to find the track that was popped, errored');
+        return callback(err, null);
+      }
+
+      sails.log('[DeviceQueueService][pop] found a track from popped information');
+      return callback(null, track);
+    }
+
+    function getTrack(err, value) {
+      client.connection.quit();
+
+      if(err) {
+        sails.log('[DeviceQueueService][pop] unable to pop: '+err);
+        return callback(err, null);
+      }
+
+      if(value) {
+        sails.log('[DeviceQueueService][pop] popped a track: '+value);
+        Track.findOne(value).exec(foundTrack);
+      } else {
+        sails.log('[DeviceQueueService][pop] end of queue, nothing to pop!');
+        return callback(null, []);
+      }
+    }
+
+    function doPop(err, device) {
+      if(err) {
+        client.connection.quit();
+        return callback(err, null);
+      }
+
+      sails.log('[DeviceQueueService][pop] lpopping from queue');
+      var keynane = ['device', 'queue', device_id].join('_');
+      client.connection.lpop(keynane, getTrack);
+    }
+
+    function connected(error) {
+      if(error) {
+        sails.log('[DeviceQueueService][pop] redis server failed connection');
+        client.connection.quit();
+        return callback('redis fail');
+      }
+
+      sails.log('[DeviceQueueService][pop] looking up device information for device['+device_id+']');
+      validatePermission(device_id, requester, doPop);
+    }
+
+    client = getClient(connected);
+  };
 
   DeviceQueueService.enqueue = function(device_id, track_id, requester, callback) {
     var client;
@@ -178,7 +230,7 @@ module.exports = (function() {
     function enqueue(err, device) {
       if(err) {
         client.connection.quit();
-        return callback(null, err);
+        return callback(err, null);
       }
 
       var keynane = ['device', 'queue', device_id].join('_');
@@ -196,6 +248,7 @@ module.exports = (function() {
       sails.log('[DeviceQueueService][enqueue] looking up device information for device['+device_id+']');
       validatePermission(device_id, requester, enqueue);
     }
+
     function foundTrack(err, track) {
       if(err || !track) {
         sails.log('[DeviceQueueService][enqueue] could not find a track per request');
