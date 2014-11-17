@@ -64,16 +64,18 @@ module.exports = {
           user: user_id
         };
 
-    if(!user_id)
-      return res.status(404).send('');
+    if(!user_id && !device_auth) {
+      sails.log('[QueueController][pop] unauthorized attempt to pop from a device queue['+device_id+']');
+      return res.status(404).send('not authorized');
+    }
 
-    function finish(err, queue) {
+    function finish(err, popped_track) {
       if(err) {
         sails.log('[QueueController][pop] failed popping');
         return res.status(404).send('');
       }
 
-      return res.status(200).json(queue);
+      return res.status(200).json(popped_track);
     }
 
     sails.log('[QueueController][pop] popping');

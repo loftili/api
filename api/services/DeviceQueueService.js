@@ -180,7 +180,7 @@ module.exports = (function() {
         Track.findOne(value).exec(foundTrack);
       } else {
         sails.log('[DeviceQueueService][pop] end of queue, nothing to pop!');
-        return callback(null, []);
+        return callback('empty queue', null);
       }
     }
 
