@@ -75,6 +75,11 @@ module.exports = {
         return res.status(404).send('');
       }
 
+      if(!popped_track) {
+        sails.log('[QueueController][pop] nothing left to pop!');
+        return res.status(204).send('');
+      }
+
       return res.status(200).json(popped_track);
     }
 
