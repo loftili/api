@@ -5,7 +5,9 @@ module.exports = (function() {
   var DeviceQueueService = {};
 
   function getClient(ready_fn) {
-    var connection = redis.createClient(),
+    var connection = redis.createClient({
+          max_attempts: 1
+        }),
         client = {},
         failed_connecting = false;
 
@@ -138,8 +140,8 @@ module.exports = (function() {
       }
 
       sails.log('[DeviceQueueService][find] asking for queue for device['+device.name+']');
-      var keynane = ['device', 'queue', device_id].join('_');
-      client.connection.lrange(keynane, 0, -1, getTracks);
+      var keyname = ['device', 'queue', device_id].join('_');
+      client.connection.lrange(keyname, 0, -1, getTracks);
     }
 
     function connected(error) {
@@ -191,8 +193,8 @@ module.exports = (function() {
       }
 
       sails.log('[DeviceQueueService][pop] lpopping from queue');
-      var keynane = ['device', 'queue', device_id].join('_');
-      client.connection.lpop(keynane, getTrack);
+      var keyname = ['device', 'queue', device_id].join('_');
+      client.connection.lpop(keyname, getTrack);
     }
 
     function connected(error) {
@@ -204,6 +206,82 @@ module.exports = (function() {
 
       sails.log('[DeviceQueueService][pop] looking up device information for device['+device_id+']');
       validatePermission(device_id, requester, doPop);
+    }
+
+    client = getClient(connected);
+  };
+
+  DeviceQueueService.remove = function(device_id, item_position, requester, callback) {
+    var client,
+        new_list = [];
+
+    function finish(err, new_list) {
+      if(err) {
+        sails.log('[DeviceQueueService][remove] failed lpushing new list, err['+err+']');
+        return callback('failed making new list!', null);
+      }
+
+      sails.log('[DeviceQueueService][remove] new list has been made! returning new list');
+      return DeviceQueueService.find(device_id, requester, callback);
+    }
+
+    function reAdd(err) {
+      if(err) {
+        sails.log('[DeviceQueueService][remove] failed getting track queue, exiting');
+        return callback('failed deleting previous key list', null);
+      }
+
+      var keyname = ['device', 'queue', device_id].join('_'),
+          lpush_args = [keyname].concat(new_list).concat([finish]);
+
+      client.connection.lpush.apply(client.connection, lpush_args);
+    }
+
+    function foundList(err, list) {
+      if(err) {
+        sails.log('[DeviceQueueService][remove] failed getting track queue, exiting');
+        return callback('failed list retrieve', null);
+      }
+
+      if(!list || item_position > list.length - 1) {
+        sails.log('[DeviceQueueService][remove] the requested queue does not exist or is not long enough');
+        return callback('invalid position', null);
+      }
+
+      var keyname = ['device', 'queue', device_id].join('_');
+
+      for(var i = 0; i < list.length; i++) {
+        if(i === item_position)
+          continue;
+
+        new_list.push(list[i]);
+      }
+
+      sails.log('[DeviceQueueService][remove] BLOWING AWAY OLD. found queue list['+list+'] new list['+new_list+']');
+      client.connection.del(keyname, reAdd);
+    }
+
+    function doRemove(err, device) {
+      if(err) {
+        sails.log('[DeviceQueueService][remove] failed validating permissions, exiting');
+        client.connection.quit();
+        return callback('permission fail');
+      }
+
+      var keyname = ['device', 'queue', device_id].join('_');
+      sails.log('[DeviceQueueService][remove] removing from queue['+keyname+'] position['+item_position+']');
+      client.connection.lrange(keyname, 0, -1, foundList);
+    }
+
+    function connected(error) {
+      if(error) {
+        sails.log('[DeviceQueueService][remove] failed connecting to the redis server');
+        client.connection.quit();
+        return callback('redis fail');
+      }
+
+      sails.log('[DeviceQueueService][remove] looking up permissions before removing');
+      validatePermission(device_id, requester, doRemove);
     }
 
     client = getClient(connected);
@@ -233,9 +311,9 @@ module.exports = (function() {
         return callback(err, null);
       }
 
-      var keynane = ['device', 'queue', device_id].join('_');
-      sails.log('[DeviceQueueService][enqueue] lpushing into list['+keynane+'] track['+track_id+']');
-      client.connection.send_command('lpush', [keynane, track_id], added);
+      var keyname = ['device', 'queue', device_id].join('_');
+      sails.log('[DeviceQueueService][enqueue] lpushing into list['+keyname+'] track['+track_id+']');
+      client.connection.send_command('rpush', [keyname, track_id], added);
     }
 
     function connected(error) {

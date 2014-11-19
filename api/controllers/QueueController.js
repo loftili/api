@@ -25,6 +25,36 @@ module.exports = {
     res.status(200).send('');
   },
 
+  remove: function(req, res, next) {
+    var device_id = parseInt(req.params.id, 10),
+        user_id = req.session.userid,
+        item_position = parseInt(req.body.position, 10),
+        valid_position = item_position >= 0,
+        device_auth = req.headers["x-loftili-device-auth"],
+        auth_info = {
+          device: device_auth,
+          user: user_id
+        };
+
+    if(!user_id && !device_auth)
+      return res.status(404).send('');
+
+    if(!valid_position)
+      return res.status(404).send('missing position index');
+
+    function finish(err, queue) {
+      if(err) {
+        sails.log('[QueueController][remove] failed removing ['+item_position+'] from device['+device_id+']');
+        return res.status(404).send('');
+      }
+
+      return res.status(200).json(queue);
+    }
+
+    sails.log('[QueueController][remove] removing position['+item_position+'] to device['+device_id+']');
+    DeviceQueueService.remove(device_id, item_position, auth_info, finish);
+  },
+
   enqueue: function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
