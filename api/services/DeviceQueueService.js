@@ -54,6 +54,11 @@ module.exports = (function() {
         var expected = DeviceTokenService.generate(device.name);
         sails.log('[DeviceQueueService][validatePermission] validating permission based on the device\'s token...');
         sails.log('[DeviceQueueService][validatePermission] expected['+expected+'] actual['+device_key+']');
+
+        if(expected !== device_key) {
+          return callback('no permission to act', null);
+        }
+
         return callback(null, device);
       }
 
@@ -159,6 +164,19 @@ module.exports = (function() {
   };
 
   DeviceQueueService.pop = function(device_id, requester, callback) {
+    var found_device,
+        found_track;
+
+    function afterAdded(err) {
+      if(err) {
+        sails.log('[DeviceQueueService][pop] failed adding the popped track back into the queue');
+        return callback(err, null);
+      }
+
+      sails.log('[DeviceQueueService][pop] successfully pushed a track after it was popped');
+      return callback(null, found_track);
+    }
+
     function foundTrack(err, track) {
       if(err) {
         sails.log('[DeviceQueueService][pop] unable to find the track that was popped, errored');
@@ -166,7 +184,12 @@ module.exports = (function() {
       }
 
       sails.log('[DeviceQueueService][pop] found a track from popped information');
-      return callback(null, track);
+      found_track = track;
+      if(found_device.loop_flag) {
+        DeviceQueueService.enqueue(device_id, track.id, requester, afterAdded);
+      } else {
+        return callback(null, track);
+      }
     }
 
     function getTrack(err, value) {
@@ -192,6 +215,7 @@ module.exports = (function() {
         return callback(err, null);
       }
 
+      found_device = device;
       sails.log('[DeviceQueueService][pop] lpopping from queue');
       var keyname = ['device', 'queue', device_id].join('_');
       client.connection.lpop(keyname, getTrack);

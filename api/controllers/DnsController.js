@@ -15,20 +15,14 @@ module.exports = (function() {
           _device = false,
           errored = false;
 
-      function updatedDevice(err, device) {
-        sails.log("[DnsController.create] updated device hostname after dns create");
-        return err ? res.status(400).send('') : res.status(200).send('');
-      }
-
       function fin(err, ok) {
         if(err)
-          res.status(400).send('');
+          return res.status(400).send('');
 
         var hostname = [_device.name, _user.username].join('.');
 
         sails.log("[DnsController.create] finished creating dns entry, updating hostname for device");
-        _device.hostname = hostname;
-        _device.save(updatedDevice);
+        return res.status(200).send('');
       }
 
       function check() {
