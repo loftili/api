@@ -43,7 +43,6 @@ module.exports = {
           params = {
             name: devicename, 
             ip_addr: remote_ip, 
-            hostname: hostname, 
             port: port,
             token: DeviceTokenService.generate(devicename)
           };
