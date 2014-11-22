@@ -7,15 +7,6 @@ module.exports = {
       required: true
     },
 
-    hostname: {
-      type: 'string'
-    },
-
-    status: {
-      type: 'boolean',
-      defaultsTo: false
-    },
-
     last_checked: {
       type: 'datetime'
     },
@@ -32,6 +23,11 @@ module.exports = {
     port: {
       type: 'integer',
       defaultsTo: '80'
+    },
+
+    loop_flag: {
+      type: 'boolean',
+      defaultsTo: true
     },
 
     permissions: {

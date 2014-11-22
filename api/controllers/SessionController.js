@@ -20,7 +20,7 @@ module.exports = {
     req.session.userid = null;
     req.session.role = null;
     req.session.username = null;
-    return res.status(201).send();
+    return res.status(200).send();
   },
 
   login: function(req, res) {
