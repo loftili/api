@@ -5,6 +5,7 @@ module.exports.routes = {
   'GET /logout': 'SessionController.logout',
 
   /* User information*/
+  'POST /users': 'UserController.create',
   'GET /users/search': 'UserController.search',
   'GET /users/:id/tracks': 'UserController.tracks',
   'PUT /users/:id/tracks': 'UserController.addTrack',
