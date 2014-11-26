@@ -1,5 +1,19 @@
 module.exports = {
 
+  create: function(req, res, next) {
+    function finished(err, user) {
+      if(err) {
+        sails.log('[UserController][create] failed creating a user: '+err);
+        return res.status(422).json(err);
+      }
+
+      return res.status(201).json(user);
+    }
+
+    sails.log('[UserController][create] attempting to create a user from request body: '+JSON.stringify(req.body));
+    User.create(req.body, finished);
+  },
+
   update: function(req, res) {
     var user_id = parseInt(req.params.id, 10),
         session_user = parseInt(req.session.userid, 10);
