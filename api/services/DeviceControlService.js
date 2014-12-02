@@ -3,7 +3,7 @@ var http = require('http'),
 
 module.exports = (function() {
 
-  function send(method, user, device, track, callback) {
+  function send(method, user, device, callback) {
     var hostname = device.ip_addr,
         port = device.port,
         options = {
@@ -83,7 +83,7 @@ module.exports = (function() {
 
   return {
 
-    start: function(user, device, track, callback) {
+    start: function(user, device, callback) {
       var hostname = [device.name, user.username, 'lofti.li'].join('.'),
           port = device.port;
 
@@ -97,10 +97,10 @@ module.exports = (function() {
       }
 
       sails.log('[DeviceControlService.start] Requesting playback on ' + hostname + ':' + port);
-      send('start', user, device, track, finish);
+      send('start', user, device, finish);
     },
 
-    stop: function(user, device, track, callback) {
+    stop: function(user, device, callback) {
       var hostname = [device.name, user.username, 'lofti.li'].join('.'),
           port = device.port;
 
@@ -114,7 +114,7 @@ module.exports = (function() {
       }
 
       sails.log('[DeviceControlService.stop] Requesting stop on ' + hostname + ':' + port);
-      send('stop', user, device, track, finish);
+      send('stop', user, device, finish);
     },
 
     ping: function(user, device, callback) {
@@ -125,7 +125,7 @@ module.exports = (function() {
         callback(error, res, body);
       }
 
-      send('status', user, device, null, finish);
+      send('status', user, device, finish);
     }
 
   };

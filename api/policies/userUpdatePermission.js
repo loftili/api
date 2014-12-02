@@ -17,8 +17,9 @@ module.exports = function userUpdatePermission(req, res, next) {
   }
 
   function finished(err, user) {
-    if(err)
+    if(err) {
       return res.status(400).send('couldnt finish');
+    }
 
     sails.log('[userUpdatePermission] user password reset finished successfully');
     return res.status(200).json(user);

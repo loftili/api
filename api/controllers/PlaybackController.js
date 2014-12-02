@@ -2,7 +2,6 @@ module.exports = (function() {
 
   function action(fn, req, res) {
     var device_id = req.body.device,
-        track_id = req.body.track,
         attempt;
 
     if(!req.session.userid)
@@ -10,9 +9,6 @@ module.exports = (function() {
 
     if(!device_id)
       return res.status(400).send('missing device id');
-
-    if(fn === 'start' && !track_id)
-      return res.status(400).send('missing track id');
 
     sails.log('[PlaybackController.' + fn + '] ' + fn + ' playback on ' + device_id);
 
@@ -33,7 +29,7 @@ module.exports = (function() {
       else
         sails.log('[PlaybackController.stop] Found device, stopping ' + permission.device.name);
 
-      DeviceControlService[fn](permission.user, permission.device, track_id, finish);
+      DeviceControlService[fn](permission.user, permission.device, finish);
     }
 
     attempt = Devicepermission.findOne({device: device_id, user: req.session.userid});

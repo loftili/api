@@ -7,7 +7,7 @@ module.exports.policies = (function() {
     '*': defaults,
 
     UserController: {
-      update: defaults.slice(1).concat(['userUpdatePermission'])
+      update: defaults.concat(['userUpdatePermission'])
     }
 
   };
