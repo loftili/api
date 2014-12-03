@@ -91,13 +91,9 @@ module.exports = {
     function finish(err, response, body) {
       if(err) {
         sails.log("[DeviceController][finishing] - devicecontrollerservice failed ping");
-        found_device.status = false;
-        found_device.save();
         return res.status(408).json(found_device);
       }
 
-      found_device.status = true;
-      found_device.save();
       sails.log("[DeviceController][finishing] - devicecontrollerservice ping success");
 
       var device_json = found_device.toJSON();

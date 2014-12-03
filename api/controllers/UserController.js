@@ -19,8 +19,10 @@ module.exports = {
         session_user = parseInt(req.session.userid, 10);
 
     function finished(err, user) {
-      if(err)
+      if(err) {
+        sails.log('[UserController][update] updating user failed err['+err+']');
         return res.status(422).send(err);
+      }
 
       return res.status(202).send(user);
     }
