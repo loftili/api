@@ -88,13 +88,16 @@ module.exports = {
   pop: function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
-        device_auth = req.headers["x-loftili-device-auth"],
+        auth_header = req.headers["x-loftili-device-auth"],
+        auth_query_token = req.query && req.query.device_token ? req.query.device_token : false,
         auth_info = {
-          device: device_auth,
+          device: auth_query_token || auth_header,
           user: user_id
         };
 
-    if(!user_id && !device_auth) {
+    sails.log('[QueueController][pop] header['+auth_header+'] query['+auth_query_token+']');
+
+    if(!user_id && !auth_header && !auth_query_token) {
       sails.log('[QueueController][pop] unauthorized attempt to pop from a device queue['+device_id+']');
       return res.status(404).send('not authorized');
     }

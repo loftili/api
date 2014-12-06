@@ -44,7 +44,7 @@ module.exports = {
             name: hostname, 
             ip_addr: remote_ip, 
             port: port,
-            token: DeviceTokenService.generate(devicename)
+            token: DeviceTokenService.generate(hostname)
           };
 
       sails.log('[RegistrationController.register] user authenticated, creating: ' + devicename + '[' + remote_ip + ']');
