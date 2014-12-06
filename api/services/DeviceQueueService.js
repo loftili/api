@@ -185,7 +185,7 @@ module.exports = (function() {
 
       sails.log('[DeviceQueueService][pop] found a track from popped information');
       found_track = track;
-      if(found_device.loop_flag) {
+      if(found_device.loop_flag && track) {
         DeviceQueueService.enqueue(device_id, track.id, requester, afterAdded);
       } else {
         return callback(null, track);

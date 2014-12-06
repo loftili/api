@@ -2,6 +2,50 @@ var net = require('net');
 
 module.exports = {
 
+  update: function(req, res, next) {
+    var user_id = parseInt(req.session.userid, 10),
+        device_id = parseInt(req.params.id, 10);
+
+    function finish(err, device) {
+      if(err) {
+        sails.log('[DeviceController][update] failed saving after update err['+err+']');
+        return res.status(422).json(err);
+      }
+
+      return res.status(200).json(device[0]);
+    }
+
+    function foundDevice(err, device) {
+      if(err) {
+        sails.log('[DeviceController][update] failed getting device for updating');
+        return res.status(404).send('');
+      }
+
+      sails.log('[DeviceController][update] found device, checking permissions');
+      var allowed = false,
+          LEVELS = DeviceShareService.LEVELS;
+
+      for(var i = 0; i < device.permissions.length; i++) {
+        var current = device.permissions[i],
+            is_current = current.user === user_id,
+            is_owner = current.level == LEVELS.DEVICE_OWNER;
+
+        if(is_current && is_owner)
+          allowed = true;
+      }
+
+      if(!allowed) {
+        sails.log('[DeviceController][update] current user not allowed to update the device, fail out');
+        return res.status(401).send('');
+      }
+
+      Device.update({id: device_id}, {ip_addr: req.body.ip_addr}).exec(finish);
+    }
+
+    sails.log('[DeviceController][update] attempting to get device info for device['+device_id+']');
+    Device.findOne({id: device_id}).populate('permissions').exec(foundDevice);
+  },
+
   destroy: function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid;
