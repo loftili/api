@@ -28,7 +28,7 @@ module.exports = {
   remove: function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
-        item_position = parseInt(req.body.position, 10),
+        item_position = parseInt(req.params.position, 10),
         valid_position = item_position >= 0,
         device_auth = req.headers["x-loftili-device-auth"],
         auth_info = {
