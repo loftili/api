@@ -258,7 +258,10 @@ module.exports = (function() {
       var keyname = ['device', 'queue', device_id].join('_'),
           lpush_args = [keyname].concat(new_list).concat([finish]);
 
-      client.connection.lpush.apply(client.connection, lpush_args);
+      if(new_list.length > 0)
+        client.connection.lpush.apply(client.connection, lpush_args);
+      else
+        finish();
     }
 
     function foundList(err, list) {
