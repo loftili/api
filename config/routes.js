@@ -25,9 +25,9 @@ module.exports.routes = {
   'POST /registration': 'RegistrationController.register',
 
   'GET /queues/:id': 'QueueController.findOne',
-  'POST /queues/:id': 'QueueController.enqueue',
+  'PUT /queues/:id': 'QueueController.enqueue',
   'POST /queues/:id/move': 'QueueController.move',
-  'POST /queues/:id/remove': 'QueueController.remove',
+  'DELETE /queues/:id/:position': 'QueueController.remove',
   'POST /queues/:id/pop': 'QueueController.pop',
 
   'POST /playback/start': 'PlaybackController.start',
