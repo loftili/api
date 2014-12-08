@@ -12,7 +12,7 @@ module.exports = (function() {
         token_unhashed = [device_token, device_name].join(':'),
         hasher = crypto.createHash('sha1');
 
-    hasher.setEncoding('base64');
+    hasher.setEncoding('hex');
     hasher.write(token_unhashed);
     hasher.end();
 
