@@ -1,14 +1,27 @@
 module.exports.policies = (function() {
 
-  var defaults = ['corsHeaders'];
+  var defaults = ['corsHeaders', 'isLoggedIn'];
 
   return {
 
     '*': defaults,
 
     UserController: {
-      update: defaults.concat(['userUpdatePermission'])
-    }
+      update: ['corsHeaders', 'userUpdatePermission']
+    },
+
+    RegistrationController: {
+      register: ['corsHeaders']
+    },
+
+    QueueController: {
+      findOne: ['corsHeaders'],
+      enqueue: ['corsHeaders'],
+      remove: ['corsHeaders'],
+      move: ['corsHeaders'],
+      pop: ['corsHeaders']
+    },
+    
 
   };
 
