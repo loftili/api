@@ -39,7 +39,16 @@ module.exports = {
         return res.status(401).send('');
       }
 
-      Device.update({id: device_id}, {ip_addr: req.body.ip_addr}).exec(finish);
+      var updates = {},
+          body = req.body || {};
+
+      if(body.ip_addr)
+        updates.ip_addr = body.ip_addr;
+
+      if(body.port)
+        updates.port = body.port;
+
+      Device.update({id: device_id}, updates).exec(finish);
     }
 
     sails.log('[DeviceController][update] attempting to get device info for device['+device_id+']');
