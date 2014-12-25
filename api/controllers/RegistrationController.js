@@ -41,14 +41,15 @@ module.exports = {
           device_secret = process.env['DEVICE_SECRET'],
           token_unhashed = [device_secret, devicename].join(':'),
           params = {
-            name: hostname, 
+            name: devicename,
+            registered_name: hostname,
             ip_addr: remote_ip, 
             port: port,
             token: DeviceTokenService.generate(hostname)
           };
 
       sails.log('[RegistrationController.register] user authenticated, creating: ' + devicename + '[' + remote_ip + ']');
-      Device.findOrCreate({name: hostname}, params, createdDevice);
+      Device.findOrCreate({registered_name: hostname}, params, createdDevice);
     }
 
     function authCheck(err, hash) {

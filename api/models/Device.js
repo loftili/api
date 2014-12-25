@@ -7,6 +7,11 @@ module.exports = {
       required: true
     },
 
+    registered_name: {
+      type: 'string',
+      required: true
+    },
+
     last_checked: {
       type: 'datetime'
     },

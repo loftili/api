@@ -55,7 +55,7 @@ module.exports.bootstrap = function(cb) {
   function addDevice() {
     Device.create({
       name: 'testing',
-      hostname: '',
+      registered_name: 'testing.dadleyy',
       ip_addr: '127.0.0.1',
       port: 80
     }, addPermission);
