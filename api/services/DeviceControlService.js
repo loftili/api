@@ -41,7 +41,13 @@ module.exports = (function() {
       sails.log(device_response);
       sails.log('----------------------------------------');
       sent = true;
-      callback(false, response_obj, device_response);
+
+      device.last_checked = new Date();
+
+      device.save(function() {
+        sails.log('[DeviceControlService] updating device last checked succeeded');
+        callback(false, response_obj, device_response);
+      });
     }
 
     function requestHandler(res) {

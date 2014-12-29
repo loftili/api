@@ -51,7 +51,7 @@ module.exports = (function() {
       sails.log('[DeviceQueueService][validatePermission] found device, checking permissions device[' + device.name + ']');
 
       if(device_key) {
-        var expected = DeviceTokenService.generate(device.name);
+        var expected = DeviceTokenService.generate(device.registered_name);
         sails.log('[DeviceQueueService][validatePermission] validating permission based on the device\'s token...');
         sails.log('[DeviceQueueService][validatePermission] expected['+expected+'] actual['+device_key+']');
 
