@@ -17,7 +17,7 @@ module.exports = (function() {
         return res.status(408).send(error);
 
       sails.log('[PlaybackController.finish] Successfully executed ' + fn + ' on  ' + device_id + ' STATUS[' + d_response.statusCode + ']');
-      return res.status(202).json({body: d_body});
+      return res.status(202).json({response: JSON.parse(d_body)});
     }
 
     function lookupCb(err, permission) {
