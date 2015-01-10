@@ -89,6 +89,23 @@ module.exports = (function() {
 
   return {
 
+    restart: function(user, device, callback) {
+      var hostname = [device.name, user.username].join('.'),
+          port = device.port;
+
+      function finish(error, res, body) {
+        if(error)
+          sails.log('[DeviceControlService.start.error] Errored playback request ERROR[' + error + ']');
+        else
+          sails.log('[DeviceControlService.start.success] Successfull playback request STATUS[' + res.statusCode + ']');
+
+        callback(error, res, body);
+      }
+
+      sails.log('[DeviceControlService.start] Requesting restart on ' + hostname + ':' + port);
+      send('restart', user, device, finish);
+    },
+
     start: function(user, device, callback) {
       var hostname = [device.name, user.username, 'lofti.li'].join('.'),
           port = device.port;
@@ -107,7 +124,7 @@ module.exports = (function() {
     },
 
     stop: function(user, device, callback) {
-      var hostname = [device.name, user.username, 'lofti.li'].join('.'),
+      var hostname = [device.name, user.username].join('.'),
           port = device.port;
 
       function finish(error, res, body) {

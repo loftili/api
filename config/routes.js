@@ -30,6 +30,7 @@ module.exports.routes = {
   'DELETE /queues/:id/:position': 'QueueController.remove',
   'POST /queues/:id/pop': 'QueueController.pop',
 
+  'POST /playback/restart': 'PlaybackController.restart',
   'POST /playback/start': 'PlaybackController.start',
   'POST /playback/stop': 'PlaybackController.stop',
 
