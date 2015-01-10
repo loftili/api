@@ -38,6 +38,10 @@ module.exports = (function() {
 
   return {
 
+    restart: function (req, res) {
+      action('restart', req, res);
+    },
+
     start: function (req, res) {
       action('start', req, res);
     },
