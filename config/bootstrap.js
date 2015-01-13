@@ -35,13 +35,21 @@ module.exports.bootstrap = function(cb) {
     cb();
   }
 
+  function mapUserToClient() {
+    ClientManagerService.generateClientToken(1, 1, finished);
+  }
+
+  function createClient() {
+    ClientManagerService.createClient('loftili', mapUserToClient);
+  }
+
   function addTrack() {
     var temp_uuid = uuid.v4();
 
     Track.create({
-      title: 'Test',
+      title: 'invalid',
       uuid: temp_uuid
-    }, finished);
+    }, createClient);
   }
 
   function addPermission() {

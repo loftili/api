@@ -1,8 +1,27 @@
 module.exports = (function() {
 
-  var ClienttokenController = {};
+  var ClientTokenController = {};
 
-  ClienttokenController.create = function(req, res, next) {
+  ClientTokenController.find = function(req, res, next) {
+    var session_id = req.session.userid,
+        user_id = parseInt(session_id, 10),
+        valid_user = user_id >= 0;
+
+    if(!valid_user)
+      return res.status(404).send('');
+
+    function foundKeys(err, keys) {
+      if(err) {
+        return res.status(404).send('');
+      }
+
+      return res.status(200).json(keys);
+    }
+    
+    Clienttoken.findWhere({user: user_id}).exec(foundKeys);
+  };
+
+  ClientTokenController.create = function(req, res, next) {
     var body = req.body,
         client_id = body.client,
         user_id = parseInt(req.session.userid, 10);
@@ -22,6 +41,6 @@ module.exports = (function() {
     ClientManagerService.generateClientToken(client_id, user_id, finish);
   };
 
-  return ClienttokenController;
+  return ClientTokenController;
 
 })();

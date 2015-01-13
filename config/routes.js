@@ -4,8 +4,13 @@ module.exports.routes = {
   'POST /auth': 'SessionController.login',
   'GET /logout': 'SessionController.logout',
 
+  'GET /clients': 'ClientController.find',
   'POST /clients': 'ClientController.create',
-  'POST /clienttokens': 'ClienttokenController.create',
+
+  'POST /clientauth': 'ClientAuthController.authenticate',
+
+  'POST /clienttokens': 'ClientTokenController.create',
+  'GET /clienttokens': 'ClientTokenController.find',
 
   /* User information*/
   'POST /users': 'UserController.create',

@@ -10,7 +10,7 @@ module.exports = {
     token: {
       type: 'string',
       required: true,
-      size: 9
+      size: 40
     },
 
     user: {
