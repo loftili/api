@@ -9,7 +9,12 @@ module.exports = (function() {
         found_client;
 
     function check() {
-      if(found_token && found_client)
+      if(!found_token || !found_client)
+        return;
+
+      if(found_token.client !== found_client.id)
+        return callback('token mismatch', null);
+      else
         return callback(null, found_token.user);
     }
 
@@ -19,7 +24,6 @@ module.exports = (function() {
         return callback('invalid token', null);
       }
 
-      sails.log(token);
       sails.log('[ClientManagerService] successfully found user');
       found_token = token;
 
@@ -40,7 +44,30 @@ module.exports = (function() {
 
     sails.log('[ClientManagerService] looking for client['+client_key+'] and token['+user_token+']');
     Client.findOne({consumer_key: client_key}).exec(foundClient);
-    Clienttoken.findOne({token: user_token}).populate('user').exec(foundToken);
+    Clientauth.findOne({token: user_token}).populate('user').exec(foundToken);
+  };
+
+  ClientManagerService.createClientAuth = function(client_id, user_id, callback) {
+    var new_token = {
+          user: user_id,
+          client: client_id
+        };
+
+    function finish(err, client_auth) {
+      return callback(err, client_auth);
+    }
+
+    function generated(err, buffer) {
+      var hex_buffer = buffer.toString('hex');
+      new_token.token = hex_buffer.substring(0, 40);
+      Clientauth.create(new_token).exec(finish);
+    }
+
+    function generate() {
+      crypto.randomBytes(30, generated);
+    }
+
+    Clientauth.destroy({user: user_id, client: client_id}).exec(generate);
   };
 
   ClientManagerService.generateClientToken = function(client_id, user_id, callback) {
@@ -53,14 +80,14 @@ module.exports = (function() {
     }
 
     function generatedConsumer(err, buffer) {
-      var token_buffer = buffer.toString('base64'),
+      var token_buffer = buffer.toString('hex'),
           mixed = [token_buffer, found_client.consumer_secret].join(':');
 
       hasher.setEncoding('hex');
       hasher.write(mixed);
       hasher.end();
 
-      new_token.token = hasher.read();
+      new_token.token = hasher.read().substring(0, 9);
 
       sails.log('[ClientManagerService] generated random bytes, creating token');
       Clienttoken.create(new_token).exec(finish);
@@ -97,25 +124,18 @@ module.exports = (function() {
     }
 
     function generatedSecret(err, buffer) {
-      new_client.consumer_secret = buffer.toString('base64');
+      new_client.consumer_secret = buffer.toString('hex').substring(0, 40);
       tryCreate();
     }
 
     function generatedConsumer(err, buffer) {
-      new_client.consumer_key = buffer.toString('base64');
+      new_client.consumer_key = buffer.toString('hex').substring(0, 15);
       tryCreate();
     }
 
     crypto.randomBytes(40, generatedSecret);
     crypto.randomBytes(15, generatedConsumer);
 
-  };
-
-  ClientManagerService.generateSecret = function() {
-    var diffie = crypto.getDiffieHellman('modp5');
-  };
-
-  ClientManagerService.generateKey = function() {
   };
 
   return ClientManagerService;
