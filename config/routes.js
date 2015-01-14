@@ -11,6 +11,7 @@ module.exports.routes = {
 
   'POST /clienttokens': 'ClientTokenController.create',
   'GET /clienttokens': 'ClientTokenController.find',
+  'DELETE /clienttokens/:id': 'ClientTokenController.destroy',
 
   /* User information*/
   'POST /users': 'UserController.create',
