@@ -1,7 +1,7 @@
 {
   "name": "loftili-api",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "a skeleton sails API application",
   "keywords": [],
   "dependencies": {
