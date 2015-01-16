@@ -1,6 +1,8 @@
-module.exports = {
+module.exports = (function() {
 
-  create: function(req, res, next) {
+  var UserController = {};
+
+  UserController.create = function(req, res, next) {
     function finished(err, user) {
       if(err) {
         sails.log('[UserController][create] failed creating a user: '+err);
@@ -12,9 +14,9 @@ module.exports = {
 
     sails.log('[UserController][create] attempting to create a user from request body: '+JSON.stringify(req.body));
     User.create(req.body, finished);
-  },
+  };
 
-  update: function(req, res) {
+  UserController.update = function(req, res) {
     var user_id = parseInt(req.params.id, 10),
         session_user = parseInt(req.session.userid, 10);
 
@@ -49,9 +51,9 @@ module.exports = {
 
     sails.log('[UserController][update] updating user['+user_id+'] session['+session_user+']');
     User.findOne(user_id).exec(found);
-  },
+  };
 
-  addTrack: function(req, res) {
+  UserController.addTrack = function(req, res) {
     var user_id = parseInt(req.params.id, 10),
         session_user = parseInt(req.session.userid, 10),
         track_id = req.body && req.body.track ? parseInt(req.body.track, 10) : false;
@@ -59,12 +61,22 @@ module.exports = {
     if(user_id !== session_user || !(track_id >= 0))
       return res.status(404).send('');
 
+    function foundTrack(err, track) {
+      if(err) {
+        sails.log('[UserController][addTrack] failed finding track after add');
+        return res.status(404).send('');
+      }
+
+      return res.status(200).json(track);
+    }
+
     function finish(err, done) {
       if(err) {
         sails.log('[UserController][addTrack] failed adding track['+track_id+'] err['+err+']');
         return res.status(404).send('');
       }
-      return res.json(done);
+
+      Track.findOne(track_id).exec(foundTrack);
     }
 
     function found(err, user) {
@@ -77,9 +89,9 @@ module.exports = {
     }
 
     User.findOne(user_id).exec(found);
-  },
+  };
 
-  tracks: function(req, res) {
+  UserController.tracks = function(req, res) {
     var user_id = parseInt(req.params.id, 10),
         session_user = parseInt(req.session.userid, 10);
 
@@ -97,9 +109,9 @@ module.exports = {
 
     sails.log('[UserController][tracks] Looking up tracks for user['+user_id+'] session['+session_user+']');
     User.findOne({id: user_id}).populate('tracks').exec(found);
-  },
+  };
 
-  search: function(req, res) {
+  UserController.search = function(req, res) {
     var query = req.query,
         user_query = query && query.q ? (query.q+'').toLowerCase() : false;
 
@@ -129,9 +141,9 @@ module.exports = {
     }
 
     User.query('SELECT id, username FROM user WHERE privacy_level < 5', callback);
-  },
+  };
 
-  passwordReset: function(req, res, next) {
+  UserController.passwordReset = function(req, res, next) {
     var user = req.body.user;
 
     if(!user)
@@ -145,7 +157,39 @@ module.exports = {
     }
 
     PasswordResetService.reset(user, finish);
-  }
+  };
+
+  UserController.dropTrack = function(req, res, next) {
+    var user_id = parseInt(req.params.id, 10),
+        track_id = parseInt(req.params.track_id, 10),
+        session_user = req.session.userid;
+
+    if(user_id !== session_user || !(track_id >= 0)) {
+      return res.status(404).send('nope');
+    }
+
+    function finish(err, other) {
+      if(err) {
+        return res.status(404).send('');
+      }
+
+      return res.status(204).send('');
+    }
+
+    function found(err, user) {
+      if(err) {
+        return res.status(404).send('');
+      }
+
+      user.tracks.remove(track_id);
+      user.save(finish);
+    }
+
+    sails.log('[UserController][dropTrack] Looking up tracks for user['+user_id+'] session['+session_user+']');
+    User.findOne({id: user_id}).populate('tracks').exec(found);
+  };
+
+  return UserController;
 	
-};
+})();
 

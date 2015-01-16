@@ -18,6 +18,7 @@ module.exports.routes = {
   'GET /users/search': 'UserController.search',
   'GET /users/:id/tracks': 'UserController.tracks',
   'PUT /users/:id/tracks': 'UserController.addTrack',
+  'DELETE /users/:id/tracks/:track_id': 'UserController.dropTrack',
   'PUT /users/:id': 'UserController.update',
   'POST /passwordreset': 'UserController.passwordReset',
   
@@ -54,6 +55,7 @@ module.exports.routes = {
   'GET /tracks/search': 'TrackController.search',
   'POST /tracks/upload': 'TrackController.upload',
   'PUT /tracks/:id': 'TrackController.update',
+  'DELETE /tracks/:id': 'TrackController.destroy',
 
   /* Tracks */
   'GET /artists/:id': 'ArtistController.findOne'

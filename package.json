@@ -32,7 +32,8 @@
     "node-uuid": "^1.4.1",
     "atob": "^1.1.2",
     "redis": "^0.12.1",
-    "knex": "^0.6.22"
+    "knex": "^0.6.22",
+    "connect-redis": "1.4.5"
   },
   "scripts": {
     "start": "node app.js",
