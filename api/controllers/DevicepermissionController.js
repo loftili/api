@@ -71,7 +71,7 @@ module.exports = {
   create: function(req, res) {
     var device_id = req.body.device,
         user_id = req.body.user,
-        level = req.body.level,
+        level = parseInt(req.body.level, 10),
         owner = req.session.userid,
         params = {
           device: device_id,
@@ -92,7 +92,11 @@ module.exports = {
       return err ? res.status(404).send(err) : populate(record);
     }
 
-    DeviceShareService.share(params, added);
+    if(!level) {
+      return res.status(422).send('');
+    } else {
+      DeviceShareService.share(params, added);
+    }
   }
 
 };

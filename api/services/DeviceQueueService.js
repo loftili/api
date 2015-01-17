@@ -1,6 +1,21 @@
 module.exports = (function() {
 
-  var DeviceQueueService = {};
+  var DeviceQueueService = {},
+      KEY_DELIM = ':';
+
+  function keyName(device_id) {
+    return ['queue', device_id].join(KEY_DELIM);
+  }
+
+  function listKey(device_id) {
+    var base = keyName(device_id);
+    return [base, 'tracks'].join(KEY_DELIM);
+  }
+
+  function currentKey(device_id) {
+    var base = keyName(device_id);
+    return [base, 'current'].join(KEY_DELIM);
+  }
 
   function validatePermission(device_id, auth_info, callback) {
     var user_id = auth_info.user || auth_info,
@@ -58,6 +73,57 @@ module.exports = (function() {
     Device.findOne(device_id).populate('permissions').exec(foundDevice);
   }
 
+  DeviceQueueService.current = function(device_id, requester, callback) {
+    var client;
+
+    function finish(err, track) {
+      if(err) {
+        return callback(err, null)
+      }
+
+      sails.log('[DeviceQueueService][current] found current['+track+']');
+      return callback(null, track);
+    }
+
+    function getTrack(err, value) {
+      if(err) {
+        sails.log('[DeviceQueueService][current] failed translating tracks');
+        sails.log(err);
+        client.connection.quit();
+        return callback(err, null)
+      }
+
+      client.connection.quit();
+      var track_id = parseInt(value, 10);
+      sails.log('[DeviceQueueService][current] populating track');
+      Track.findOne(track_id).exec(finish);
+    }
+
+    function getCurrent(err, device) {
+      if(err) {
+        client.connection.quit();
+        return callback(err, null);
+      }
+
+      var keyname = currentKey(device_id);
+      sails.log('[DeviceQueueService][current] asking for queue for device['+device.name+'], keyname['+keyname+']');
+      client.connection.get(keyname, getTrack);
+    }
+
+    function connected(error) {
+      if(error) {
+        sails.log('[DeviceQueueService][current] redis server failed connection');
+        client.connection.quit();
+        return callback('redis fail');
+      }
+
+      sails.log('[DeviceQueueService][current] looking up device information for device['+device_id+']');
+      validatePermission(device_id, requester, getCurrent);
+    }
+
+    client = RedisConnection.getClient(connected);
+  };
+
   DeviceQueueService.find = function(device_id, requester, callback) {
     var client,
         queue_ids = [];
@@ -95,6 +161,7 @@ module.exports = (function() {
       }
 
       client.connection.quit();
+
       for(var i = 0; i < values.length; i++) {
         var val = values[i],
             id = parseInt(val, 10);
@@ -112,8 +179,8 @@ module.exports = (function() {
         return callback(null, err);
       }
 
-      sails.log('[DeviceQueueService][find] asking for queue for device['+device.name+']');
-      var keyname = ['device', 'queue', device_id].join('_');
+      var keyname = listKey(device_id);
+      sails.log('[DeviceQueueService][find] asking for queue for device['+device.name+'], keyname['+keyname+']');
       client.connection.lrange(keyname, 0, -1, getTracks);
     }
 
@@ -133,7 +200,8 @@ module.exports = (function() {
 
   DeviceQueueService.pop = function(device_id, requester, callback) {
     var found_device,
-        found_track;
+        found_track,
+        popped_id;
 
     function afterAdded(err) {
       if(err) {
@@ -153,6 +221,7 @@ module.exports = (function() {
 
       sails.log('[DeviceQueueService][pop] found a track from popped information');
       found_track = track;
+
       if(found_device.loop_flag && track) {
         DeviceQueueService.enqueue(device_id, track.id, requester, afterAdded);
       } else {
@@ -160,7 +229,9 @@ module.exports = (function() {
       }
     }
 
-    function getTrack(err, value) {
+    function getTrack(err) {
+      var value = popped_id;
+
       client.connection.quit();
 
       if(err) {
@@ -177,6 +248,17 @@ module.exports = (function() {
       }
     }
 
+    function setCurrent(err, value) {
+      if(err) {
+        sails.log('[DeviceQueueService][pop] unable to pop: '+err);
+        return callback(err, null);
+      }
+
+      var keyname = currentKey(device_id);
+      popped_id = value;
+      client.connection.set(keyname, value, getTrack);
+    }
+
     function doPop(err, device) {
       if(err) {
         client.connection.quit();
@@ -185,8 +267,8 @@ module.exports = (function() {
 
       found_device = device;
       sails.log('[DeviceQueueService][pop] lpopping from queue');
-      var keyname = ['device', 'queue', device_id].join('_');
-      client.connection.lpop(keyname, getTrack);
+      var keyname = listKey(device_id);
+      client.connection.lpop(keyname, setCurrent);
     }
 
     function connected(error) {
@@ -223,7 +305,7 @@ module.exports = (function() {
         return callback('failed deleting previous key list', null);
       }
 
-      var keyname = ['device', 'queue', device_id].join('_'),
+      var keyname = listKey(device_id),
           lpush_args = [keyname].concat(new_list).concat([finish]);
 
       if(new_list.length > 0)
@@ -243,7 +325,7 @@ module.exports = (function() {
         return callback('invalid position', null);
       }
 
-      var keyname = ['device', 'queue', device_id].join('_');
+      var keyname = listKey(device_id);
 
       for(var i = 0; i < list.length; i++) {
         if(i === item_position)
@@ -263,7 +345,7 @@ module.exports = (function() {
         return callback('permission fail');
       }
 
-      var keyname = ['device', 'queue', device_id].join('_');
+      var keyname = listKey(device_id);
       sails.log('[DeviceQueueService][remove] removing from queue['+keyname+'] position['+item_position+']');
       client.connection.lrange(keyname, 0, -1, foundList);
     }
@@ -306,7 +388,7 @@ module.exports = (function() {
         return callback(err, null);
       }
 
-      var keyname = ['device', 'queue', device_id].join('_');
+      var keyname = listKey(device_id);
       sails.log('[DeviceQueueService][enqueue] lpushing into list['+keyname+'] track['+track_id+']');
       client.connection.send_command('rpush', [keyname, track_id], added);
     }
