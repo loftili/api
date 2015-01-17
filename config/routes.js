@@ -44,6 +44,9 @@ module.exports.routes = {
   'POST /playback/start': 'PlaybackController.start',
   'POST /playback/stop': 'PlaybackController.stop',
 
+  'PUT /devicestates/:id': 'DeviceStateController.update',
+  'GET /devicestates/:id': 'DeviceStateController.findOne',
+
   /* Device visibility */
   'GET /devicepermissions': 'DevicepermissionController.find',
   'POST /devicepermissions': 'DevicepermissionController.create',
