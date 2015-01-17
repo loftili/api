@@ -11,12 +11,16 @@ module.exports = (function() {
         client;
 
     function finish(err, state_info) {
+      client.connection.quit();
+
       if(err) {
-        client.connection.quit();
         return callback(err);
       }
 
-      client.connection.quit();
+      if(!state_info) {
+        return callback('no state info available');
+      }
+
       return callback(null, state_info);
     }
 
@@ -42,6 +46,8 @@ module.exports = (function() {
       if(state_info.hasOwnProperty(state_key))
         state_map.push([state_key, state_info[state_key]]);
     }
+
+    state_map.push(['timestamp', new Date().getTime()]);
 
     function finish(err) {
       if(err) {
