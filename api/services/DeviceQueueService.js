@@ -1,37 +1,6 @@
-var redis = require("redis");
-
 module.exports = (function() {
 
   var DeviceQueueService = {};
-
-  function getClient(ready_fn) {
-    var connection = redis.createClient({
-          max_attempts: 1
-        }),
-        client = {},
-        failed_connecting = false;
-
-    function error(err) {
-      sails.log('[REDIS ERROR] ' + err);
-      client.error = err;
-
-      if(!failed_connecting)
-        ready_fn(err);
-
-      failed_connecting = true;
-    }
-
-    function ready() {
-      ready_fn(null);
-    }
-
-    connection.on('error', error);
-    connection.on('ready', ready);
-
-    client.connection = connection;
-
-    return client;
-  }
 
   function validatePermission(device_id, auth_info, callback) {
     var user_id = auth_info.user || auth_info,
@@ -51,11 +20,10 @@ module.exports = (function() {
       sails.log('[DeviceQueueService][validatePermission] found device, checking permissions device[' + device.name + ']');
 
       if(device_key) {
-        var expected = DeviceTokenService.generate(device.registered_name);
         sails.log('[DeviceQueueService][validatePermission] validating permission based on the device\'s token...');
-        sails.log('[DeviceQueueService][validatePermission] expected['+expected+'] actual['+device_key+']');
+        sails.log('[DeviceQueueService][validatePermission] expected['+device.token+'] actual['+device_key+']');
 
-        if(expected !== device_key) {
+        if(device.token !== device_key) {
           return callback('no permission to act', null);
         }
 
@@ -160,7 +128,7 @@ module.exports = (function() {
       validatePermission(device_id, requester, getQueue);
     }
 
-    client = getClient(connected);
+    client = RedisConnection.getClient(connected);
   };
 
   DeviceQueueService.pop = function(device_id, requester, callback) {
@@ -232,7 +200,7 @@ module.exports = (function() {
       validatePermission(device_id, requester, doPop);
     }
 
-    client = getClient(connected);
+    client = RedisConnection.getClient(connected);
   };
 
   DeviceQueueService.remove = function(device_id, item_position, requester, callback) {
@@ -311,7 +279,7 @@ module.exports = (function() {
       validatePermission(device_id, requester, doRemove);
     }
 
-    client = getClient(connected);
+    client = RedisConnection.getClient(connected);
   };
 
   DeviceQueueService.enqueue = function(device_id, track_id, requester, callback) {
@@ -359,7 +327,7 @@ module.exports = (function() {
         sails.log('[DeviceQueueService][enqueue] could not find a track per request');
         return callback('missing track');
       }
-      client = getClient(connected);
+      client = RedisConnection.getClient(connected);
     }
 
     Track.findOne(track_id).exec(foundTrack);

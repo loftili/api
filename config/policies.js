@@ -25,7 +25,10 @@ module.exports.policies = (function() {
       move: ['corsHeaders'],
       pop: ['corsHeaders']
     },
-    
+
+    DeviceStateController: {
+      update: ['corsHeaders']
+    }
 
   };
 
