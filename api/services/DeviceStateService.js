@@ -6,6 +6,32 @@ module.exports = (function() {
     return ['device', device_id].join(':');
   }
 
+  DeviceStateService.find = function(device_id, callback) {
+    var key_name = stateKey(device_id),
+        client;
+
+    function finish(err, state_info) {
+      if(err) {
+        client.connection.quit();
+        return callback(err);
+      }
+
+      client.connection.quit();
+      return callback(null, state_info);
+    }
+
+    function connected(err) {
+      if(err) {
+        return callback(err);
+      }
+
+      sails.log('[DeviceStateService][find] connected to redis, running find sequence');
+      client.connection.hgetall(key_name, finish);
+    }
+
+    client = RedisConnection.getClient(connected);
+  };
+
   DeviceStateService.update = function(device_id, state_info, callback) {
     var key_name = stateKey(device_id),
         state_map = [],

@@ -34,6 +34,7 @@ module.exports.routes = {
 
   'POST /registration': 'RegistrationController.register',
 
+  'GET /queues/:id/current': 'QueueController.current',
   'GET /queues/:id': 'QueueController.findOne',
   'PUT /queues/:id': 'QueueController.enqueue',
   'POST /queues/:id/move': 'QueueController.move',

@@ -4,6 +4,44 @@ module.exports = (function() {
 
 
   DeviceStateController.findOne = function(req, res, next) {
+    var device_id = parseInt(req.params.id, 10),
+        user_id = req.session.userid;
+
+    function finish(err, device_state) {
+      if(err) {
+        sails.log('[DeviceStateController][findOne] errored inside service['+err+']');
+        return res.status(404).send('');
+      }
+
+      return res.status(200).json(device_state);
+    }
+
+    function foundDevice(err, device) {
+      if(err) {
+        sails.log('[DeviceStateController][findOne] errored while finding device');
+        return res.status(404).send('');
+      }
+
+      var permissions = device.permissions,
+          p_count = permissions.length,
+          can_check = false;
+
+      for(var i = 0; i < p_count; i++) {
+        var p = permissions[i];
+        if(p.user == user_id) {
+          can_check = true;
+        }
+      }
+
+      if(can_check)
+        DeviceStateService.find(device_id, finish);
+      else {
+        sails.log('[DeviceStateController][findOne] user has no right');
+        return res.status(404).send('');
+      }
+    }
+
+    Device.findOne(device_id).populate('permissions').exec(foundDevice);
   };
 
   DeviceStateController.update = function(req, res, next) {

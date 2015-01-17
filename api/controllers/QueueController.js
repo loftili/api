@@ -1,6 +1,29 @@
-module.exports = {
+module.exports = (function() {
 
-  findOne: function(req, res, next) {
+  var QueueController = {};
+
+  QueueController.current = function(req, res, next) {
+    var device_id = parseInt(req.params.id, 10),
+        user_id = req.session.userid,
+        device_auth = req.headers["x-loftili-device-auth"],
+        auth_info = {
+          user: user_id,
+          device: device_auth
+        };
+
+    function finish(err, track) {
+      if(err) {
+        sails.log('[QueueController][findOne] failed getting current track for queue');
+        return res.status(404).send('');
+      }
+      return res.status(200).json(track);
+    }
+        
+    sails.log('[QueueController][findOne] finding the current track for queue');
+    DeviceQueueService.current(device_id, auth_info, finish);
+  };
+
+  QueueController.findOne = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
         device_auth = req.headers["x-loftili-device-auth"],
@@ -19,13 +42,13 @@ module.exports = {
         
     sails.log('[QueueController][findOne] finding the queue belonging to device[' + device_id + ']');
     DeviceQueueService.find(device_id, auth_info, finish);
-  },
+  };
 
-  move: function(req, res, next) {
+  QueueController.move = function(req, res, next) {
     res.status(200).send('');
-  },
+  };
 
-  remove: function(req, res, next) {
+  QueueController.remove = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
         item_position = parseInt(req.params.position, 10),
@@ -53,9 +76,9 @@ module.exports = {
 
     sails.log('[QueueController][remove] removing position['+item_position+'] to device['+device_id+']');
     DeviceQueueService.remove(device_id, item_position, auth_info, finish);
-  },
+  };
 
-  enqueue: function(req, res, next) {
+  QueueController.enqueue = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
         track_id = parseInt(req.body.track, 10),
@@ -66,8 +89,9 @@ module.exports = {
           user: user_id
         };
 
-    if(!user_id)
+    if(!user_id) {
       return res.status(404).send('');
+    }
 
     if(!valid_id)
       return res.status(404).send('missing track id');
@@ -83,9 +107,9 @@ module.exports = {
 
     sails.log('[QueueController][enqueue] adding track['+track_id+'] to device[' + device_id + ']');
     DeviceQueueService.enqueue(device_id, track_id, auth_info, finish);
-  },
+  };
 
-  pop: function(req, res, next) {
+  QueueController.pop = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
         auth_header = req.headers["x-loftili-device-auth"],
@@ -118,6 +142,8 @@ module.exports = {
 
     sails.log('[QueueController][pop] popping');
     DeviceQueueService.pop(device_id, auth_info, finish);
-  }
+  };
 
-};
+  return QueueController;
+
+})();
