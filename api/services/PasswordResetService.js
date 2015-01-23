@@ -70,7 +70,7 @@ module.exports = (function() {
       transport.sendMail({
         from: 'no-reply@loftili.com',
         to: user.email,
-        subject: 'loftili password reset',
+        subject: '[loftili] your password reset',
         html: email_html
       }, sent);
     }

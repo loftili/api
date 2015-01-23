@@ -1,0 +1,107 @@
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, address, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strong, b, u, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video
+  margin: 0
+  padding: 0
+  border: 0
+  font-size: 100%
+  font: inherit
+  vertical-align: baseline
+
+ol, ul
+  list-style: none
+
+blockquote, q
+  quotes: none
+
+blockquote:before, blockquote:after,
+q:before, q:after
+  content: ''
+  content: none
+
+table
+  border-collapse: collapse
+  border-spacing: 0
+
+/* ===== */
+
+$blue-color: #477dca
+$link-color: $blue-color
+
+body
+  line-height: 1
+  
+  .content
+    display: block
+    padding: 20px 0
+    border-top: 3px solid darken(white, 40)
+    background: darken(white, 5)
+    font-family: "Trebuchet MS", Helvetica, sans-serif
+    position: relative
+
+  .title-container,
+  .details-container
+    display: block
+    position: relative
+    padding: 0 30px
+    max-width: 600px
+    margin: 0 auto
+
+  .title-container
+    padding-bottom: 10px
+    margin-bottom: 10px
+
+    hr
+      display: block
+      border: none
+      border-bottom: 1px solid darken(white, 12)
+      margin: 20px 40px 0
+
+  .information
+    text-align: center
+
+  .information .title-container h1
+    font-size: 30px
+    color: darken(white, 80)
+    display: block
+    text-align: center
+    font-family: "Big Caslon", Book Antiqua, Palatino Linotype, Georgia, serif
+
+  .information .details
+    color: darken(white, 70)
+    font-size: 16px
+    line-height: 24px
+    margin: 0 0 10px 0
+
+  .information .signature
+    font-size: 14px
+    line-height: 22px
+    color: darken(white, 60)
+    font-style: italic
+
+  .linkage
+    text-align: center
+    padding: 10px 0
+
+  .linkage a.join-link
+    display: inline-block
+    box-sizing: border-box
+    font-size: 14px
+    line-height: 25px
+    height: 30px
+    padding: 0 5px
+    border: 2px solid $link-color
+    border-radius: 2px
+
+body a
+  color: $link-color
+  text-decoration: none

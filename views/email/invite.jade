@@ -1,7 +1,22 @@
 doctype html
 html(lang="en")
   head
-    title loftli invite
+    title [title here]
   body
-    h1 Someone has invited you to join the loftli platform
-    a(href="https://lofti.li/join/#{token}" title="") join
+    .content
+      .information
+        .title-container
+          h1.title join the loftili platform
+          hr
+        .details-container
+          p.details What a great day. You've been invited to join our platform and give your 
+            | home audio system the features it deserves. Chances are you have a lot of questions 
+            | about this "loftili" schenanigans, and we'd love to get you up to speed. Come take a
+            | look at our <a href="https://lofti.li/faq" title="faq">faq</a> and see what we're all
+            | about on our <a href="https://www.youtube.com/channel/UC9UwH1yJl8s5Ldwp2i-Vf1g">youtube</a>
+            | channel. We're really excited to have you joining us, and we hope you really enjoy what
+            | we have to offer. 
+          .linkage
+            a.join-link(href="https://lofti.li/join/#{token}" title="") get started today
+          p.signature - Danny Hadley, Creator
+
