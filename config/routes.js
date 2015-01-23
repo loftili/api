@@ -7,6 +7,10 @@ module.exports.routes = {
   'GET /clients': 'ClientController.find',
   'POST /clients': 'ClientController.create',
 
+  'DELETE /invitations/:id': 'InvitationsController.destroy',
+  'GET /invitations': 'InvitationsController.find',
+  'POST /invitations': 'InvitationsController.create',
+
   'POST /clientauth': 'ClientAuthController.authenticate',
 
   'POST /clienttokens': 'ClientTokenController.create',
