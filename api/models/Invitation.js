@@ -18,8 +18,9 @@ module.exports = {
       required: true
     },
 
-    accepted: {
-      model: 'user'
+    state: {
+      type: 'integer',
+      defaultsTo: 0
     }
 
   }

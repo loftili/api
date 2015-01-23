@@ -6,7 +6,7 @@ exports.up = function(knex, Promise) {
     table.integer('from');
     table.string('token', 10);
     table.string('to');
-    table.integer('accepted');
+    table.integer('state');
     table.dateTime('createdAt');
     table.dateTime('updatedAt');
   });

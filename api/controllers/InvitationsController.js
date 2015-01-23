@@ -15,7 +15,7 @@ module.exports = (function() {
         return res.status(404).send('');
       }
 
-      sails.log('[InvitationsController][create] successfully sent invite');
+      sails.log('[InvitationsController][create] successfully sent invite ['+invitation+']');
       return res.status(200).json(invitation);
     }
 
@@ -26,9 +26,11 @@ module.exports = (function() {
       }
 
       if(!user) {
+        sails.log('[InvitationsController][create] user target doesnt exist, sending');
         InvitationsManager.send({from: user_id, to: target_email}, finish);
       } else {
-        return res.status(422).send('');
+        sails.log('[InvitationsController][create] user already a member');
+        return res.status(422).send('already a member');
       }
     }
 
@@ -36,21 +38,26 @@ module.exports = (function() {
   };
 
   InvitationsController.find = function(req, res, next) {
-    var user_id = parseInt(req.session.userid, 10);
+    var user_id = parseInt(req.session.userid, 10),
+        token = req.query && req.query.token;
 
-    if(!(user_id >= 0))
+    if(!(user_id >= 0) && !token)
       return res.status(404).send('');
 
     function foundInvites(err, invites) {
       if(err) {
-        sails.log('[InvitationsController] failed to find invitations');
+        sails.log('[InvitationsController] failed to find invitations, err['+err+']');
         return res.status(404).send('');
       }
 
       return res.status(200).json(invites);
     }
 
-    Invitation.find({from: user_id}, foundInvites);
+    if(!token) {
+      Invitation.find({from: user_id}, foundInvites);
+    } else {
+      Invitation.find({token: token}, foundInvites);
+    }
   };
 
   InvitationsController.destroy = function(req, res, next) {

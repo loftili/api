@@ -17,6 +17,10 @@ module.exports.policies = (function() {
     ClientAuthController: {
       authenticate: ['corsHeaders']
     },
+
+    InvitationsController: {
+      find: ['corsHeaders']
+    },
   
     QueueController: {
       findOne: ['corsHeaders'],

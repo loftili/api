@@ -12,8 +12,9 @@ module.exports = (function() {
         to = options.to,
         created_invite;
 
-    function sent(err, info) {
-      sails.log("[PasswordResetService] Sent callback | err[" + err + "] info[" + info.response + "]");
+    function sentEmail(err, info) {
+      sails.log("[InvitationsManager][send] Sent callback | err[" + err + "] info[" + info.response + "]");
+
       if(err) {
         return callback(err, null);
       } else {
@@ -29,7 +30,9 @@ module.exports = (function() {
 
       var template_path = path.join(__dirname, '..', '..', 'views', 'email', 'invite.jade'),
           template_fn = jade.compileFile(template_path, {}),
-          email_html = template_fn({token: invite.token}),
+          email_html = template_fn({token: invite.token});
+
+      sails.log('[InvitationsManager][send] successfully created invite ['+invite+']');
 
       created_invite = invite;
 
@@ -38,7 +41,7 @@ module.exports = (function() {
         to: to,
         subject: 'invitation to loftili',
         html: email_html
-      }, sent);
+      }, sentEmail);
     }
 
     function generated(err, buffer) {
@@ -49,7 +52,19 @@ module.exports = (function() {
             token: token
           };
 
-      Invitation.findOrCreate({from: from, to: to}, params, created);
+      function alreadyExists(err, invitation) {
+        if(err) { 
+          sails.log('[InvitationsManager][send] unable to create or find the record based on params');
+          return callback(err, null);
+        }
+
+        if(invitation.length > 0)
+          return callback(null, invitation);
+        else
+          Invitation.findOrCreate(params, params, created);
+      }
+
+      Invitation.find({from: from, to: to}, alreadyExists);
     }
 
     crypto.randomBytes(30, generated);
