@@ -45,9 +45,9 @@ module.exports.routes = {
   'DELETE /queues/:id/:position': 'QueueController.remove',
   'POST /queues/:id/pop': 'QueueController.pop',
 
-  'POST /playback/restart': 'PlaybackController.restart',
-  'POST /playback/start': 'PlaybackController.start',
-  'POST /playback/stop': 'PlaybackController.stop',
+  'POST /playback/restart': 'PlaybackController.restartPlayback',
+  'POST /playback/start': 'PlaybackController.startPlayback',
+  'POST /playback/stop': 'PlaybackController.stopPlayback',
 
   'PUT /devicestates/:id': 'DeviceStateController.update',
   'GET /devicestates/:id': 'DeviceStateController.findOne',
