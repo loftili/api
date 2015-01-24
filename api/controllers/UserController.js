@@ -25,7 +25,9 @@ module.exports = (function() {
       UserInvitation.create({invitation: found_invite.id, user: user.id}, finish);
     }
 
-    function foundToken(err, invite) {
+    function foundToken(err, invites) {
+      var invite = invites ? invites[0] : false;
+
       if(err) {
         sails.log('[UserController][create] errored while looking for invitation');
         return res.status(404).send('');
@@ -49,7 +51,7 @@ module.exports = (function() {
     }
 
     sails.log('[UserController][create] attempting to create a user from request body: '+JSON.stringify(req.body));
-    Invitation.findOne({token: token}).populate('users').exec(foundToken);
+    Invitation.find({token: token}).populate('users').exec(foundToken);
   };
 
   UserController.update = function(req, res) {
