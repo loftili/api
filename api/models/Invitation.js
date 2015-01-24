@@ -21,6 +21,11 @@ module.exports = {
     state: {
       type: 'integer',
       defaultsTo: 0
+    },
+
+    users: {
+      collection: 'UserInvitation',
+      via: 'invitation'
     }
 
   }

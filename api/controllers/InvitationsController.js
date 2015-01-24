@@ -50,13 +50,23 @@ module.exports = (function() {
         return res.status(404).send('');
       }
 
-      return res.status(200).json(invites);
+      var count = invites.length,
+          empty = [];
+
+      for(var i = 0; i < count; i++) {
+        var invite = invites[i];
+
+        if(invite.users.length === 0)
+          empty.push(invite);
+      }
+
+      return res.status(200).json(empty);
     }
 
     if(!token) {
-      Invitation.find({from: user_id}, foundInvites);
+      Invitation.find({from: user_id}).populate('users').exec(foundInvites);
     } else {
-      Invitation.find({token: token}, foundInvites);
+      Invitation.find({token: token}).populate('users').exec(foundInvites);
     }
   };
 
