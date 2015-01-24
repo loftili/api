@@ -56,7 +56,7 @@ module.exports = (function() {
       for(var i = 0; i < count; i++) {
         var invite = invites[i];
 
-        if(invite.users.length === 0)
+        if(invite.users.length === 0 || user_id >= 0)
           empty.push(invite);
       }
 
