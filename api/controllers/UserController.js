@@ -3,17 +3,53 @@ module.exports = (function() {
   var UserController = {};
 
   UserController.create = function(req, res, next) {
-    function finished(err, user) {
+    var token = req.body.token,
+        found_invite = null,
+        created_user = null;
+
+    function finish() {
+      return res.status(201).json(created_user);
+    }
+
+    function madeUser(err, user) {
       if(err) {
         sails.log('[UserController][create] failed creating a user: '+err);
         return res.status(422).json(err);
       }
 
-      return res.status(201).json(user);
+
+      sails.log('[UserController][create] createdUser finished, user['+user.id+']');
+
+      created_user = user;
+
+      UserInvitation.create({invitation: found_invite.id, user: user.id}, finish);
+    }
+
+    function foundToken(err, invite) {
+      if(err) {
+        sails.log('[UserController][create] errored while looking for invitation');
+        return res.status(404).send('');
+      }
+
+      if(!invite || req.body.email !== invite.to) {
+        sails.log('[UserController][create] attempt without token - req.email['+req.body.email+'] invite['+invite+']');
+        return res.status(401).send('missing token');
+      }
+
+      if(invite.users.length > 0) {
+        sails.log('[UserController][create] token already used');
+        return res.status(401).send('already used');
+      }
+
+      sails.log('[UserController][create] matched token to attempt, creating');
+
+      found_invite = invite;
+
+      User.findOrCreate({email: req.body.email}, req.body, madeUser);
     }
 
     sails.log('[UserController][create] attempting to create a user from request body: '+JSON.stringify(req.body));
-    User.create(req.body, finished);
+    Invitation.findOne({token: token}).populate('users').exec(foundToken);
   };
 
   UserController.update = function(req, res) {

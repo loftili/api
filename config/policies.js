@@ -7,6 +7,7 @@ module.exports.policies = (function() {
     '*': defaults,
 
     UserController: {
+      create: ['corsHeaders'],
       update: ['corsHeaders', 'userUpdatePermission']
     },
 
