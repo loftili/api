@@ -54,7 +54,13 @@ module.exports = (function() {
       User.findOrCreate({email: req.body.email}, req.body, madeUser);
     }
 
-    sails.log('[UserController][create] attempting to create a user from request body: '+JSON.stringify(req.body));
+    var info = {
+      email: req.body.email,
+      password: lower(req.body.password).replace(/.*/gi, '*'),
+      username: req.body.username,
+      token: req.body.token
+    };
+    sails.log('[UserController][create] attempting to create a user from request body: '+JSON.stringify(info));
     Invitation.find({token: token}).populate('users').exec(foundToken);
   };
 
