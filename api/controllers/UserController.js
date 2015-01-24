@@ -2,6 +2,9 @@ module.exports = (function() {
 
   var UserController = {};
 
+  function to_s(str) { return ['', str].join(''); }
+  function lower(str) { return to_s(str).toLowerCase(); }
+
   UserController.create = function(req, res, next) {
     var token = req.body.token,
         found_invite = null,
@@ -26,14 +29,15 @@ module.exports = (function() {
     }
 
     function foundToken(err, invites) {
-      var invite = invites ? invites[0] : false;
+      var invite = invites ? invites[0] : false,
+          is_invited = invite && lower(invite.to) === lower(req.body.email);
 
       if(err) {
         sails.log('[UserController][create] errored while looking for invitation');
         return res.status(404).send('');
       }
 
-      if(!invite || req.body.email !== invite.to) {
+      if(!invite || !is_invited) {
         sails.log('[UserController][create] attempt without token - req.email['+req.body.email+'] invite['+invite+']');
         return res.status(401).send('missing token');
       }
