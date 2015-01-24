@@ -1,156 +1,78 @@
-var http = require('http'),
+var request = require('request'),
     domains = require('../../config/domain');
 
 module.exports = (function() {
 
-  function send(method, user, device, callback) {
-    var hostname = device.ip_addr,
-        port = device.port,
-        options = {
-          hostname: hostname,
-          port: port,
-          path: ('/' + method),
-          method: 'GET',
-          headers: {
-            "x-loftili-auth": user.username
-          }
-        },
-        request = null,
-        device_response = '',
-        response_obj = null,
-        device_response_overflow = false,
-        sent = false;
+  var DeviceControlService = {};
 
-    function receiveData(data) {
-      if(device_response_overflow)
-        return callback('device response overflow', false);
-
-      sails.log('[DeviceControlService.send.receiveData] Received data');
-      device_response += data;
-
-      if(device_response.length > 1e6)
-        device_response_overflow = true;
-    }
-
-    function finish() {
-      if(device_response_overflow)
-        return errorHandler('device response buffer overflow');
-
-      sails.log('[DeviceControlService.send.finish] Finished receiving response from device');
-      sails.log('----------------------------------------');
-      sails.log(device_response);
-      sails.log('----------------------------------------');
-      sent = true;
-
-      device.last_checked = new Date();
-
-      device.save(function() {
-        sails.log('[DeviceControlService] updating device last checked succeeded');
-        callback(false, response_obj, device_response);
-      });
-    }
-
-    function requestHandler(res) {
-      if(sent)
-        return;
-
-      res.setEncoding('utf8');
-      response_obj = res;
-      sails.log('[DeviceControlService.send.requestHandler] receiving response: ' + JSON.stringify(res.headers));
-
-      if(!res.headers['x-loftili-version'])
-        return errorHandler('missing loftili core header');
-
-      res.on('data', receiveData);
-      res.on('end', finish);
-    }
-
-    function errorHandler(e) {
-      if(sent)
-        return;
-
-      sails.log('[DeviceControlService.send.error] Errored device com request ' + e);
-      sent = true;
-      request.abort();
-      callback('errored request to device [' + e + ']', false);
-    }
-
-    function socketOpened(socket) {
-      socket.setTimeout(500);  
-      socket.on('timeout', errorHandler);
-    }
-
-    sails.log('[DeviceControlService.send.start] Opening http request to ' + hostname + ':' + port);
-    request = http.request(options, requestHandler);
-    request.on('socket', socketOpened);
-    request.on('error', errorHandler);
-    request.end();
+  function log(msg) {
+    msg = ['[DeviceControlService]['+new Date()+']', msg].join(' ');
+    sails.log(msg);
   }
 
-  return {
+  function sendRequest(api_path, device, requestCallback) {
+    var ip_addr = device.ip_addr,
+        port = device.port,
+        request_url = 'http://'+ip_addr+':'+port+api_path,
+        options = {
+          url: request_url,
+          headers: {
+            'x-loftili-auth': device.token
+          }
+        };
 
-    restart: function(user, device, callback) {
-      var hostname = [device.name, user.username].join('.'),
-          port = device.port;
+    function finishedRequest(error, response, body) {
+      var body_json;
 
-      function finish(error, res, body) {
-        if(error)
-          sails.log('[DeviceControlService.start.error] Errored playback request ERROR[' + error + ']');
-        else
-          sails.log('[DeviceControlService.start.success] Successfull playback request STATUS[' + res.statusCode + ']');
-
-        callback(error, res, body);
+      try {
+        body_json = JSON.parse(body);
+      } catch(e) {
+        error = 'invalid body';
       }
 
-      sails.log('[DeviceControlService.start] Requesting restart on ' + hostname + ':' + port);
-      send('restart', user, device, finish);
-    },
-
-    start: function(user, device, callback) {
-      var hostname = [device.name, user.username, 'lofti.li'].join('.'),
-          port = device.port;
-
-      function finish(error, res, body) {
-        if(error)
-          sails.log('[DeviceControlService.start.error] Errored playback request ERROR[' + error + ']');
-        else
-          sails.log('[DeviceControlService.start.success] Successfull playback request STATUS[' + res.statusCode + ']');
-
-        callback(error, res, body);
+      if(!error && response.statusCode == 200) {
+        log('success request body['+body+']');
+        return requestCallback(null, body_json);
       }
 
-      sails.log('[DeviceControlService.start] Requesting playback on ' + hostname + ':' + port);
-      send('start', user, device, finish);
-    },
-
-    stop: function(user, device, callback) {
-      var hostname = [device.name, user.username].join('.'),
-          port = device.port;
-
-      function finish(error, res, body) {
-        if(error)
-          sails.log('[DeviceControlService.stop.error] Errored playback request ERROR[' + error + ']');
-        else
-          sails.log('[DeviceControlService.stop.success] Successfully stopped playback on ' + hostname);
-
-        callback(error, res, body);
-      }
-
-      sails.log('[DeviceControlService.stop] Requesting stop on ' + hostname + ':' + port);
-      send('stop', user, device, finish);
-    },
-
-    ping: function(user, device, callback) {
-      function finish(error, res, body) {
-        if(error)
-          sails.log('[DeviceControlService.ping.error] Errored ping request ERROR[' + error + ']');
-
-        callback(error, res, body);
-      }
-
-      send('status', user, device, finish);
+      log('failed request');
+      return requestCallback(error);
     }
 
+    log('sending request['+(request_url)+']');
+    request(options, finishedRequest);
+  }
+
+  DeviceControlService.restart = function(device, callback) {
+    log('restarting device['+device.registered_name+']');
+
+    function finished(err, response) {
+      return err ? callback(err) : callback(null, response);
+    }
+
+    sendRequest('/restart', device, finished);
   };
+
+  DeviceControlService.start = function(device, callback) {
+    log('starting device['+device.registered_name+']');
+
+    function finished(err, response) {
+      return err ? callback(err) : callback(null, response);
+    }
+
+    sendRequest('/start', device, finished);
+  };
+
+  DeviceControlService.stop = function(device, callback) {
+    log('stopping device['+device.registered_name+']');
+
+    function finished(err, response) {
+      return err ? callback(err) : callback(null, response);
+    }
+
+    sendRequest('/stop', device, finished);
+  };
+
+  return DeviceControlService;
 
 })();
