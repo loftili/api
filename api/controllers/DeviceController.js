@@ -21,7 +21,13 @@ module.exports = {
         return res.status(404).send('');
       }
 
+      if(!device) {
+        sails.log('[DeviceController][update] unable to find device for update');
+        return res.status(404).send('');
+      }
+
       sails.log('[DeviceController][update] found device, checking permissions');
+
       var allowed = false,
           LEVELS = DeviceShareService.LEVELS;
 

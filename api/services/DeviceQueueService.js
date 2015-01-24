@@ -45,7 +45,7 @@ module.exports = (function() {
         return callback(null, device);
       }
 
-      var permissions = device.permissions,
+      var permissions = device ? device.permissions : [],
           levels = DeviceShareService.LEVELS,
           allowed = false;
 

@@ -25,6 +25,11 @@ module.exports = (function() {
         return res.status(404).send('');
       }
 
+      if(!device) {
+        sails.log('[DeviceStateService][findOne] unable to find device');
+        return res.status(404).send('');
+      }
+
       var permissions = device.permissions,
           p_count = permissions.length,
           can_check = false;
