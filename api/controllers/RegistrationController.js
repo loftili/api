@@ -1,20 +1,36 @@
 var bcrypt = require('bcrypt');
 
-module.exports = {
+module.exports = (function() {
+
+  var RegistrationController = {};
 	
-  register: function(req, res, next) {
+  RegistrationController.register = function(req, res, next) {
     var devicename = req.body.devicename,
         username = req.body.username,
         password = req.body.password,
         remote_ip = req.connection.remoteAddress,
+        DEFAULT_DEVICE_INFO = {
+          'player:state': 0
+        },
         port = req.body.port,
         found_user = null,
-        created_device;
+        created_device,
+        device_token;
+
+    function log(msg) {
+      msg = ['[RegistrationController]['+new Date()+']', msg].join(' ');
+      sails.log(msg);
+    }
+
+    function finished() {
+      log('finished creating permission for new device');
+      return res.status(200).json({"status": "ok", "token": device_token, "id": created_device.id});
+    }
 
     function createdPermission(err, permission) {
-      var device_token = created_device.token;
-      sails.log('[RegistrationController.register] finished creating permission for new device');
-      return res.status(200).json({"status": "ok", "token": device_token, "id": created_device.id});
+      device_token = created_device.token;
+      log('prepping initial device state information');
+      DeviceStateService.update(created_device.id, DEFAULT_DEVICE_INFO, finished);
     }
 
     function createdDevice(err, device) {
@@ -31,12 +47,12 @@ module.exports = {
       };
 
       created_device = device;
-      sails.log('[RegistrationController.register] creating permission for new device');
+      log('creating permission for new device');
 
       DeviceShareService.share(params, createdPermission);
     }
 
-    function finish() {
+    function createDevice() {
       var hostname = [devicename, username].join('.'),
           device_secret = process.env['DEVICE_SECRET'],
           token_unhashed = [device_secret, devicename].join(':'),
@@ -48,17 +64,17 @@ module.exports = {
             token: DeviceTokenService.generate(hostname)
           };
 
-      sails.log('[RegistrationController.register] user authenticated, creating: ' + devicename + '[' + remote_ip + ']');
+      log('user authenticated, creating: ' + devicename + '[' + remote_ip + ']');
       Device.findOrCreate({registered_name: hostname}, params, createdDevice);
     }
 
     function authCheck(err, hash) {
-      return (err || !hash) ? res.status(401).send('unable to authenticate') : finish();
+      return (err || !hash) ? res.status(401).send('unable to authenticate') : createDevice();
     }
 
     function foundUser(err, user) {
       if(err || !user) {
-        sails.log('[RegistrationController.register] errored looking up user: ' + username);
+        log('errored looking up user: ' + username);
         return res.status(401).send('unable to authenticate');
       }
 
@@ -68,12 +84,14 @@ module.exports = {
     }
 
     if(devicename && username && password && port) {
-      sails.log('[RegistrationController.register] looking up user: ' + username);
+      log('looking up user: ' + username);
       User.findOne({username: username}).exec(foundUser);
     } else {
       return res.status(400).send('missing registration parameters');
     }
-  }
 
-};
+  };
 
+  return RegistrationController;
+
+})();
