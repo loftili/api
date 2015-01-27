@@ -1,97 +1,21 @@
-/**
- * WebSocket Server Settings
- * (sails.config.sockets)
- *
- * These settings provide transparent access to the options for Sails'
- * encapsulated WebSocket server, as well as some additional Sails-specific
- * configuration layered on top.
- *
- * For more information on sockets configuration, including advanced config options, see:
- * http://sailsjs.org/#/documentation/reference/sails.config/sails.config.sockets.html
- */
-
 module.exports.sockets = {
 
-  /***************************************************************************
-  *                                                                          *
-  * This custom onConnect function will be run each time AFTER a new socket  *
-  * connects (To control whether a socket is allowed to connect, check out   *
-  * `authorization` config.) Keep in mind that Sails' RESTful simulation for *
-  * sockets mixes in socket.io events for your routes and blueprints         *
-  * automatically.                                                           *
-  *                                                                          *
-  ***************************************************************************/
+  resource: '/heartbeat',
+
   onConnect: function(session, socket) {
-
-    // By default, do nothing.
-
+    sails.log('[::Socket][connection] someone has connected');
   },
 
-
-  /***************************************************************************
-  *                                                                          *
-  * This custom onDisconnect function will be run each time a socket         *
-  * disconnects                                                              *
-  *                                                                          *
-  ***************************************************************************/
   onDisconnect: function(session, socket) {
-
-    // By default: do nothing.
   },
 
+  transports: [
+    'polling',
+    'websocket'
+  ],
 
-  /***************************************************************************
-  *                                                                          *
-  * `transports`                                                             *
-  *                                                                          *
-  * A array of allowed transport methods which the clients will try to use.  *
-  * The flashsocket transport is disabled by default You can enable          *
-  * flashsockets by adding 'flashsocket' to this list:                       *
-  *                                                                          *
-  ***************************************************************************/
-  // transports: [
-  //   'websocket',
-  //   'htmlfile',
-  //   'xhr-polling',
-  //   'jsonp-polling'
-  // ],
+  adapter: 'redis',
 
-  /***************************************************************************
-  *                                                                          *
-  * Use this option to set the datastore socket.io will use to manage        *
-  * rooms/sockets/subscriptions: default: memory                             *
-  *                                                                          *
-  ***************************************************************************/
-
-  // adapter: 'memory',
-
-  /***************************************************************************
-  *                                                                          *
-  * Node.js (and consequently Sails.js) apps scale horizontally. It's a      *
-  * powerful, efficient approach, but it involves a tiny bit of planning. At *
-  * scale, you'll want to be able to copy your app onto multiple Sails.js    *
-  * servers and throw them behind a load balancer.                           *
-  *                                                                          *
-  * One of the big challenges of scaling an application is that these sorts  *
-  * of clustered deployments cannot share memory, since they are on          *
-  * physically different machines. On top of that, there is no guarantee     *
-  * that a user will "stick" with the same server between requests (whether  *
-  * HTTP or sockets), since the load balancer will route each request to the *
-  * Sails server with the most available resources. However that means that  *
-  * all room/pubsub/socket processing and shared memory has to be offloaded  *
-  * to a shared, remote messaging queue (usually Redis)                      *
-  *                                                                          *
-  * Luckily, Socket.io (and consequently Sails.js) apps support Redis for    *
-  * sockets by default. To enable a remote redis pubsub server, uncomment    *
-  * the config below.                                                        *
-  *                                                                          *
-  * Worth mentioning is that, if `adapter` config is `redis`, but host/port  *
-  * is left unset, Sails will try to connect to redis running on localhost   *
-  * via port 6379                                                            *
-  *                                                                          *
-  ***************************************************************************/
-
-  // adapter: 'redis',
   // host: '127.0.0.1',
   // port: 6379,
   // db: 'sails',
@@ -183,6 +107,6 @@ module.exports.sockets = {
   *                                                                          *
   ***************************************************************************/
 
-  // origins: '*:*',
+  origins: '*:*',
 
 };

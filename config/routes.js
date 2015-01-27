@@ -1,4 +1,5 @@
 module.exports.routes = {
+
   /* Session */
   'GET /auth': 'SessionController.index',
   'POST /auth': 'SessionController.login',
