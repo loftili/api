@@ -27,7 +27,7 @@ module.exports = (function() {
     function sendMail(err, html) {
       if(err) {
         sails.log('[InvitationsManager][send] failed juicing');
-        callback('failed juice', null);
+        return callback('failed juice', null);
       }
 
       var params = {

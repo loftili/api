@@ -9,6 +9,8 @@ module.exports = (function() {
     if(!(user_id >= 0) || !target_email)
       return req.status(401).send('members only');
 
+    target_email = (target_email+'').toLowerCase();
+
     function finish(err, invitation) {
       if(err) {
         sails.log('[InvitationsController][create] errored during manager send');

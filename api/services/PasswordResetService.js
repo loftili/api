@@ -1,6 +1,7 @@
 var btoa = require('btoa'),
     jade = require('jade'),
-    path = require('path');
+    path = require('path'),
+    crypto = require('crypto');
 
 module.exports = (function() {
 
@@ -54,25 +55,42 @@ module.exports = (function() {
       callback(err, found_user);
     }
 
-    function finish(err, user) {
-      if(err)
-        return callback(err, false);
+    function sendMail(err, html) {
+      if(err) {
+        return callback(err, null);
+      }
 
-      sails.log("[PasswordResetService] Sending mail using nodemailer");
-      found_user = user;
-
-      var template_path = path.join(__dirname, '..', '..', 'views', 'email', 'reset_password.jade'),
-          template_fn = jade.compileFile(template_path, {}),
-          email_html = template_fn({token: user.reset_token});
-
-      sails.log("[PasswordResetService] template path: " + template_path);
+      sails.log("[PasswordResetService] finished compiling, sending");
 
       transport.sendMail({
         from: 'no-reply@loftili.com',
-        to: user.email,
+        to: found_user.email,
         subject: '[loftili] your password reset',
-        html: email_html
+        html: html
       }, sent);
+    }
+
+    function compileEmail(err, user) {
+      if(err) {
+        return callback(err, false);
+      }
+
+      sails.log("[PasswordResetService] creating html email");
+      found_user = user;
+
+      MailCompiler.compile('reset_password.jade', {token: user.reset_token}, sendMail);
+    }
+
+    function generated(err, buffer) {
+      if(err) {
+        sails.log('[PasswordResetService][reset] failed generating random token err['+err+']');
+        return callback('failed token gen', null);
+      }
+
+      var token = buffer.toString('hex').substring(0, 20);
+
+      found_user.reset_token = token;
+      found_user.save(compileEmail);
     }
       
     function foundUser(err, user) {
@@ -82,8 +100,9 @@ module.exports = (function() {
       if(!user)
         return callback('missing', false);
 
-      user.reset_token = makeToken(user);
-      user.save(finish);
+      found_user = user;
+
+      crypto.randomBytes(30, generated);
     }
 
     if(is_email) 
