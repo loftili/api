@@ -58,6 +58,7 @@ module.exports = {
 
     reset_token: {
       type: 'string',
+      size: 20,
       defaultsTo: null
     },
 
@@ -94,6 +95,12 @@ module.exports = {
       else
         cb();
     }
+
+    if(values.email)
+      values.email = (values.email+'').toLowerCase();
+
+    if(values.username)
+      values.username = (values.username+'').toLowerCase();
 
     HashService(values, 'password', finish);
   }
