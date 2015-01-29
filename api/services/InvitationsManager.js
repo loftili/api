@@ -40,15 +40,6 @@ module.exports = (function() {
       transport.sendMail(params, sentEmail);
     }
 
-    function hasStyle(result) {
-      var template_path = path.join(__dirname, '..', '..', 'views', 'email', 'invite.jade'),
-          template_fn = jade.compileFile(template_path, {}),
-          email_html = template_fn({token: created_invite.token});
-
-      sails.log('[InvitationsManager][send] successfully created invite, making html email');
-      juice.juiceContent(email_html, {url: 'http://', extraCss: result.css}, sendMail);
-    }
-
     function created(err, invite) {
       if(err) { 
         sails.log('[InvitationsManager][send] unable to create or find the record based on params');
@@ -57,15 +48,8 @@ module.exports = (function() {
 
       created_invite = invite;
 
-      var sheet_path = path.join(__dirname, '..', '..', 'views', 'email', 'style.sass');
-
-      sails.log('[InvitationsManager][send] generating the styles for the html email');
-
-      sass.render({
-        file: sheet_path,
-        success: hasStyle,
-        error: hasStyle
-      });
+      sails.log('[InvitationsManager][send] using MailCompiler for html email');
+      MailCompiler.compile('invite.jade', {token: created_invite.token}, sendMail);
     }
 
     function generated(err, buffer) {
