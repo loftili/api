@@ -7,6 +7,7 @@ module.exports = {
     'password', 
     'first_name', 
     'last_name', 
+    'privacy_level', 
     'username'
   ],
 
