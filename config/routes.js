@@ -12,6 +12,8 @@ module.exports.routes = {
   'GET /invitations': 'InvitationsController.find',
   'POST /invitations': 'InvitationsController.create',
 
+  'GET /devicehistory': 'DeviceHistoryController.find',
+
   'POST /clientauth': 'ClientAuthController.authenticate',
 
   'POST /clienttokens': 'ClientTokenController.create',
