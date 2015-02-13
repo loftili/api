@@ -2,6 +2,11 @@ module.exports = (function() {
 
   var QueueController = {};
 
+  function log(msg) {
+    var d = new Date();
+    sails.log('[QueueController]['+d+'] ' + msg);
+  }
+
   QueueController.current = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
@@ -13,13 +18,13 @@ module.exports = (function() {
 
     function finish(err, track) {
       if(err) {
-        sails.log('[QueueController][findOne] failed getting current track for queue');
+        log('failed getting current track for queue');
         return res.status(404).send('');
       }
       return res.status(200).json(track);
     }
         
-    sails.log('[QueueController][findOne] finding the current track for queue');
+    log('finding the current track for queue');
     DeviceQueueService.current(device_id, auth_info, finish);
   };
 
@@ -34,13 +39,13 @@ module.exports = (function() {
 
     function finish(err, queue) {
       if(err) {
-        sails.log('[QueueController][findOne] failed getting queue for device[' + device_id + ']');
+        log('failed getting queue for device[' + device_id + ']');
         return res.status(404).send('');
       }
       return res.status(200).json(queue);
     }
         
-    sails.log('[QueueController][findOne] finding the queue belonging to device[' + device_id + ']');
+    log('finding the queue belonging to device[' + device_id + ']');
     DeviceQueueService.find(device_id, auth_info, finish);
   };
 
@@ -67,14 +72,14 @@ module.exports = (function() {
 
     function finish(err, queue) {
       if(err) {
-        sails.log('[QueueController][remove] failed removing ['+item_position+'] from device['+device_id+']');
+        log('failed removing ['+item_position+'] from device['+device_id+']');
         return res.status(404).send('');
       }
 
       return res.status(200).json(queue);
     }
 
-    sails.log('[QueueController][remove] removing position['+item_position+'] to device['+device_id+']');
+    log('removing position['+item_position+'] to device['+device_id+']');
     DeviceQueueService.remove(device_id, item_position, auth_info, finish);
   };
 
@@ -98,14 +103,14 @@ module.exports = (function() {
 
     function finish(err, queue) {
       if(err) {
-        sails.log('[QueueController][enqueue] failed queuing device[' + device_id + ']');
+        log('failed queuing device[' + device_id + ']');
         return res.status(404).send('');
       }
 
       return res.status(200).json(queue);
     }
 
-    sails.log('[QueueController][enqueue] adding track['+track_id+'] to device[' + device_id + ']');
+    log('adding track['+track_id+'] to device[' + device_id + ']');
     DeviceQueueService.enqueue(device_id, track_id, auth_info, finish);
   };
 
@@ -119,28 +124,28 @@ module.exports = (function() {
           user: user_id
         };
 
-    sails.log('[QueueController][pop] header['+auth_header+'] query['+auth_query_token+']');
+    log('header['+auth_header+'] query['+auth_query_token+']');
 
     if(!user_id && !auth_header && !auth_query_token) {
-      sails.log('[QueueController][pop] unauthorized attempt to pop from a device queue['+device_id+']');
+      log('unauthorized attempt to pop from a device queue['+device_id+']');
       return res.status(404).send('not authorized');
     }
 
     function finish(err, popped_track) {
       if(err) {
-        sails.log('[QueueController][pop] failed popping');
+        log('failed popping: ' + err);
         return res.status(404).send('');
       }
 
       if(!popped_track) {
-        sails.log('[QueueController][pop] nothing left to pop!');
+        log('nothing left to pop!');
         return res.status(204).send('');
       }
 
       return res.status(200).json(popped_track);
     }
 
-    sails.log('[QueueController][pop] popping');
+    log('popping from queue for device['+device_id+']');
     DeviceQueueService.pop(device_id, auth_info, finish);
   };
 

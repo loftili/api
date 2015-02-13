@@ -17,26 +17,31 @@ module.exports = (function() {
     return [base, 'current'].join(KEY_DELIM);
   }
 
+  function log(msg) {
+    var d = new Date();
+    sails.log('[DeviceQueueService]['+d+'] '+ msg);
+  }
+
   function validatePermission(device_id, auth_info, callback) {
     var user_id = auth_info.user || auth_info,
         device_key = auth_info.device;
 
     function foundDevice(err, device) {
       if(err) {
-        sails.log('[DeviceQueueService][validatePermission] failed getting device['+device_id+']');
+        log('failed getting device['+device_id+'] err['+err+']');
         return callback(err, null);
       }
 
       if(!device) {
-        sails.log('[DeviceQueueService][validatePermission] failed getting device['+device_id+']');
+        log('unable to find device['+device_id+']');
         return callback('no device', null);
       }
       
-      sails.log('[DeviceQueueService][validatePermission] found device, checking permissions device[' + device.name + ']');
+      log('found device, checking permissions device[' + device.name + ']');
 
       if(device_key) {
-        sails.log('[DeviceQueueService][validatePermission] validating permission based on the device\'s token...');
-        sails.log('[DeviceQueueService][validatePermission] expected['+device.token+'] actual['+device_key+']');
+        log('validating permission based on the device\'s token...');
+        log('expected['+device.token+'] actual['+device_key+']');
 
         if(device.token !== device_key) {
           return callback('no permission to act', null);
@@ -62,10 +67,10 @@ module.exports = (function() {
       }
 
       if(allowed) {
-        sails.log('[DeviceQueueService][validatePermission] permissions check out, getting queue for device[' + device.name + ']');
+        log('permissions check out, getting queue for device[' + device.name + ']');
         callback(null, device);
       } else {
-        sails.log('[DeviceQueueService][validatePermission] permission failed for device[' + device.name + ']');
+        log('permission failed for device[' + device.name + ']');
         callback('not allowed', null);
       }
     }
@@ -81,21 +86,20 @@ module.exports = (function() {
         return callback(err, null)
       }
 
-      sails.log('[DeviceQueueService][current] found current['+track+']');
+      log('found current['+track+']');
       return callback(null, track);
     }
 
     function getTrack(err, value) {
       if(err) {
-        sails.log('[DeviceQueueService][current] failed translating tracks');
-        sails.log(err);
+        log('failed translating tracks: ' + err);
         client.connection.quit();
         return callback(err, null)
       }
 
       client.connection.quit();
       var track_id = parseInt(value, 10);
-      sails.log('[DeviceQueueService][current] populating track');
+      log('populating track');
       Track.findOne(track_id).exec(finish);
     }
 
@@ -106,18 +110,18 @@ module.exports = (function() {
       }
 
       var keyname = currentKey(device_id);
-      sails.log('[DeviceQueueService][current] asking for queue for device['+device.name+'], keyname['+keyname+']');
+      log('asking for queue for device['+device.name+'], keyname['+keyname+']');
       client.connection.get(keyname, getTrack);
     }
 
     function connected(error) {
       if(error) {
-        sails.log('[DeviceQueueService][current] redis server failed connection');
+        log('redis server failed connection');
         client.connection.quit();
         return callback('redis fail');
       }
 
-      sails.log('[DeviceQueueService][current] looking up device information for device['+device_id+']');
+      log('looking up device information for device['+device_id+']');
       validatePermission(device_id, requester, getCurrent);
     }
 
@@ -133,7 +137,7 @@ module.exports = (function() {
         return callback(err, null)
       }
 
-      sails.log('[DeviceQueueService][find] found queue['+queue_ids.join()+']');
+      log('found queue['+queue_ids.join()+']');
 
       var results = [];
       for(var i = 0; i < queue_ids.length; i++){
@@ -154,8 +158,7 @@ module.exports = (function() {
 
     function getTracks(err, values) {
       if(err) {
-        sails.log('[DeviceQueueService][find] failed translating tracks');
-        sails.log(err);
+        log('failed translating tracks: ' + err);
         client.connection.quit();
         return callback(err, null)
       }
@@ -169,7 +172,7 @@ module.exports = (function() {
         queue_ids.push(id);
       }
 
-      sails.log('[DeviceQueueService][find] populating tracks');
+      log('populating tracks');
       Track.find().where({id: queue_ids}).exec(finish);
     }
 
@@ -180,18 +183,18 @@ module.exports = (function() {
       }
 
       var keyname = listKey(device_id);
-      sails.log('[DeviceQueueService][find] asking for queue for device['+device.name+'], keyname['+keyname+']');
+      log('asking for queue for device['+device.name+'], keyname['+keyname+']');
       client.connection.lrange(keyname, 0, -1, getTracks);
     }
 
     function connected(error) {
       if(error) {
-        sails.log('[DeviceQueueService][find] redis server failed connection');
+        log('redis server failed connection');
         client.connection.quit();
         return callback('redis fail');
       }
 
-      sails.log('[DeviceQueueService][find] looking up device information for device['+device_id+']');
+      log('looking up device information for device['+device_id+']');
       validatePermission(device_id, requester, getQueue);
     }
 
@@ -205,28 +208,30 @@ module.exports = (function() {
 
     function afterAdded(err) {
       if(err) {
-        sails.log('[DeviceQueueService][pop] failed adding the popped track back into the queue');
+        log('failed adding the popped track back into the queue');
         return callback(err, null);
       }
 
-      sails.log('[DeviceQueueService][pop] successfully pushed a track after it was popped');
+      log('successfully pushed a track after it was popped');
       return callback(null, found_track);
+    }
+
+    function madeHistory(err, record) {
+      if(found_device.loop_flag && found_track)
+        DeviceQueueService.enqueue(device_id, found_track.id, requester, afterAdded);
+      else
+        return callback(null, found_track);
     }
 
     function foundTrack(err, track) {
       if(err) {
-        sails.log('[DeviceQueueService][pop] unable to find the track that was popped, errored');
+        log('unable to find the track that was popped, errored');
         return callback(err, null);
       }
 
-      sails.log('[DeviceQueueService][pop] found a track from popped information');
+      log('found a track from popped information, creating history record');
       found_track = track;
-
-      if(found_device.loop_flag && track) {
-        DeviceQueueService.enqueue(device_id, track.id, requester, afterAdded);
-      } else {
-        return callback(null, track);
-      }
+      DeviceHistory.create({device: device_id, track: track.id}).exec(madeHistory);
     }
 
     function getTrack(err) {
@@ -235,22 +240,22 @@ module.exports = (function() {
       client.connection.quit();
 
       if(err) {
-        sails.log('[DeviceQueueService][pop] unable to pop: '+err);
+        log('unable to pop: '+err);
         return callback(err, null);
       }
 
       if(value) {
-        sails.log('[DeviceQueueService][pop] popped a track: '+value);
+        log('popped a track: '+value);
         Track.findOne(value).exec(foundTrack);
       } else {
-        sails.log('[DeviceQueueService][pop] end of queue, nothing to pop!');
+        log('end of queue, nothing to pop!');
         return callback(null, null);
       }
     }
 
     function setCurrent(err, value) {
       if(err) {
-        sails.log('[DeviceQueueService][pop] unable to pop: '+err);
+        log('unable to pop: '+err);
         return callback(err, null);
       }
 
@@ -266,19 +271,19 @@ module.exports = (function() {
       }
 
       found_device = device;
-      sails.log('[DeviceQueueService][pop] lpopping from queue');
+      log('lpopping from queue');
       var keyname = listKey(device_id);
       client.connection.lpop(keyname, setCurrent);
     }
 
     function connected(error) {
       if(error) {
-        sails.log('[DeviceQueueService][pop] redis server failed connection');
+        log('redis server failed connection');
         client.connection.quit();
         return callback('redis fail');
       }
 
-      sails.log('[DeviceQueueService][pop] looking up device information for device['+device_id+']');
+      log('looking up device information for device['+device_id+']');
       validatePermission(device_id, requester, doPop);
     }
 
@@ -291,17 +296,17 @@ module.exports = (function() {
 
     function finish(err, new_list) {
       if(err) {
-        sails.log('[DeviceQueueService][remove] failed lpushing new list, err['+err+']');
+        log('failed lpushing new list, err['+err+']');
         return callback('failed making new list!', null);
       }
 
-      sails.log('[DeviceQueueService][remove] new list has been made! returning new list');
+      log('new list has been made! returning new list');
       return DeviceQueueService.find(device_id, requester, callback);
     }
 
     function reAdd(err) {
       if(err) {
-        sails.log('[DeviceQueueService][remove] failed getting track queue, exiting');
+        log('failed getting track queue ' + err);
         return callback('failed deleting previous key list', null);
       }
 
@@ -316,12 +321,12 @@ module.exports = (function() {
 
     function foundList(err, list) {
       if(err) {
-        sails.log('[DeviceQueueService][remove] failed getting track queue, exiting');
+        log('failed getting track queue, exiting: ' + err);
         return callback('failed list retrieve', null);
       }
 
       if(!list || item_position > list.length - 1) {
-        sails.log('[DeviceQueueService][remove] the requested queue does not exist or is not long enough');
+        log('the requested queue does not exist or is not long enough');
         return callback('invalid position', null);
       }
 
@@ -334,30 +339,30 @@ module.exports = (function() {
         new_list.push(list[i]);
       }
 
-      sails.log('[DeviceQueueService][remove] BLOWING AWAY OLD. found queue list['+list+'] new list['+new_list+']');
+      log('BLOWING AWAY OLD. found queue list['+list+'] new list['+new_list+']');
       client.connection.del(keyname, reAdd);
     }
 
     function doRemove(err, device) {
       if(err) {
-        sails.log('[DeviceQueueService][remove] failed validating permissions, exiting');
+        log('failed validating permissions, exiting');
         client.connection.quit();
         return callback('permission fail');
       }
 
       var keyname = listKey(device_id);
-      sails.log('[DeviceQueueService][remove] removing from queue['+keyname+'] position['+item_position+']');
+      log('removing from queue['+keyname+'] position['+item_position+']');
       client.connection.lrange(keyname, 0, -1, foundList);
     }
 
     function connected(error) {
       if(error) {
-        sails.log('[DeviceQueueService][remove] failed connecting to the redis server');
+        log('failed connecting to the redis server');
         client.connection.quit();
         return callback('redis fail');
       }
 
-      sails.log('[DeviceQueueService][remove] looking up permissions before removing');
+      log('looking up permissions before removing');
       validatePermission(device_id, requester, doRemove);
     }
 
@@ -373,8 +378,7 @@ module.exports = (function() {
 
     function added(err, result) {
       if(err) {
-        sails.log('[DeviceQueueService][enqueue] failed getting queue for ['+device_id+']');
-        sails.log(err);
+        log('failed getting queue for ['+device_id+']' + err);
         return callback(err, null)
       }
 
@@ -389,24 +393,24 @@ module.exports = (function() {
       }
 
       var keyname = listKey(device_id);
-      sails.log('[DeviceQueueService][enqueue] lpushing into list['+keyname+'] track['+track_id+']');
+      log('lpushing into list['+keyname+'] track['+track_id+']');
       client.connection.send_command('rpush', [keyname, track_id], added);
     }
 
     function connected(error) {
       if(error) {
-        sails.log('[DeviceQueueService][enqueue] redis server failed connection');
+        log('redis server failed connection');
         client.connection.quit();
         return callback('redis fail');
       }
 
-      sails.log('[DeviceQueueService][enqueue] looking up device information for device['+device_id+']');
+      log('looking up device information for device['+device_id+']');
       validatePermission(device_id, requester, enqueue);
     }
 
     function foundTrack(err, track) {
       if(err || !track) {
-        sails.log('[DeviceQueueService][enqueue] could not find a track per request');
+        log('could not find a track per request');
         return callback('missing track');
       }
       client = RedisConnection.getClient(connected);
