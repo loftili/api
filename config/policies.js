@@ -6,6 +6,10 @@ module.exports.policies = (function() {
 
     '*': defaults,
 
+    SystemController: {
+      index: [],
+    },
+
     SessionController: {
       logout: ['corsHeaders']
     },
