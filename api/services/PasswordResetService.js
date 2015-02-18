@@ -28,6 +28,10 @@ module.exports = (function() {
       return callback(false, user);
     }
 
+    function doSave() {
+      found_user.save(saved);
+    }
+
     function found(err, user) {
       if(err)
         return callback(err, false);
@@ -35,10 +39,12 @@ module.exports = (function() {
       if(!user)
         return callback('missing', false);
 
+      found_user = user;
+      found_user.password = new_password;
+      found_user.reset_token = null;
+
       sails.log("[PasswordResetService][finish] user found, proceeding to update of model");
-      user.password = new_password;
-      user.reset_token = null;
-      user.save(saved);
+      HashService(found_user, 'password', doSave);
     }
 
     sails.log("[PasswordResetService][finish] attempting to finish password reset based on: " + reset_token);

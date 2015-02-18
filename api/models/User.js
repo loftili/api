@@ -78,18 +78,6 @@ module.exports = {
 
   },
 
-  beforeUpdate: function(values, cb) {
-    function finish(err, ok) {
-      if(err)
-        cb(err);
-      else
-        cb();
-    }
-
-    if(typeof values.password === 'string')
-      HashService(values, 'password', finish);
-  },
-
   beforeCreate: function(values, cb) {
     function finish(err, ok) {
       if(err)
