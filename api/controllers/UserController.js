@@ -78,11 +78,29 @@ module.exports = (function() {
     }
 
     function update(user) {
-      for(var name in req.body) {
-        if(req.body.hasOwnProperty(name) && User.writable.indexOf(name) >= 0)
+      var updating_password = false,
+          body = req.body;
+
+      for(var name in body) {
+        var can_write = User.writable.indexOf(name) >= 0,
+            can_update = body.hasOwnProperty(name) && can_write;
+
+        if(can_update) {
           user[name] = req.body[name];
+
+          if(name == 'password')
+            updating_password = true;
+        }
       }
-      user.save(finished);
+
+      function save() {
+        user.save(finished);
+      }
+
+      if(updating_password)
+        HashService(user, 'password', save);
+      else
+        save();
     }
 
     function found(err, user) {
