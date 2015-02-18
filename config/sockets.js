@@ -3,19 +3,15 @@ module.exports.sockets = {
   path: '/sock',
 
   beforeConnect: function(handshake, cb) {
-    sails.log(arguments);
+    sails.log('[::socket] connection inbound');
     return cb(null, true);
   },
 
-  onConnect: function() {
-    sails.log('[::socket] new connection');
+  afterDisconnect: function() {
+    sails.log('[::socket] connection closed');
   },
 
   grant3rdPartyCookie: true,
-
-  authorization: function() {
-    sails.log('[::socket] authorization');
-  },
 
   origins: '*:*'
 
