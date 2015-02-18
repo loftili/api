@@ -8,6 +8,7 @@ module.exports.policies = (function() {
 
     SystemController: {
       index: [],
+      socket: []
     },
 
     SessionController: {

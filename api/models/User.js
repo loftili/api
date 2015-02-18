@@ -86,7 +86,8 @@ module.exports = {
         cb();
     }
 
-    HashService(values, 'password', finish);
+    if(typeof values.password === 'string')
+      HashService(values, 'password', finish);
   },
 
   beforeCreate: function(values, cb) {
