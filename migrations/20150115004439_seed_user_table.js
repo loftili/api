@@ -2,11 +2,11 @@ var bcrypt = require('bcrypt');
 
 exports.up = function(knex, Promise) {
   var first_user = {
-    email: 'danny@dadleyy.com',
+    email: 'test@loftili.com',
     password: 'password',
-    first_name: 'danny',
-    last_name: 'hadley',
-    username: 'dadleyy'
+    first_name: 'test',
+    last_name: 'testington',
+    username: 'tester'
   };
 
   return knex.transaction(function(trx) {
@@ -20,5 +20,5 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-  return knex('user').where('email', 'danny@dadleyy.com').del();
+  return knex('user').where('email', 'test@loftili.com').del();
 };
