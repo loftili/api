@@ -1,7 +1,7 @@
 module.exports.routes = {
 
   'GET /system': 'SystemController.index',
-  // 'GET /sk': 'SystemController.socket',
+  'GET /sk': 'SystemController.socket',
 
   /* Session */
   'GET /auth': 'SessionController.index',

@@ -17,12 +17,17 @@ module.exports = (function() {
 
   SystemController.index = function(req, res, next) {
     var info = {},
-        git_tag = process.env['GIT_TAG'] || 'dev';
+        git_tag = process.env['GIT_TAG'] || 'dev',
+        query = req.query,
+        message = query.message;
 
     info.version = [pkg.version, git_tag].join('-');
 
     log('getting info');
-    DeviceSockets.emit('sysinfo');
+
+    DeviceSockets.emit([
+      'sysinfo', (message || 'status')
+    ].join(':'));
 
     return res.status(200).json(info);
   };
