@@ -12,6 +12,11 @@ module.exports = {
       required: true
     },
 
+    serial_number: {
+      type: 'string',
+      required: true
+    },
+
     last_checked: {
       type: 'datetime'
     },
