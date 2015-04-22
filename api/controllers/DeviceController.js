@@ -1,8 +1,50 @@
 var net = require('net');
 
-module.exports = {
+module.exports = (function() {
 
-  update: function(req, res, next) {
+  var DeviceController = {};
+
+  DeviceController.create = function(req, res, next) {
+    var body = req.body,
+        serial = body ? body.serial_number : false,
+        name =  body ? body.name : false,
+        user_id = parseInt(req.session.userid, 10),
+        created_device;
+
+    if(!(user_id > 0)) 
+      return res.forbidden();
+
+    if(!serial || !name) 
+      return res.badRequest('missing device name or serial');
+
+    function finish(err) {
+      if(err) return res.badRequest(err);
+
+      return res.json(created_device);
+    }
+
+    function created(err, device) {
+      if(err) return res.badRequest(err);
+
+      created_device = device;
+
+      DeviceShareService.share({
+        device: device.id,
+        target: user_id,
+        level: DeviceShareService.LEVELS.DEVICE_OWNER,
+        force: true
+      }, finish);
+    }
+
+    Device.create({
+      serial_number: serial,
+      name: name,
+      registered_name: name,
+      token: DeviceTokenService.generate(name)
+    }, created);
+  };
+
+  DeviceController.update = function(req, res, next) {
     var user_id = parseInt(req.session.userid, 10),
         device_id = parseInt(req.params.id, 10);
 
@@ -59,9 +101,9 @@ module.exports = {
 
     sails.log('[DeviceController][update] attempting to get device info for device['+device_id+']');
     Device.findOne({id: device_id}).populate('permissions').exec(foundDevice);
-  },
+  };
 
-  destroy: function(req, res, next) {
+  DeviceController.destroy = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid;
 
@@ -112,10 +154,9 @@ module.exports = {
       Device.findOne(device_id).populate('permissions').exec(finish);
     else
       return res.status(404).send('');
-  },
-    
+  };
 
-  findOne: function(req, res, next) {
+  DeviceController.findOne = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10);
 
     function finish(err, device) {
@@ -131,9 +172,9 @@ module.exports = {
       Device.findOne(device_id).exec(finish);
     else
       return res.status(404).send('');
-  },
+  };
 
-  ping: function(req, res, next) {
+  DeviceController.ping = function(req, res, next) {
     var device_id = req.params.id,
         user_id = req.session.userid,
         username = req.session.username,
@@ -147,52 +188,14 @@ module.exports = {
     if(!device_id)
       return res.status(400).send('');
 
-    function finish(err, response, body) {
-      if(err) {
-        sails.log("[DeviceController][finishing] - devicecontrollerservice failed ping");
-        return res.status(408).json(found_device);
-      }
+    return res.status(200).send('');
+  };
 
-      sails.log("[DeviceController][finishing] - devicecontrollerservice ping success");
-
-      var device_json = found_device.toJSON();
-
-      try {
-        device_json.ping = JSON.parse(body);
-      } catch(e) {
-        device_json.ping = {
-          "status": "error",
-          "message": "could not parse response from device"
-        };
-      }
-
-      return res.status(200).json(device_json);
-    }
-
-    function missing() {
-      if(failed) 
-        return false;
-
-      failed = true;
-      return res.status(404).send('');
-    }
-
-    function lookupCb(err, permission) {
-      if(err || !permission || !permission.user || !permission.device)
-        return res.status(404).send('unable to find device');
-
-      sails.log("[DeviceController][foundDevice] - found device");
-      found_device = permission.device;
-      DeviceControlService.ping(permission.user, permission.device, finish);
-    }
-
-    attempt = Devicepermission.findOne({device: device_id, user: req.session.userid});
-    attempt.populate('device').populate('user').exec(lookupCb);
-  },
-
-  missing: function(req, res) {
+  DeviceController.missing = function(req, res) {
     res.status(404).send('not found');
-  }
+  };
 
-};
+  return DeviceController;
+
+})();
 

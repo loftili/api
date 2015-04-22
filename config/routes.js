@@ -37,11 +37,13 @@ module.exports.routes = {
   'DELETE /dns': 'DnsController.destroy',
 
   /* Device & Device management */
+  'POST /devices': 'DeviceController.create',
   'GET /devices/:id/ping': 'DeviceController.ping',
   'GET /devices/:id': 'DeviceController.findOne',
   'PUT /devices/:id': 'DeviceController.update',
   'DELETE /devices/:id': 'DeviceController.destroy',
 
+  'GET /registration': 'RegistrationController.register',
   'POST /registration': 'RegistrationController.register',
 
   'GET /queues/:id/current': 'QueueController.current',

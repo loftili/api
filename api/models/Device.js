@@ -14,7 +14,9 @@ module.exports = {
 
     serial_number: {
       type: 'string',
-      required: true
+      required: true,
+      minLength: 40,
+      size: 40
     },
 
     last_checked: {
