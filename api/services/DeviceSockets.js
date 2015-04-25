@@ -20,6 +20,9 @@ module.exports = (function() {
     sails.log('[::socket]['+new Date()+'] ' + msg);
   }
 
+  DeviceSockets.userConnection = function(session) {
+  };
+
   DeviceSockets.add = function(socket) {
     var id = uuid();
 

@@ -38,6 +38,7 @@ module.exports.routes = {
 
   /* Device & Device management */
   'POST /devices': 'DeviceController.create',
+  'GET /devices': 'DeviceController.find',
   'GET /devices/:id/ping': 'DeviceController.ping',
   'GET /devices/:id': 'DeviceController.findOne',
   'PUT /devices/:id': 'DeviceController.update',

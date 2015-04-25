@@ -1,7 +1,8 @@
-module.exports = {
+module.exports = (function() {
 
-  attributes: {
+  var DevicePermission = {};
 
+  DevicePermission.attributes = {
     user: {
       model: 'user',
       required: true
@@ -16,8 +17,9 @@ module.exports = {
       type: 'integer',
       required: true
     }
+  };
 
-  }
+  return DevicePermission;
 
-};
+})();
 

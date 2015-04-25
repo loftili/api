@@ -4,6 +4,32 @@ module.exports = (function() {
 
   var DeviceController = {};
 
+  DeviceController.find = function(req, res) { 
+    var current_user = parseInt(req.session.userid, 10);
+    
+    if(!(current_user > 0)) return res.forbidden();
+
+    function error(err) {
+      sails.log(err);
+      res.badRequest('');
+    }
+
+    function found(err, devices) {
+      if(err) return error(err);
+      var valid = [], i = 0, l = devices.length;
+
+      for(i; i < l; i++) {
+        var has_permission = devices[i].permissions.length > 0;
+        if(has_permission) valid.push(devices[i]);
+      }
+
+      return res.json(valid);
+    }
+
+    sails.log('[DeviceController] looking for devies for user: ' + current_user);
+    Device.find({}).populate('permissions').exec(found);
+  };
+
   DeviceController.create = function(req, res, next) {
     var body = req.body,
         serial = body ? body.serial_number : false,
@@ -90,11 +116,8 @@ module.exports = (function() {
       var updates = {},
           body = req.body || {};
 
-      if(body.ip_addr)
-        updates.ip_addr = body.ip_addr;
-
-      if(body.port)
-        updates.port = body.port;
+      if(body.name)
+        updates.name = body.name;
 
       Device.update({id: device_id}, updates).exec(finish);
     }

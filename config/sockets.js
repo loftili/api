@@ -1,9 +1,11 @@
+var cookies = require('cookie-parser');
+
 module.exports.sockets = {
 
   path: '/sock',
 
-  beforeConnect: function(handshake, cb) {
-    return cb(null, true);
+  beforeConnect: function(connection, callback) {
+    callback(null, true);
   },
 
   afterDisconnect: function() {

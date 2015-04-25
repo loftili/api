@@ -33,7 +33,7 @@ module.exports = {
     },
 
     permissions: {
-      collection: 'devicepermission',
+      collection: 'Devicepermission',
       via: 'device'
     },
 
