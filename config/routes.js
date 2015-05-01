@@ -1,12 +1,14 @@
 module.exports.routes = {
 
   'GET /system': 'SystemController.index',
-  'GET /sk': 'SystemController.socket',
 
   /* Session */
   'GET /auth': 'SessionController.index',
   'POST /auth': 'SessionController.login',
   'GET /logout': 'SessionController.logout',
+
+  'GET /devicestream/open': 'DeviceStreamController.open',
+  'GET /devicestream/:id': 'DeviceStreamController.subscribe',
 
   'GET /clients': 'ClientController.find',
   'POST /clients': 'ClientController.create',
@@ -32,9 +34,6 @@ module.exports.routes = {
   'PUT /users/:id': 'UserController.update',
   'POST /passwordreset': 'UserController.passwordReset',
   
-  /* Dns */
-  'POST /dns': 'DnsController.create',
-  'DELETE /dns': 'DnsController.destroy',
 
   /* Device & Device management */
   'POST /devices': 'DeviceController.create',

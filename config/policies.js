@@ -7,8 +7,11 @@ module.exports.policies = (function() {
     '*': defaults,
 
     SystemController: {
-      index: [],
-      socket: []
+      index: []
+    },
+
+    DeviceStreamController: {
+      open: []
     },
 
     SessionController: {

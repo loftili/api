@@ -8,7 +8,8 @@ module.exports.sockets = {
     callback(null, true);
   },
 
-  afterDisconnect: function() {
+  afterDisconnect: function(session, connection, callback) {
+    DeviceSockets.users.remove(session.userid, callback);
   },
 
   grant3rdPartyCookie: true,

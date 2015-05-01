@@ -1,21 +1,14 @@
-module.exports = function notFound (data, options) {
+module.exports = (function() {
 
-  var req = this.req;
-  var res = this.res;
-  var sails = req._sails;
+  function notFound() {
+    var req = this.req,
+        res = this.res;
 
-  res.status(404);
+    res.status(404);
 
-  if (data !== undefined) {
-    sails.log.verbose('Sending 404 ("Not Found") response: \n',data);
-  }
-  else sails.log.verbose('Sending 404 ("Not Found") response');
-
-  if (sails.config.environment === 'production') {
-    data = undefined;
+    return res.send('not found');
   }
 
-  return res.jsonx(data);
+  return notFound;
 
-};
-
+})();
