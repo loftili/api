@@ -2,7 +2,7 @@
 
 exports.up = function(knex, Promise) {
   return knex.schema.table('device', function (table) {
-    table.string('serial_number');
+    table.integer('serial_number');
   });
 };
 

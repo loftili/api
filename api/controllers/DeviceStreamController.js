@@ -41,18 +41,21 @@ module.exports = (function() {
 
   DeviceStreamController.open = function(req, res) {
     var query = req.query,
-        serial = query.sn;
+        serial = req.headers['x-loftili-device-serial'],
+        token = req.headers['x-loftili-device-token'];
 
+    function found(err, matching_serials) {
+      if(matching_serials.length !== 1 || matching_serials[0].devices.length !== 1)
+        return res.badRequest();
 
-    function found(err, device) {
-      if(err || !device)
-        return res.badRequest('');
+      var serial = matching_serials[0],
+          device = serial.devices[0];
 
-      log("opening device stream!");
-      DeviceSockets.add(req.socket, device.id);
+      return device.token === token ? DeviceSockets.add(req.socket, device.id) : res.badRequest('invalid device credentials [1]');
     }
 
-    Device.findOne({serial_number: serial}).exec(found);
+    log('looking for serials matching: ' + serial);
+    DeviceSerial.find({serial_number: serial}).populate('devices').exec(found);
   };
 
   return DeviceStreamController;

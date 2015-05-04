@@ -1,6 +1,8 @@
-module.exports = {
+module.exports = (function() {
 
-  attributes: {
+  var Device = {};
+
+  Device.attributes = {
 
     name: {
       type: 'string',
@@ -13,10 +15,7 @@ module.exports = {
     },
 
     serial_number: {
-      type: 'string',
-      required: true,
-      minLength: 40,
-      size: 40
+      model: 'DeviceSerial'
     },
 
     last_checked: {
@@ -43,9 +42,9 @@ module.exports = {
       return obj;
     }
 
-  },
+  };
 
-  beforeDestroy: function(criteria, cb) {
+  Device.beforeDestroy = function(criteria, cb) {
     var id = criteria.where.id;
 
     function destroyPermissions(err, permissions) {
@@ -56,7 +55,8 @@ module.exports = {
     }
 
     Devicepermission.find({device: id}).exec(destroyPermissions);
-  }
+  };
 
-};
+  return Device;
 
+})();
