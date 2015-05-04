@@ -179,7 +179,10 @@ module.exports = (function() {
 
   UserController.search = function(req, res) {
     var query = req.query,
-        user_query = query && query.q ? (query.q+'').toLowerCase() : false;
+        user_query = query && query.q ? (query.q+'').toLowerCase() : false,
+        current_user = req.session.userid;
+
+    if(!current_user) return res.forbidden();
 
     if(!user_query)
       return res.status(404).send('Not found');
@@ -199,14 +202,14 @@ module.exports = (function() {
         user = users[index];
         username = user.username.toLowerCase();
 
-        if(username.indexOf(user_query) > -1)
+        if(username.indexOf(user_query) > -1 && user.id !== current_user)
           matching.push(user);
       }
 
       return matching.length > 0 ? res.status(200).json(matching) : res.status(404).send('');
     }
 
-    User.query('SELECT id, username FROM user WHERE privacy_level < 5', callback);
+    User.query('SELECT id, username FROM user WHERE privacy_level < 5 OR privacy_level IS NULL', callback);
   };
 
   UserController.passwordReset = function(req, res, next) {

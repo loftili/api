@@ -12,22 +12,19 @@ module.exports = {
       required: true
     },
 
+    serial_number: {
+      type: 'string',
+      required: true,
+      minLength: 40,
+      size: 40
+    },
+
     last_checked: {
       type: 'datetime'
     },
 
-    ip_addr: {
-      type: 'string',
-      regex: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
-    },
-
     token: {
       type: 'string'
-    },
-
-    port: {
-      type: 'integer',
-      defaultsTo: '80'
     },
 
     loop_flag: {
@@ -36,7 +33,7 @@ module.exports = {
     },
 
     permissions: {
-      collection: 'devicepermission',
+      collection: 'Devicepermission',
       via: 'device'
     },
 

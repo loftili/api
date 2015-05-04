@@ -2,37 +2,43 @@ module.exports = (function() {
 
   var PlaybackController = {};
 
+  function log(message) {
+    sails.log('[PlaybackController]['+new Date()+'] ' + message);
+  }
+
   function action(fn, req, res) {
     var device_id = req.body.device,
         attempt;
 
     if(!req.session.userid)
-      return res.status(401).send('');
+      return res.forbidden();
 
     if(!device_id)
-      return res.status(400).send('missing device id');
+      return res.badRequest('missing device id');
 
     function finish(error, info) {
-      if(error) {
-        return res.status(404).send(error);
-      }
+      if(error)
+        return res.badRequest(error);
 
       return res.status(202).json(info);
     }
 
     function lookupCb(err, permission) {
       if(err || !permission || !permission.user || !permission.device) {
-        return res.status(404).send('unable to find device');
+        log("unable to find device or permission for device");
+        return res.notFound('unable to find device');
       }
 
-      sails.log('[PlaybackController]['+fn+']['+new Date()+'] '+(fn.toUpperCase())+' device['+permission.device.name+']');
-      return DeviceControlService[fn](permission.device, finish);
+      log((fn.toUpperCase())+' device['+permission.device.name+']');
+      return DeviceControlService.audio[fn](permission.device, finish);
     }
 
-    attempt = Devicepermission.findOne({device: device_id, user: req.session.userid});
-    attempt.populate('device').populate('user').exec(lookupCb);
+    attempt = Devicepermission.findOne({
+      device: device_id, 
+      user: req.session.userid
+    });
 
-    return;
+    attempt.populate('device').populate('user').exec(lookupCb);
   }
 
   PlaybackController.restartPlayback = function(req, res, next) {
@@ -46,7 +52,6 @@ module.exports = (function() {
   PlaybackController.stopPlayback = function(req, res, next) {
     return action('stop', req, res);
   };
-
 
   return PlaybackController;
 
