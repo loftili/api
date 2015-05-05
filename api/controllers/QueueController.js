@@ -126,8 +126,6 @@ module.exports = (function() {
   QueueController.pop = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
-        auth_header = req.headers["x-loftili-device-auth"],
-        auth_query_token = req.query && req.query.device_token ? req.query.device_token : false,
         auth_info = authInfo(req);
 
     if(!auth_info)
