@@ -14,7 +14,7 @@ module.exports = (function() {
 
     function updatedDevice(err, device) {
       if(err) return res.badRequest('invalid serial number [2]');
-      return res.json({token: device.token});
+      return res.json({token: device.token, device: device.id});
     }
 
     function foundSerial(err, serial_record) {

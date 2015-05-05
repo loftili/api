@@ -1,20 +1,38 @@
 module.exports = (function() {
 
-  var QueueController = {};
+  var QueueController = {},
+      TOKEN_HEADER = 'x-loftili-device-token',
+      SERIAL_HEADER = 'x-loftili-device-serial';
 
   function log(msg) {
     var d = new Date();
     sails.log('[QueueController]['+d+'] ' + msg);
   }
 
+  function deviceHeaders(req) {
+    var serial = req.headers[SERIAL_HEADER],
+        token = req.headers[TOKEN_HEADER];
+
+    return serial && token ? {serial: serial, token: token} : false;
+  }
+
+  function authInfo(req) {
+    var user_id = parseInt(req.session.userid, 10),
+        device_headers = deviceHeaders(req);
+
+    if(device_headers)
+      return device_headers;
+
+    return user_id > 0 ? {user: user_id} : false;
+  }
+
   QueueController.current = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
-        device_auth = req.headers["x-loftili-device-auth"],
-        auth_info = {
-          user: user_id,
-          device: device_auth
-        };
+        auth_info = authInfo(req);
+
+    if(!auth_info)
+      return res.notFound('not found [0]');
 
     function finish(err, track) {
       if(err) {
@@ -31,17 +49,17 @@ module.exports = (function() {
   QueueController.findOne = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
-        device_auth = req.headers["x-loftili-device-auth"],
-        auth_info = {
-          user: user_id,
-          device: device_auth
-        };
+        auth_info = authInfo(req);
+
+    if(!auth_info)
+      return res.notFound('not found [0]');
 
     function finish(err, queue) {
       if(err) {
         log('failed getting queue for device[' + device_id + ']');
         return res.status(404).send('');
       }
+
       return res.status(200).json(queue);
     }
         
@@ -58,14 +76,10 @@ module.exports = (function() {
         user_id = req.session.userid,
         item_position = parseInt(req.params.position, 10),
         valid_position = item_position >= 0,
-        device_auth = req.headers["x-loftili-device-auth"],
-        auth_info = {
-          device: device_auth,
-          user: user_id
-        };
+        auth_info = authInfo(req);
 
-    if(!user_id && !device_auth)
-      return res.status(404).send('');
+    if(!auth_info)
+      return res.notFound('not found [0]');
 
     if(!valid_position)
       return res.status(404).send('missing position index');
@@ -88,15 +102,10 @@ module.exports = (function() {
         user_id = req.session.userid,
         track_id = parseInt(req.body.track, 10),
         valid_id = track_id >= 0,
-        device_auth = req.headers["x-loftili-device-auth"],
-        auth_info = {
-          device: device_auth,
-          user: user_id
-        };
+        auth_info = authInfo(req);
 
-    if(!user_id) {
-      return res.status(404).send('');
-    }
+    if(!auth_info)
+      return res.notFound('not found [0]');
 
     if(!valid_id)
       return res.status(404).send('missing track id');
@@ -119,17 +128,10 @@ module.exports = (function() {
         user_id = req.session.userid,
         auth_header = req.headers["x-loftili-device-auth"],
         auth_query_token = req.query && req.query.device_token ? req.query.device_token : false,
-        auth_info = {
-          device: auth_query_token || auth_header,
-          user: user_id
-        };
+        auth_info = authInfo(req);
 
-    log('header['+auth_header+'] query['+auth_query_token+']');
-
-    if(!user_id && !auth_header && !auth_query_token) {
-      log('unauthorized attempt to pop from a device queue['+device_id+']');
-      return res.status(404).send('not authorized');
-    }
+    if(!auth_info)
+      return res.notFound('not found [0]');
 
     function finish(err, popped_track) {
       if(err) {

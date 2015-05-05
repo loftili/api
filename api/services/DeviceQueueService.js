@@ -24,7 +24,8 @@ module.exports = (function() {
 
   function validatePermission(device_id, auth_info, callback) {
     var user_id = auth_info.user || auth_info,
-        device_key = auth_info.device;
+        token = auth_info.token,
+        serial = auth_info.serial;
 
     function foundDevice(err, device) {
       if(err) {
@@ -39,11 +40,11 @@ module.exports = (function() {
       
       log('found device, checking permissions device[' + device.name + ']');
 
-      if(device_key) {
+      if(token && serial) {
         log('validating permission based on the device\'s token...');
-        log('expected['+device.token+'] actual['+device_key+']');
+        log('expected['+device.token+'] actual['+token+']');
 
-        if(device.token !== device_key) {
+        if(device.token !== token) {
           return callback('no permission to act', null);
         }
 
@@ -153,7 +154,7 @@ module.exports = (function() {
         }
       }
 
-      return callback(null, results);
+      return callback(null, {queue: results});
     }
 
     function getTracks(err, values) {
