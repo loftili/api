@@ -112,10 +112,14 @@ module.exports = (function() {
       if(connected[i].device === device_id) { d = connected[i]; break; }
     }
 
-    if(!d)
+    if(!d) {
+      log('device socket not found - failed writing');
       return callback('missing device', false);
+    }
 
+    log('writing ['+message+'] to device...');
     d.socket.write(message);
+    log('finished.');
     return callback(null, 'ok');
   };
 

@@ -5,7 +5,7 @@ module.exports = (function() {
   var RegistrationController = {}; 
 
   function log(msg) {
-    sails.log('serial number: ' + msg);
+    sails.log('[RegistrationController]['+(new Date())+']' + msg);
   }
 
   RegistrationController.register = function(req, res, next) {
@@ -32,6 +32,7 @@ module.exports = (function() {
       */
 
       device.token = DeviceTokenService.generate(device.name);
+      log('new device token: ' + device.token);
       device.save(updatedDevice);
     }
 

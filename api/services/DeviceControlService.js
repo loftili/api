@@ -28,7 +28,9 @@ module.exports = (function() {
       log('restarting device['+device.registered_name+']');
 
       function finished(err, response) {
-        return err ? callback(err) : callback(null, response);
+        if(err) return callback(err);
+        log('device restarted succesfully');
+        return callback(null, response);
       }
 
       sendRequest([name, 'restart'].join(':'), device, finished);
@@ -38,7 +40,9 @@ module.exports = (function() {
       log('starting device['+device.registered_name+']');
 
       function finished(err, response) {
-        return err ? callback(err) : callback(null, response);
+        if(err) return callback(err);
+        log('device started succesfully');
+        return callback(null, response);
       }
 
       sendRequest([name, 'start'].join(':'), device, finished);
@@ -48,7 +52,9 @@ module.exports = (function() {
       log('stopping device['+device.registered_name+']');
 
       function finished(err, response) {
-        return err ? callback(err) : callback(null, response);
+        if(err) return callback(err);
+        log('device stopped succesfully');
+        return callback(null, response);
       }
 
       sendRequest([name, 'stop'].join(':'), device, finished);
