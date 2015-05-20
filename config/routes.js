@@ -7,6 +7,9 @@ module.exports.routes = {
   'POST /auth': 'SessionController.login',
   'GET /logout': 'SessionController.logout',
 
+  // see bootstrap.js
+  // 'SUBSCRIBE /devicestream/open': 'DeviceStreamController.open',
+
   'GET /devicestream/open': 'DeviceStreamController.open',
   'GET /devicestream/:id': 'DeviceStreamController.subscribe',
 

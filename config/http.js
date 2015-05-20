@@ -13,7 +13,12 @@ module.exports.http = (function(){
         }
       },
 
+      socketPickup: function(req, res, next) {
+        next();
+      },
+
       order: [
+        'socketPickup',
         'startRequestTimer',
         'cookieParser',
         'session',

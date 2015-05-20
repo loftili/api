@@ -15,7 +15,8 @@ module.exports.policies = (function() {
     },
 
     SessionController: {
-      logout: ['corsHeaders']
+      logout: ['corsHeaders'],
+      link: []
     },
 
     UserController: {
