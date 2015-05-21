@@ -32,7 +32,7 @@ module.exports = (function() {
     }
 
     log('looking for devies for user: ' + current_user);
-    Device.find({}).populate('permissions').exec(found);
+    Device.find().populate('permissions', {user: current_user}).exec(found);
   };
 
   DeviceController.create = function(req, res, next) {
