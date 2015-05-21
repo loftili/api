@@ -121,13 +121,13 @@ module.exports = (function() {
       if(err)
         return callback(err, false);
 
-      track_info.title = tags.title ? tags.title.replace('\0', '') : null;
+      track_info.title = tags.title ? tags.title.replace(/\0/ig, '') : null;
       track_info.year = tags.year;
       track_info.type = 'audio/mp3';
       sails.log('[TrackManagementService][upload] successfully loaded mp3 tags... title[' +track_info.title+ ']');
 
       if(tags.artist) {
-        var cleaned_artist_name = tags.artist.replace('\0', ''),
+        var cleaned_artist_name = tags.artist.replace(/\0/ig, ''),
             artist_info = { "name": cleaned_artist_name };
 
         Artist.findOrCreate(artist_info, artist_info, associate);

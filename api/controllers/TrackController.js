@@ -1,8 +1,10 @@
 var atob = require('atob');
 
-module.exports = {
+module.exports = (function() {
 
-  search: function(req, res) {
+  var TrackController = {};
+
+  TrackController.search = function(req, res) {
     var query = req.query,
         track_query = query ? (query.q||'').toLowerCase() : false;
 
@@ -37,9 +39,9 @@ module.exports = {
         sql_query = ['select', selections, 'from track as t', join].join(' ');
 
     Track.query(sql_query, callback);
-  },
+  };
 
-  find: function(req, res, next) {
+  TrackController.find = function(req, res, next) {
     var user_id = req.session.userid;
 
     function finish(err, tracks) {
@@ -52,9 +54,9 @@ module.exports = {
 
     sails.log('[TrackController][find] getting whole list of tracks');
     Track.find().populate('artist').exec(finish);
-  },
+  };
 
-  scout: function(req, res) {
+  TrackController.scout = function(req, res) {
     var query = req.query,
         url = query && query.url ? query.url : false;
 
@@ -79,9 +81,9 @@ module.exports = {
       TrackManagementService.scout(decoded, finish);
     } else
       return res.status(404).send('');
-  },
+  };
 
-  upload: function(req, res) {
+  TrackController.upload = function(req, res) {
     var user = req.session.userid;
 
     function finish(err, track) {
@@ -116,9 +118,9 @@ module.exports = {
     }
 
     req.file('file').upload(callback);
-  },
+  };
 
-  update: function(req, res) {
+  TrackController.update = function(req, res) {
     var track_id = req.params.id,
         track_title = req.body.title;
 
@@ -138,11 +140,9 @@ module.exports = {
     }
 
     Track.findOne({id: track_id}).exec(found);
-  },
+  };
 
-  missing: function(req, res) {
-    res.status(404).send('not found');
-  }
+  return TrackController;
 	
-};
+})();
 
