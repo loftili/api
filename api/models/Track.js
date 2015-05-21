@@ -1,6 +1,8 @@
-module.exports = {
+module.exports = (function() {
 
-  attributes: {
+  var Track = {};
+
+  Track.attributes = {
 
     title: {
       type: 'string',
@@ -37,7 +39,8 @@ module.exports = {
       return obj;
     }
 
-  }
+  };
 
-};
+  return Track;
 
+})();

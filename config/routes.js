@@ -37,6 +37,17 @@ module.exports.routes = {
   'PUT /users/:id': 'UserController.update',
   'POST /passwordreset': 'UserController.passwordReset',
   
+  /* Device serials */
+  'GET /deviceserials': 'DeviceSerialController.find',
+  'POST /deviceserials': 'DeviceSerialController.create',
+  'DELETE /deviceserials/:id': 'DeviceSerialController.destroy',
+  'GET /deviceserials/:id': 'DeviceSerialController.findOne',
+
+  /* User Roles */
+  'GET /userroles': 'UserRolesController.find',
+
+  /* User Roles Mapping */
+  'GET /userrolemapping': 'UserRoleMappingController.find',
 
   /* Device & Device management */
   'POST /devices': 'DeviceController.create',

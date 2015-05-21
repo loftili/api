@@ -12,10 +12,10 @@ module.exports = (function()  {
       if(err || !user)
         return res.status(401).send('');
 
-      return res.json(user.toJSON());
+      return res.json(user);
     }
 
-    var user = User.findOne({id: req.session.userid}).exec(finish);
+    var user = User.findOne({id: req.session.userid}).populate('roles').exec(finish);
   };
 
   SessionController.logout = function(req, res) {

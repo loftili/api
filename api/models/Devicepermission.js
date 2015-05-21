@@ -3,6 +3,7 @@ module.exports = (function() {
   var DevicePermission = {};
 
   DevicePermission.attributes = {
+
     user: {
       model: 'user',
       required: true
@@ -17,6 +18,7 @@ module.exports = (function() {
       type: 'integer',
       required: true
     }
+
   };
 
   return DevicePermission;

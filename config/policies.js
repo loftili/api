@@ -10,8 +10,18 @@ module.exports.policies = (function() {
       index: []
     },
 
+    DeviceSerialController: {
+      find: defaults.concat(['admin']),
+      create: defaults.concat(['admin']),
+      destroy: defaults.concat(['admin'])
+    },
+
+    UserRolesController: {
+      find: defaults
+    },
+
     DeviceStreamController: {
-      open: []
+      open: ['corsHeaders']
     },
 
     SessionController: {

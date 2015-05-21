@@ -35,11 +35,6 @@ module.exports = {
       defaultsTo: 1
     },
 
-    role: {
-      type: 'integer',
-      defaultsTo: 1
-    },
-
     last_name: {
       type: 'string',
       required: true
@@ -61,6 +56,11 @@ module.exports = {
       type: 'string',
       size: 20,
       defaultsTo: null
+    },
+
+    roles: {
+      collection: 'UserRoleMapping',
+      via: 'user'
     },
 
     tracks: {

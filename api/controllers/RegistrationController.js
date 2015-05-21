@@ -25,11 +25,8 @@ module.exports = (function() {
 
       var device = serial_record.devices[0];
       
-      /*
-      if(device.token) {
+      if(device.token)
         return res.badRequest('invalid serial number [0]');
-      }
-      */
 
       device.token = DeviceTokenService.generate(device.name);
       log('new device token: ' + device.token);
