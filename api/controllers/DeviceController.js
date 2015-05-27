@@ -218,10 +218,11 @@ module.exports = (function() {
       return device ? res.json(device) : res.status(404).send('');
     }
 
-    if(device_id >= 0)
-      Device.findOne(device_id).exec(finish);
-    else
-      return res.status(404).send('');
+    if(!(device_id >= 0)) return res.badRequest('invalid device id');
+
+    Device.findOne(device_id)
+      .populate('permissions')
+      .populate('serial_number').exec(finish);
   };
 
   DeviceController.ping = function(req, res, next) {
