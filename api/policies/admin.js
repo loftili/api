@@ -10,7 +10,7 @@ module.exports = (function() {
       return is_admin ? next() : res.forbidden();
     }
 
-    isAdmin.check(finish);
+    isAdmin.check(user_id, finish);
   }
 
   isAdmin.check = function(user_id, callback) {
