@@ -36,10 +36,30 @@ module.exports = (function() {
   };
 
   DeviceSerialController.find = function(req, res) {
+    var device_id = parseInt(req.query.device, 10);
+
+    function filter(serials) {
+      var result = [],
+          count = serials.length;
+
+      for(var i = 0; i < count; i++) {
+        var serial = serials[i];
+        if(serial.devices.length == 1) result.push(serial);
+      }
+
+      return result;
+    }
+
     function found(err, serials) {
       if(err) return res.serverError(err);
-      res.json(serials);
+      var result = device_id >= 0 ? filter(serials) : serials;
+      res.json(result);
     }
+
+    if(device_id > 0) {
+      return DeviceSerial.find().populate('devices', {id: device_id}).exec(found);
+    }
+
     return DeviceSerial.find().populate('devices').exec(found);
   };
 
