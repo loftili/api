@@ -6,22 +6,31 @@ module.exports = (function() {
 
     if(!valid_id) return res.forbidden();
 
+    function finish(is_admin) {
+      return is_admin ? next() : res.forbidden();
+    }
+
+    isAdmin.check(finish);
+  }
+
+  isAdmin.check = function(user_id, callback) {
     function foundRoles(err, roles) {
-      if(err) return res.badRequest(err);
+      if(err) return callback(false);
+
       var count = roles.length;
 
       for(var i = 0; i < count; i++) {
         var role = roles[i].role,
             name = role.role;
 
-        if(/admin/i.test(name)) return next();
+        if(/admin/i.test(name)) return callback(true);
       }
 
-      return res.forbidden();
+      return callback(false);
     }
 
     UserRoleMapping.find({user: user_id}).populate('role').exec(foundRoles);
-  }
+  };
 
   return isAdmin;
 

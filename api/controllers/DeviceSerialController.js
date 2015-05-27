@@ -1,4 +1,5 @@
-var crypto = require('crypto');
+var crypto = require('crypto'),
+    isAdmin = require('../policies/admin');
 
 module.exports = (function() {
 
@@ -36,7 +37,8 @@ module.exports = (function() {
   };
 
   DeviceSerialController.find = function(req, res) {
-    var device_id = parseInt(req.query.device, 10);
+    var device_id = parseInt(req.query.device, 10),
+        user_id = parseInt(req.session.userid, 10);
 
     function filter(serials) {
       var result = [],
@@ -47,20 +49,34 @@ module.exports = (function() {
         if(serial.devices.length == 1) result.push(serial);
       }
 
-      return result;
+      count = result.length;
+      var devices = [];
+      for(var i = 0; i < count; i++) {
+        var serial = result[i],
+            device = serial.devices[0];
+        devices.push(device.id);
+      }
+
+      function callback(is_admin) {
+        return is_admin ? res.json(result) : res.forbidden();
+      }
+
+      isAdmin.check(user_id, callback);
     }
 
     function found(err, serials) {
       if(err) return res.serverError(err);
-      var result = device_id >= 0 ? filter(serials) : serials;
-      res.json(result);
+      return device_id >= 0 ? filter(serials) : res.json(serials);
     }
 
-    if(device_id > 0) {
+    if(device_id > 0)
       return DeviceSerial.find().populate('devices', {id: device_id}).exec(found);
+
+    function getAll() {
+      return DeviceSerial.find().populate('devices').exec(found);
     }
 
-    return DeviceSerial.find().populate('devices').exec(found);
+    return isAdmin(req, res, getAll);
   };
 
   DeviceSerialController.create = function(req, res) {

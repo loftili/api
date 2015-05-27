@@ -123,6 +123,17 @@ module.exports = (function() {
     return callback(null, 'ok');
   };
 
+  DeviceSockets.isConnected = function(device_id) {
+    var i = 0, 
+        c = connected.length;
+
+    for(i; i < c; i++) {
+      if(connected[i].device == device_id) return true;
+    }
+
+    return false;
+  };
+
   return DeviceSockets;
 
 })();

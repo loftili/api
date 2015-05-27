@@ -11,7 +11,6 @@ module.exports.policies = (function() {
     },
 
     DeviceSerialController: {
-      find: defaults.concat(['admin']),
       create: defaults.concat(['admin']),
       destroy: defaults.concat(['admin'])
     },

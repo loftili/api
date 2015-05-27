@@ -4,7 +4,7 @@ module.exports = (function() {
 
   function log(msg) {
     var msg = [
-      '[DeviceSocketController]',
+      '[DeviceStreamController]',
       '['+(new Date())+']'
     ].join('') + ' ' + msg;
 

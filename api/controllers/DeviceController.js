@@ -222,7 +222,7 @@ module.exports = (function() {
 
     Device.findOne(device_id)
       .populate('permissions')
-      .populate('serial_number').exec(finish);
+      .exec(finish);
   };
 
   DeviceController.ping = function(req, res, next) {
