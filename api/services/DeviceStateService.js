@@ -1,9 +1,13 @@
+var Logger = require('./Logger');
+
+
 module.exports = (function() {
 
-  var DeviceStateService = {};
+  var DeviceStateService = {},
+      log = Logger('DeviceStateService');
 
   function stateKey(device_id) {
-    return ['device', device_id].join(':');
+    return ['device', device_id, 'state'].join(':');
   }
 
   DeviceStateService.find = function(device_id, callback) {
@@ -29,7 +33,7 @@ module.exports = (function() {
         return callback(err);
       }
 
-      sails.log('[DeviceStateService][find] connected to redis, running find sequence');
+      log('connected to redis, running find sequence');
       client.connection.hgetall(key_name, finish);
     }
 
@@ -43,15 +47,14 @@ module.exports = (function() {
         client;
 
     for(var state_key in state_info) {
-      if(state_info.hasOwnProperty(state_key))
-        state_map.push([state_key, state_info[state_key]]);
+      if(state_info.hasOwnProperty(state_key)) state_map.push([state_key, state_info[state_key]]);
     }
 
     state_map.push(['timestamp', new Date().getTime()]);
 
     function finish(err) {
       if(err) {
-        sails.log('[DeviceStateService][update] errored durring redis - error['+err+']');
+        log('[DeviceStateService][update] errored durring redis - error['+err+']');
         client.connection.quit();
         return callback('redis error');
       }
@@ -70,7 +73,7 @@ module.exports = (function() {
         return callback(err);
       }
 
-      sails.log('[DeviceStateService][update] connected to redis, running update sequence');
+      log('[DeviceStateService][update] connected to redis, running update sequence');
 
       var count = state_map.length;
 

@@ -1,24 +1,14 @@
+var Logger = require('../services/Logger'),
+    DeviceAuthentication = require('../services/DeviceAuthentication');
+
 module.exports = (function() {
 
   var QueueController = {},
-      TOKEN_HEADER = 'x-loftili-device-token',
-      SERIAL_HEADER = 'x-loftili-device-serial';
-
-  function log(msg) {
-    var d = new Date();
-    sails.log('[QueueController]['+d+'] ' + msg);
-  }
-
-  function deviceHeaders(req) {
-    var serial = req.headers[SERIAL_HEADER],
-        token = req.headers[TOKEN_HEADER];
-
-    return serial && token ? {serial: serial, token: token} : false;
-  }
+      log = Logger('QueueController');
 
   function authInfo(req) {
     var user_id = parseInt(req.session.userid, 10),
-        device_headers = deviceHeaders(req);
+        device_headers = DeviceAuthentication.parseRequest(req);
 
     if(device_headers)
       return device_headers;

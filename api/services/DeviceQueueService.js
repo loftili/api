@@ -1,7 +1,10 @@
+var Logger = require('../services/Logger');
+
 module.exports = (function() {
 
   var DeviceQueueService = {},
-      KEY_DELIM = ':';
+      KEY_DELIM = ':',
+      log = Logger("DeviceQueueService");
 
   function keyName(device_id) {
     return ['queue', device_id].join(KEY_DELIM);
@@ -15,11 +18,6 @@ module.exports = (function() {
   function currentKey(device_id) {
     var base = keyName(device_id);
     return [base, 'current'].join(KEY_DELIM);
-  }
-
-  function log(msg) {
-    var d = new Date();
-    sails.log('[DeviceQueueService]['+d+'] '+ msg);
   }
 
   function validatePermission(device_id, auth_info, callback) {
@@ -38,11 +36,11 @@ module.exports = (function() {
         return callback('no device', null);
       }
       
-      log('found device, checking permissions device[' + device.name + ']');
+      log('[validatePermission] found device, checking permissions device[' + device.name + ']');
 
       if(token && serial) {
-        log('validating permission based on the device\'s token...');
-        log('expected['+device.token+'] actual['+token+']');
+        log('[validatePermission] validating permission based on the device\'s token...');
+        log('[validatePermission] expected['+device.token+'] actual['+token+']');
 
         if(device.token !== token) {
           return callback('no permission to act', null);
@@ -67,13 +65,11 @@ module.exports = (function() {
         break;
       }
 
-      if(allowed) {
-        log('permissions check out, getting queue for device[' + device.name + ']');
-        callback(null, device);
-      } else {
-        log('permission failed for device[' + device.name + ']');
-        callback('not allowed', null);
-      }
+      if(allowed)
+        return callback(null, device);
+
+      log('permission failed for device[' + device.name + ']');
+      callback('not allowed', null);
     }
 
     Device.findOne(device_id).populate('permissions').exec(foundDevice);

@@ -1,3 +1,5 @@
+var Logger = require('./Logger');
+
 module.exports = (function() {
 
   var DeviceSockets = { users: {} },
@@ -6,22 +8,16 @@ module.exports = (function() {
       uuid = (function() {
         var i = 0;
         return (function() { return ['_', ++i, '_'].join(''); });
-      })();
+      })(),
+      log = Logger('::DeviceSockets');
 
   function clean() {
     var i = 0,
         c = connected.length;
 
     for(i; i < c; i++) {
-      if(connected[i] && !connected[i].socket.writable) {
-        log("removing socket ["+i+"], no longer connected");
-        connected.splice(i, 1);
-      }
+      if(connected[i] && !connected[i].socket.writable) connected[i].cleanup();
     }
-  }
-
-  function log(msg) {
-    sails.log('[::socket]['+new Date()+'] ' + msg);
   }
 
   DeviceSockets.users.add = function(user, device, socket) {
@@ -65,7 +61,8 @@ module.exports = (function() {
   };
 
   DeviceSockets.add = function(socket, device_id) {
-    var id = uuid();
+    var id = uuid(),
+        noop = function() { };
 
     clean();
 
@@ -83,18 +80,20 @@ module.exports = (function() {
       log("removing socket at ["+n+"]");
       connected.splice(n, 1);
       DeviceSockets.users.broadcast(device_id, "disconnected");
+      DeviceStateService.update(device_id, {connected: false}, noop);
     }
 
-    log("adding socket ["+id+"] for device["+device_id+"]");
+    log("adding socket ["+id+"] for device["+device_id+"] and setting state");
 
     connected.push({
       device: device_id, 
       socket: socket, 
-      id: id
+      id: id,
+      cleanup: remove
     });
 
+    DeviceStateService.update(device_id, {connected: true}, noop);
     DeviceSockets.users.broadcast(device_id, "connected");
-
     socket.on('close', remove);
   };
 

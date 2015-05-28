@@ -1,15 +1,9 @@
+var Logger = require('../services/Logger');
+
 module.exports = (function() {
 
-  var DeviceStreamController = {};
-
-  function log(msg) {
-    var msg = [
-      '[DeviceStreamController]',
-      '['+(new Date())+']'
-    ].join('') + ' ' + msg;
-
-    sails.log(msg);
-  }
+  var DeviceStreamController = {},
+      log = Logger('DeviceStreamController');
 
   DeviceStreamController.subscribe = function(req, res) {
     if(!req.isSocket) return res.notFound();

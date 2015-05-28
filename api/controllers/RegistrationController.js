@@ -5,7 +5,7 @@ module.exports = (function() {
   var RegistrationController = {}; 
 
   function log(msg) {
-    sails.log('[RegistrationController]['+(new Date())+']' + msg);
+    sails.log('[RegistrationController]['+(new Date())+'] ' + msg);
   }
 
   RegistrationController.register = function(req, res, next) {
