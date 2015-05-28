@@ -1,10 +1,9 @@
+var Logger = require('../services/Logger');
+
 module.exports = (function() {
 
-  var PlaybackController = {};
-
-  function log(message) {
-    sails.log('[PlaybackController]['+new Date()+'] ' + message);
-  }
+  var PlaybackController = {},
+      log = Logger('PlaybackController');
 
   function action(fn, req, res) {
     var device_id = req.body.device,
@@ -41,16 +40,20 @@ module.exports = (function() {
     attempt.populate('device').populate('user').exec(lookupCb);
   }
 
-  PlaybackController.restartPlayback = function(req, res, next) {
+  PlaybackController.restart = function(req, res, next) {
     return action('restart', req, res);
   };
 
-  PlaybackController.startPlayback = function(req, res, next) {
+  PlaybackController.start = function(req, res, next) {
     return action('start', req, res);
   };
 
-  PlaybackController.stopPlayback = function(req, res, next) {
+  PlaybackController.stop = function(req, res, next) {
     return action('stop', req, res);
+  };
+
+  PlaybackController.skip = function(req, res, next) {
+    return action('skip', req, res);
   };
 
   return PlaybackController;

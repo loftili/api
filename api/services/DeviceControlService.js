@@ -1,15 +1,12 @@
 var request = require('request'),
-    domains = require('../../config/domain');
+    domains = require('../../config/domain'),
+    Logger = require('./Logger');
 
 module.exports = (function() {
 
   var DeviceControlService = {},
-      supported_engines = ['audio'];
-
-  function log(msg) {
-    msg = ['[DeviceControlService]['+new Date()+']', msg].join(' ');
-    sails.log(msg);
-  }
+      supported_engines = ['audio'],
+      log = Logger('DeviceControlService');
 
   function sendRequest(command, device, requestCallback) {
     var message = "CMD " + command;
@@ -58,6 +55,18 @@ module.exports = (function() {
       }
 
       sendRequest([name, 'stop'].join(':'), device, finished);
+    };
+
+    fns.skip = function(device, callback) {
+      log('skipping device['+device.registered_name+']');
+
+      function finished(err, response) {
+        if(err) return callback(err);
+        log('device skipped succesfully');
+        return callback(null, response);
+      }
+
+      sendRequest([name, 'skip'].join(':'), device, finished);
     };
 
     return fns;
