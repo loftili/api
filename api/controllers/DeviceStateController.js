@@ -70,6 +70,9 @@ module.exports = (function() {
         return res.notFound();
       }
 
+
+      log('update success');
+      DeviceSockets.users.broadcast(device_id, 'DEVICE_STATE');
       return res.status(200).send('');
     }
 

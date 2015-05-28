@@ -124,7 +124,7 @@ module.exports = (function() {
     function finish(err, popped_track) {
       if(err) {
         log('failed popping: ' + err);
-        return res.status(404).send('');
+        return res.notFound();
       }
 
       if(!popped_track) {
@@ -132,6 +132,7 @@ module.exports = (function() {
         return res.status(204).send('');
       }
 
+      DeviceSockets.users.broadcast(device_id, 'QUEUE_UPDATE');
       return res.status(200).json(popped_track);
     }
 

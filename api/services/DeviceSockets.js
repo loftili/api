@@ -79,7 +79,7 @@ module.exports = (function() {
 
       log("removing socket at ["+n+"]");
       connected.splice(n, 1);
-      DeviceSockets.users.broadcast(device_id, "disconnected");
+      DeviceSockets.users.broadcast(device_id, "DEVICE_DISCONNECTED");
       DeviceStateService.update(device_id, {connected: false}, noop);
     }
 
@@ -93,7 +93,7 @@ module.exports = (function() {
     });
 
     DeviceStateService.update(device_id, {connected: true}, noop);
-    DeviceSockets.users.broadcast(device_id, "connected");
+    DeviceSockets.users.broadcast(device_id, "DEVICE_CONNECTED");
     socket.on('close', remove);
   };
 
