@@ -1,6 +1,7 @@
 module.exports.policies = (function() {
 
-  var defaults = ['corsHeaders', 'isLoggedIn'];
+  var defaults = ['corsHeaders', 'isLoggedIn'],
+      admin = defaults.concat(['admin']);
 
   return {
 
@@ -10,9 +11,16 @@ module.exports.policies = (function() {
       index: []
     },
 
+    AccountRequestController: {
+      create: ['corsHeaders'],
+      find: admin,
+      findOne: admin,
+      destroy: admin
+    },
+
     DeviceSerialController: {
-      create: defaults.concat(['admin']),
-      destroy: defaults.concat(['admin'])
+      create: admin,
+      destroy: admin
     },
 
     UserRolesController: {

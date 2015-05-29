@@ -22,6 +22,7 @@ module.exports = (function() {
 
   DeviceSerialController.destroy = function(req, res) {
     var id = req.params.id;
+
     function destroyed(err) {
       if(err) return res.serverError(err);
       return res.status(200).send('');

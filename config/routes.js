@@ -43,6 +43,12 @@ module.exports.routes = {
   'DELETE /deviceserials/:id': 'DeviceSerialController.destroy',
   'GET /deviceserials/:id': 'DeviceSerialController.findOne',
 
+  /* Account Requests */
+  'GET /accountrequests': 'AccountRequestController.find',
+  'GET /accountrequests/:id': 'AccountRequestController.findOne',
+  'POST /accountrequests': 'AccountRequestController.create',
+  'DELETE /accountrequests/:id': 'AccountRequestController.destroy',
+
   /* User Roles */
   'GET /userroles': 'UserRolesController.find',
 
