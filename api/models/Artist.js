@@ -1,6 +1,8 @@
-module.exports = {
+module.exports = (function() {
 
-  attributes: {
+  var Artist = {};
+
+  Artist.attributes = {
 
     name: {
       type: 'string',
@@ -12,7 +14,8 @@ module.exports = {
       via: 'artist'
     }
 
-  }
+  };
 
-};
+  return Artist;
 
+})();
