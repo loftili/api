@@ -4,6 +4,17 @@ module.exports = (function() {
 
   var TrackController = {};
 
+  TrackController.findOne = function(req, res) {
+    var id = req.params.id;
+
+    function found(err, track) {
+      if(err) return res.serverError(err);
+      return track ? res.json(track) : res.notFound();
+    }
+
+    Track.findOne(id).exec(found);
+  };
+
   TrackController.search = function(req, res) {
     var query = req.query,
         track_query = query ? (query.q||'').toLowerCase() : false;
