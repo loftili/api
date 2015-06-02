@@ -9,7 +9,12 @@ module.exports = (function() {
         var i = 0;
         return (function() { return ['_', ++i, '_'].join(''); });
       })(),
-      log = Logger('::DeviceSockets');
+      log = Logger('::DeviceSockets'),
+      STATE_RESET = {
+        connected: false,
+        playback: 0,
+        current_track: false
+      };
 
   function clean() {
     var i = 0,
@@ -77,10 +82,13 @@ module.exports = (function() {
 
       if(n < 0) return;
 
-      log("removing socket at ["+n+"]");
+      function finish() {
+        DeviceSockets.users.broadcast(device_id, "DEVICE_DISCONNECTED");
+      }
+
+      log("removing socket at ["+n+"] and updating state");
       connected.splice(n, 1);
-      DeviceSockets.users.broadcast(device_id, "DEVICE_DISCONNECTED");
-      DeviceStateService.update(device_id, {connected: false}, noop);
+      DeviceStateService.update(device_id, STATE_RESET, finish);
     }
 
     log("adding socket ["+id+"] for device["+device_id+"] and setting state");
