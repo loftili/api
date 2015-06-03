@@ -11,9 +11,7 @@ module.exports = (function() {
       })(),
       log = Logger('::DeviceSockets'),
       STATE_RESET = {
-        connected: false,
-        playback: 0,
-        current_track: false
+        connected: false
       };
 
   function clean() {
