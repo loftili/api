@@ -5,6 +5,26 @@ module.exports = (function() {
   var DeviceStreamController = {},
       log = Logger('DeviceStreamController');
 
+  DeviceStreamController.destroy = function(req, res) {
+    var device_id = parseInt(req.params.id, 10);
+
+    function finish(err, ok) {
+      if(err) return res.badRequest(err);
+      return res.status(202);
+    }
+
+    log('attempting to remove device stream ['+device_id+']');
+    DeviceSockets.remove(device_id, finish);
+  };
+
+  DeviceStreamController.find = function(req, res) {
+    function foundDevices(err, devices) {
+      if(err) return res.serverError(err);
+      return res.json(devices);
+    }
+    Device.find({where: {id: DeviceSockets.devices()}}).exec(foundDevices);
+  };
+
   DeviceStreamController.subscribe = function(req, res) {
     if(!req.isSocket) return res.notFound();
     var socket_id = sails.sockets.id(req.socket),

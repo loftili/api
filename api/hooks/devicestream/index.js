@@ -1,14 +1,18 @@
+var Logger = require('../../services/Logger');
+
 module.exports = function(sails) {
 
-  var Hook = {};
+  var Hook = {},
+      log = Logger('[Hook] DeviceStream');
 
   function subscribe(req, res, next) {
     if(!/subscribe/i.test(req.method)) return next();
+    log('device subscription attempt received, passing to DeviceStreamController');
     return sails.controllers.devicestream.open(req, res);
   }
 
   function addSockets() {
-    sails.hooks.http.app.all('/devicestream', subscribe);
+    sails.hooks.http.app.all('/devicestreams', subscribe);
   }
 
   Hook.initialize = function(cb) {

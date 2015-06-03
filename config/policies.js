@@ -28,7 +28,9 @@ module.exports.policies = (function() {
     },
 
     DeviceStreamController: {
-      open: ['corsHeaders']
+      open: ['corsHeaders'],
+      destroy: admin,
+      find: admin
     },
 
     SessionController: {

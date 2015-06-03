@@ -63,13 +63,25 @@ module.exports = (function() {
     }
   };
 
+  DeviceSockets.devices = function() {
+    var result = [],
+        i = 0,
+        c = connected.length;
+
+    for(i; i < c; i++) {
+      result.push(connected[i].device);
+    }
+
+    return result;
+  };
+
   DeviceSockets.add = function(socket, device_id) {
     var id = uuid(),
         noop = function() { };
 
     clean();
 
-    function remove() {
+    function remove(callback) {
       var i = 0,
           n = -1;
 
@@ -82,6 +94,7 @@ module.exports = (function() {
 
       function finish() {
         DeviceSockets.users.broadcast(device_id, "DEVICE_DISCONNECTED");
+        if(callback) callback();
       }
 
       log("removing socket at ["+n+"] and updating state");
@@ -101,6 +114,29 @@ module.exports = (function() {
     DeviceStateService.update(device_id, {connected: true}, noop);
     DeviceSockets.users.broadcast(device_id, "DEVICE_CONNECTED");
     socket.on('close', remove);
+  };
+
+  DeviceSockets.remove = function(device_id, callback) {
+    var i = 0,
+        c = connected.length,
+        f = false;
+
+    console.log(connected);
+
+    for(i; i < c; i++) {
+      log(connected[i].device);
+      if(!connected[i] || connected[i].device !== device_id) continue;
+      f = connected[i];
+      break;
+    }
+
+    if(!f) return callback('couldnt find matching device socket', false);
+
+    function finish() {
+      callback(false, true);
+    }
+
+    f.cleanup(finish);
   };
 
   DeviceSockets.send = function(message, device_id, callback) {

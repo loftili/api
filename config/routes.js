@@ -8,10 +8,13 @@ module.exports.routes = {
   'GET /logout': 'SessionController.logout',
 
   // see bootstrap.js
-  // 'SUBSCRIBE /devicestream/open': 'DeviceStreamController.open',
+  // 'SUBSCRIBE /devicestreams': 'DeviceStreamController.open',
+  // depricated:
+  // 'GET /devicestreams/open': 'DeviceStreamController.open',
 
-  'GET /devicestream/open': 'DeviceStreamController.open',
-  'GET /devicestream/:id': 'DeviceStreamController.subscribe',
+  'GET /devicestreams': 'DeviceStreamController.find',
+  'DELETE /devicestreams/:id': 'DeviceStreamController.destroy',
+  'GET /devicestreams/:id': 'DeviceStreamController.subscribe',
 
   'GET /clients': 'ClientController.find',
   'POST /clients': 'ClientController.create',
