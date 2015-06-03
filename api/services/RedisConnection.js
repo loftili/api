@@ -5,7 +5,9 @@ module.exports = (function() {
   var RedisConnection = {};
 
   RedisConnection.getClient = function(ready_fn) {
-    var connection = redis.createClient({
+    var port = process.env['REDIS_PORT'] || 6379,
+        hostname = process.env['REDIS_HOST'] || '127.0.0.1',
+        connection = redis.createClient(port, hostname, {
           max_attempts: 1
         }),
         client = {},
