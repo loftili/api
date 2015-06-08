@@ -1,6 +1,8 @@
-module.exports = {
+module.exports = (function() {
 
-  destroy: function(req, res) {
+  var DevicePermissionController = {};
+
+  DevicePermissionController.destroy = function(req, res) {
     var session_user = parseInt(req.session.userid, 10),
         permission_id = parseInt(req.params.id, 10),
         found_permission = null;
@@ -40,9 +42,9 @@ module.exports = {
     }
 
     Devicepermission.findOne(permission_id, found);
-  },
+  };
 
-  find: function(req, res) {
+  DevicePermissionController.find = function(req, res) {
     var session_user = req.session.userid,
         device_query = req.query.device,
         user_query = req.query.user,
@@ -65,10 +67,10 @@ module.exports = {
       return res.status(404).send('missing parameters');
 
     Devicepermission.find(where_clause).populate('user').populate('device').exec(found);
-  },
+  };
 
 
-  create: function(req, res) {
+  DevicePermissionController.create = function(req, res) {
     var device_id = req.body.device,
         user_id = req.body.user,
         level = parseInt(req.body.level, 10),
@@ -97,7 +99,8 @@ module.exports = {
     } else {
       DeviceShareService.share(params, added);
     }
-  }
+  };
 
-};
+  return DevicePermissionController;
 
+})();

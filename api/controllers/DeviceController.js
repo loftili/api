@@ -1,13 +1,10 @@
-var net = require('net');
+var net = require('net'),
+    Logger = require('../services/Logger');
 
 module.exports = (function() {
 
-  var DeviceController = {};
-
-  function _log(msg) {
-    var full = "[DeviceController]["+new Date()+"] " + msg;
-    sails.log(full);
-  }
+  var DeviceController = {},
+      _log = Logger('DeviceController');
 
   DeviceController.find = function(req, res) { 
     var current_user = parseInt(req.session.userid, 10);
@@ -113,12 +110,12 @@ module.exports = (function() {
     function foundDevice(err, device) {
       if(err) {
         _log('failed getting device for updating');
-        return res.status(404).send('');
+        return res.notFound();
       }
 
       if(!device) {
         _log('unable to find device for update');
-        return res.status(404).send('');
+        return res.notFound();
       }
 
       _log('found device, checking permissions');
@@ -137,7 +134,7 @@ module.exports = (function() {
 
       if(!allowed) {
         _log('current user not allowed to update the device, fail out');
-        return res.status(401).send('');
+        return res.notFound();
       }
 
       var updates = {},
@@ -145,6 +142,9 @@ module.exports = (function() {
 
       if(body.name)
         updates.name = body.name;
+
+      if(body.stream)
+        updates.stream = body.stream;
 
       Device.update({id: device_id}, updates).exec(finish);
     }
@@ -222,28 +222,8 @@ module.exports = (function() {
 
     Device.findOne(device_id)
       .populate('permissions')
+      .populate('stream')
       .exec(finish);
-  };
-
-  DeviceController.ping = function(req, res, next) {
-    var device_id = req.params.id,
-        user_id = req.session.userid,
-        username = req.session.username,
-        failed = false,
-        found_device = null,
-        attempt;
-
-    if(!user_id)
-      return res.status(401).send('');
-
-    if(!device_id)
-      return res.status(400).send('');
-
-    return res.status(200).send('');
-  };
-
-  DeviceController.missing = function(req, res) {
-    res.status(404).send('not found');
   };
 
   return DeviceController;

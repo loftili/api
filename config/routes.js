@@ -61,13 +61,25 @@ module.exports.routes = {
   /* Device & Device management */
   'POST /devices': 'DeviceController.create',
   'GET /devices': 'DeviceController.find',
-  'GET /devices/:id/ping': 'DeviceController.ping',
   'GET /devices/:id': 'DeviceController.findOne',
   'PUT /devices/:id': 'DeviceController.update',
   'DELETE /devices/:id': 'DeviceController.destroy',
 
   'GET /registration': 'RegistrationController.register',
   'POST /registration': 'RegistrationController.register',
+
+  /* streams */
+  'GET /streams': 'StreamController.find',
+  'POST /streams': 'StreamController.create',
+  'DELETE /streams/:id': 'StreamController.destroy',
+  'PUT /streams/:id': 'StreamController.update',
+  'PUT /streams/:id/queue': 'StreamController.enqueue',
+  'DELETE /streams/:id/queue/:position': 'StreamController.dequeue',
+  'GET /streams/:id': 'StreamController.findOne',
+
+  'GET /streampermissions': 'StreamPermissionController.find',
+  'POST /streampermissions': 'StreamPermissionController.create',
+  'DELETE /streampermissions/:id': 'StreamPermissionController.destroy',
 
   'GET /queues/:id/current': 'QueueController.current',
   'GET /queues/:id': 'QueueController.findOne',

@@ -134,8 +134,6 @@ module.exports = (function() {
         return callback(err, null)
       }
 
-      log('found queue['+queue_ids.join()+']');
-
       var results = [];
       for(var i = 0; i < queue_ids.length; i++){
         var queued_id = queue_ids[i];
