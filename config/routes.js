@@ -33,7 +33,7 @@ module.exports.routes = {
 
   /* User information*/
   'POST /users': 'UserController.create',
-  'GET /users/search': 'UserController.search',
+  'GET /users': 'UserController.find',
   'GET /users/:id/tracks': 'UserController.tracks',
   'PUT /users/:id/tracks': 'UserController.addTrack',
   'DELETE /users/:id/tracks/:track_id': 'UserController.dropTrack',

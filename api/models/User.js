@@ -1,4 +1,5 @@
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt'),
+    crypto = require('crypto');
 
 module.exports = {
 
@@ -70,7 +71,11 @@ module.exports = {
     },
 
     toJSON: function() {
-      var obj = this.toObject();
+      var obj = this.toObject(),
+          email = obj.email,
+          hasher = crypto.createHash('md5');
+      hasher.update(email);
+      obj['gravatar_url'] = 'https://gravatar.com/avatar/' + hasher.digest('hex');
       delete obj['password'];
       delete obj['reset_token'];
       return obj;

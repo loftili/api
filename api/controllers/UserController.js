@@ -1,3 +1,5 @@
+var isAdmin = require('../policies/admin');
+
 module.exports = (function() {
 
   var UserController = {};
@@ -177,39 +179,28 @@ module.exports = (function() {
     User.findOne({id: user_id}).populate('tracks').exec(found);
   };
 
-  UserController.search = function(req, res) {
+  UserController.find = function(req, res) {
     var query = req.query,
         user_query = query && query.q ? (query.q+'').toLowerCase() : false,
-        current_user = req.session.userid;
+        current_user = req.session.userid,
+        admin_flag = query && query.admin;
 
     if(!current_user) return res.forbidden();
 
     if(!user_query)
-      return res.status(404).send('Not found');
+      return res.notFound('missing query');
 
     function callback(err, users) {
-      if(err) {
-        sails.log('[UserController][search] SQL error:');
-        sails.log(err);
-        return res.status(500).send('');
-      }
-
-      var matching = [],
-          index = [],
-          user, username;
-
-      for(var index = 0; index < users.length; index++) {
-        user = users[index];
-        username = user.username.toLowerCase();
-
-        if(username.indexOf(user_query) > -1 && user.id !== current_user)
-          matching.push(user);
-      }
-
-      return matching.length > 0 ? res.status(200).json(matching) : res.status(404).send('');
+      if(err) return res.serverError(err);
+      return res.json(users);
     }
 
-    User.query('SELECT id, username FROM user WHERE privacy_level < 5 OR privacy_level IS NULL', callback);
+    function adminCheck(is_admin) {
+      return is_admin ? UserSearch.admin(user_query, callback) : UserSearch.visible(user_query, callback);
+    }
+
+    return admin_flag ? isAdmin.check(req.session.userid, adminCheck) 
+      : UserSearch.visible(user_query, callback);
   };
 
   UserController.passwordReset = function(req, res, next) {
