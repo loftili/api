@@ -36,7 +36,7 @@ module.exports = (function() {
       }
 
       var keyname = listKey(stream_id),
-          lpush_args = [keyname].concat(new_list).concat([finish]);
+          lpush_args = [keyname].concat(new_list.reverse()).concat([finish]);
 
       if(new_list.length > 0) client.connection.lpush.apply(client.connection, lpush_args);
       else finish();
@@ -54,8 +54,6 @@ module.exports = (function() {
       var keyname = listKey(stream_id);
 
       for(var i = 0; i < list.length; i++) {
-        log(item_position);
-
         if(i === item_position) {
           log('skipping item at position['+item_position+']');
           continue;
