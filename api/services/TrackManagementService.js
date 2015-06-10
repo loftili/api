@@ -131,7 +131,7 @@ module.exports = (function() {
 
       function madeArtist(err, artist) {
         log('created new artist');
-        track_info.artist = artists[0].id;
+        track_info.artist = artist;
         Track.create(track_info).exec(finished);
       }
 
