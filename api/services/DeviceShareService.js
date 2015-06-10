@@ -1,10 +1,13 @@
+var Logger = require('./Logger');
+
 module.exports = (function() {
 
   var DeviceShareService = { },
       LEVELS = {
         DEVICE_OWNER: 1,
-        DEVICE_FRIEND: 2
-      };
+        DEVICE_FRIEND: (1 << 1)
+      },
+      log = Logger('DeviceShareService');
 
   DeviceShareService.LEVELS = LEVELS;
 
@@ -22,8 +25,8 @@ module.exports = (function() {
 
     function finish(err, created) {
       if(err) {
-        sails.log('[DeviceShareService][totalfail]');
-        sails.log(err);
+        log('totally failed creating device permission');
+        log(err);
       }
 
       cb(err, created);
@@ -31,22 +34,22 @@ module.exports = (function() {
 
     function foundOwner(err, record) {
       if(err) {
-        sails.log('[DeviceShareService][share] failed very hard, ' + err);
+        log('failed very hard, ' + err);
         return cb(err);
       }
 
       if(!record) {
-        sails.log('[DeviceShareService][share] unable to find a valid ownership based on that which was requested');
+        log('unable to find a valid ownership based on that which was requested');
         return cb('not the owner');
       }
 
-      sails.log('[DeviceShareService][share] found the valid owner during share, good to go, creating ' + JSON.stringify(params));
+      log('found the valid owner during share, good to go, creating ' + JSON.stringify(params));
       Devicepermission.findOrCreate(params, params, finish);
     }
 
     if(is_forced) {
-      sails.log('[DeviceShareService][share] forcing level ' + level);
-      sails.log('[DeviceShareService][share] forcing share of device, ' + JSON.stringify(params));
+      log('forcing level ' + level);
+      log('forcing share of device, ' + JSON.stringify(params));
       Devicepermission.findOrCreate(params, params, finish);
     } else {
       var ownership_params = {
@@ -54,7 +57,7 @@ module.exports = (function() {
             level: LEVELS.DEVICE_OWNER
           };
 
-      sails.log('[DeviceShareService][share] looking up ownership of device, ' + JSON.stringify(ownership_params));
+      log('looking up ownership of device, ' + JSON.stringify(ownership_params));
       Devicepermission.find(ownership_params, foundOwner);
     }
   };

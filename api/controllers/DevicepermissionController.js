@@ -1,6 +1,9 @@
+var Logger = require('../services/Logger');
+
 module.exports = (function() {
 
-  var DevicePermissionController = {};
+  var DevicePermissionController = {},
+      log = Logger('DevicePermissionController');
 
   DevicePermissionController.destroy = function(req, res) {
     var session_user = parseInt(req.session.userid, 10),
@@ -9,7 +12,7 @@ module.exports = (function() {
 
     function finish(err, deleted) {
       if(err) {
-        sails.log('[DevicepermissionController][destroy] unable to destroy [' + err + ']');
+        log('unable to destroy [' + err + ']');
         return res.status(404).send('');
       }
 
@@ -18,26 +21,23 @@ module.exports = (function() {
 
     function check(err, current_permission) {
       if(err || !current_permission || current_permission.length < 1) {
-        sails.log('[DevicepermissionController][destroy] unable to find owner permission based on current owner [' + err + ']');
+        log('unable to find owner permission based on current owner [' + err + ']');
         return res.status(404).send('');
       }
 
-      sails.log('[DevicepermissionController][destroy] found the permission with current user: [' + current_permission[0].level + ']');
-
-      if(current_permission[0].level !== DeviceShareService.LEVELS.DEVICE_OWNER)
-        res.status(404).send('');
-      else
-        Devicepermission.destroy({id: permission_id}, finish);
+      log('found the permission with current user: [' + current_permission[0].level + ']');
+      if(current_permission[0].level !== DeviceShareService.LEVELS.DEVICE_OWNER) return  res.notFound();
+      Devicepermission.destroy({id: permission_id}, finish);
     }
 
     function found(err, permission) {
       if(err) {
-        sails.log('[DevicepermissionController][destroy] could not delete record: ' + err);
+        log('could not delete record: ' + err);
         return res.status(404).send('');
       }
 
       found_permission = permission;
-      sails.log('[DevicepermissionController][destroy] found a valid permission based on param, checking permission to delete');
+      log('found a valid permission based on param, checking permission to delete');
       Devicepermission.find({user: session_user}).exec(check);
     }
 
@@ -83,7 +83,7 @@ module.exports = (function() {
         };
 
     function finish(err, record) {
-      return err ? res.status(404).send(err) : res.status(202).json(record);
+      return err ? res.notFound() : res.status(202).json(record);
     }
 
     function populate(record) {
@@ -91,14 +91,11 @@ module.exports = (function() {
     }
 
     function added(err, record) {
-      return err ? res.status(404).send(err) : populate(record);
+      return err ? res.notFound() : populate(record);
     }
 
-    if(!level) {
-      return res.status(422).send('');
-    } else {
-      DeviceShareService.share(params, added);
-    }
+    if(!level) return res.badRequest('missing permission level');
+    DeviceShareService.share(params, added);
   };
 
   return DevicePermissionController;
