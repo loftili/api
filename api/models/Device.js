@@ -14,10 +14,6 @@ module.exports = (function() {
       required: true
     },
 
-    stream: {
-      model: 'Stream'
-    },
-
     serial_number: {
       model: 'DeviceSerial'
     },

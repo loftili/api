@@ -23,11 +23,6 @@ module.exports = (function() {
       required: true,
       defaultsTo: 0
     },
-    
-    devices: {
-      collection: 'Device',
-      via: 'stream'
-    },
 
     permissions: {
       collection: 'StreamPermission',

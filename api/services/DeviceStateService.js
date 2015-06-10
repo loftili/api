@@ -12,7 +12,12 @@ module.exports = (function() {
 
   DeviceStateService.find = function(device_id, callback) {
     var key_name = stateKey(device_id),
-        client;
+        client, found_info = null;
+
+    function foundMapping(err, mapping) {
+      found_info.stream = mapping.stream;
+      return callback(null, found_info);
+    }
 
     function finish(err, state_info) {
       client.connection.quit();
@@ -25,7 +30,8 @@ module.exports = (function() {
         return callback('no state info available');
       }
 
-      return callback(null, state_info);
+      found_info = state_info;
+      DeviceStreamMapping.findOne({device: device_id}).exec(foundMapping);
     }
 
     function connected(err) {
@@ -33,11 +39,52 @@ module.exports = (function() {
         return callback(err);
       }
 
-      log('connected to redis, running find sequence');
       client.connection.hgetall(key_name, finish);
     }
 
     client = RedisConnection.getClient(connected);
+  };
+
+  DeviceStateService.subscribe = function(device_id, stream_id, callback) {
+    function finished(err, record) {
+      if(err) return callback(err);
+      callback(null, record);
+    }
+
+    function foundMappings(err, mappings) {
+      if(err) return callback(err);
+      var c = mappings.length;
+
+      // no mappings all across the board - takeover
+      if(c === 0)
+        return DeviceStreamMapping.create({stream: stream_id, device: device_id, alpha: true}).exec(finished);
+
+      // if there is only one mapping, and it came from this 
+      // device, the device is switching to a stream without
+      // an alpha (it has no subscribers) - take over
+      if(c === 1 && mappings[0].device === device_id) {
+        mappings[0].stream = stream_id;
+        mappings[0].alpha = true;
+        return mappings[0].save(finished);
+      }
+
+      for(var i = 0; i < c; i++) {
+        var mapping = mappings[i],
+            dev = mapping.device;
+
+        if(dev !== device_id) continue;
+        mapping.stream = stream_id;
+        return mapping.save(finished);
+      }
+    }
+
+    DeviceStreamMapping.find({
+      or: [{
+        stream: stream_id
+      }, {
+        device: device_id
+      }]
+    }).exec(foundMappings);
   };
 
   DeviceStateService.update = function(device_id, state_info, callback) {

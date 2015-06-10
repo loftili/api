@@ -51,6 +51,87 @@ module.exports = (function() {
     Device.findOne(device_id).populate('permissions').exec(foundDevice);
   };
 
+  DeviceStateController.stream = function(req, res, next) {
+    var device_id = parseInt(req.params.id, 10),
+        stream_id = parseInt(req.body.stream, 10),
+        current_user = parseInt(req.session.userid, 10),
+        found_stream = null;
+
+    if(isNaN(stream_id) || stream_id < 0) return res.badRequest('invalid stream id');
+
+    function executed(err) {
+      if(err) {
+        log('unable to execute device command based on stream update: '+err);
+        return res.serverError();
+      }
+
+      return stream_id === 0 ? res.status(204).send('') : res.json(found_stream);
+    }
+
+    function finish(err) {
+      if(err) {
+        log('unable to update device\'s stream state: ' + err);
+        return res.serverError(err);
+      }
+
+      // finish by telling the device to update
+      return stream_id === 0 ? DeviceControlService.audio.stop(device_id, executed) 
+        : DeviceControlService.audio.skip(device_id, executed);
+    }
+
+    function canUpdate(err) {
+      if(err) {
+        log('user does not have permission to update device['+device_id+'] to stream['+stream_id+'] err['+err+']');
+        return res.notFound();
+      }
+
+      return DeviceStateService.subscribe(device_id, stream_id, finish);
+    }
+
+    function foundStream(err, stream) {
+      if(err) {
+        log('failed finding stream to path to: '+err);
+        return res.serverError(err);
+      }
+
+      found_stream = stream;
+
+      if(stream.privacy < 2) 
+        return DeviceStateService.subscribe(device_id, stream_id, finish);
+
+      var levels = StreamPermissionManager.LEVELS,
+          mask = levels.OWNER | levels.MANAGER | levels.CONTRIBUTOR;
+
+      return StreamPermissionManager.is(current_user, stream_id, mask, canUpdate);
+    }
+
+    function foundPermissions(err, permissions) {
+      if(err) { 
+        log('failed looking up device permissions for state patch: '+err);
+        return res.serverError(err);
+      }
+
+      if(permissions.length < 0) return res.notFound();
+
+      // checking device permission level
+      var level = permissions[0].level,
+          levels = DeviceShareService.LEVELS,
+          mask = levels.DEVICE_FRIEND | levels.DEVICE_OWNER;
+
+      // invalid device permission level
+      if(!(mask & level)) return res.notFound();
+
+      // we're unsubscribing - special case
+      if(stream_id === 0) {
+        return DeviceStateService.subscribe(device_id, 0, finish);
+      }
+          
+      return Stream.findOne(stream_id).exec(foundStream);
+    }
+
+    Devicepermission.find({user: current_user, device: device_id}).exec(foundPermissions);
+  };
+
   DeviceStateController.update = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         auth_info = DeviceAuthentication.parseRequest(req),

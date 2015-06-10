@@ -81,18 +81,10 @@ module.exports.routes = {
   'POST /streampermissions': 'StreamPermissionController.create',
   'DELETE /streampermissions/:id': 'StreamPermissionController.destroy',
 
-  'GET /queues/:id/current': 'QueueController.current',
   'GET /queues/:id': 'QueueController.findOne',
-  'PUT /queues/:id': 'QueueController.enqueue',
-  'POST /queues/:id/move': 'QueueController.move',
-  'DELETE /queues/:id/:position': 'QueueController.remove',
   'POST /queues/:id/pop': 'QueueController.pop',
 
-  'POST /playback/restart': 'PlaybackController.restart',
-  'POST /playback/start': 'PlaybackController.start',
-  'POST /playback/stop': 'PlaybackController.stop',
-  'POST /playback/skip': 'PlaybackController.skip',
-
+  'PATCH /devicestates/:id': 'DeviceStateController.stream',
   'PUT /devicestates/:id': 'DeviceStateController.update',
   'GET /devicestates/:id': 'DeviceStateController.findOne',
 

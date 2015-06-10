@@ -82,7 +82,8 @@ module.exports = (function() {
   };
 
   StreamController.find = function(req, res) {
-    var current_user = parseInt(req.session.userid);
+    var current_user = parseInt(req.session.userid),
+        query = req.query.q;
 
     function found(err, streams) {
       if(err) return res.serverError(err);
@@ -106,7 +107,16 @@ module.exports = (function() {
       return res.json(r);
     }
 
-    Stream.find().populate('permissions').exec(found);
+    if(!query) 
+      return Stream.find().populate('permissions').exec(found)
+
+    Stream.find({
+      or: [{
+        title: { 'contains': query }
+      }, {
+        description: { 'contains': query }
+      }]
+    }).populate('permissions').exec(found);
   };
 
   StreamController.create = function(req, res) {
@@ -208,7 +218,7 @@ module.exports = (function() {
 
 
       if(stream.privacy === 0) {
-        StreamManager.find(id, foundListing);
+        return StreamManager.find(id, foundListing);
       }
 
       var p = stream.permissions;

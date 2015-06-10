@@ -15,7 +15,7 @@ module.exports = (function() {
       return requestCallback(err, state);
     }
 
-    DeviceSockets.send(message, device.id, finished);
+    DeviceSockets.send(message, device, finished);
   }
 
   function engine(name) {

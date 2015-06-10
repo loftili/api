@@ -15,13 +15,11 @@ module.exports = (function() {
       return mask & p.level ? callback(false, true) : callback(true);
     }
     StreamPermission.find({user: user_id, stream: stream_id}).exec(found);
-
   };
 
   StreamPermissionManager.isOwner = function(user_id, stream_id, callback) {
     return StreamPermissionManager.is(user_id, stream_id, LEVELS.OWNER, callback);
   };
-
 
   StreamPermissionManager.LEVELS = LEVELS;
 

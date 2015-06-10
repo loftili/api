@@ -143,9 +143,6 @@ module.exports = (function() {
       if(body.name)
         updates.name = body.name;
 
-      if(body.stream)
-        updates.stream = body.stream;
-
       Device.update({id: device_id}, updates).exec(finish);
     }
 
@@ -222,7 +219,6 @@ module.exports = (function() {
 
     Device.findOne(device_id)
       .populate('permissions')
-      .populate('stream')
       .exec(finish);
   };
 
