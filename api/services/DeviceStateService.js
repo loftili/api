@@ -74,6 +74,7 @@ module.exports = (function() {
 
         if(dev !== device_id) continue;
         mapping.stream = stream_id;
+        mapping.alpha = false;
         return mapping.save(finished);
       }
     }
