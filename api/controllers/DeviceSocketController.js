@@ -59,11 +59,6 @@ module.exports = (function() {
         token = req.headers['x-loftili-device-token'],
         device;
 
-    function foundMapping(err, mappings) {
-      if(err || mappings.length !== 1) return;
-      DeviceControlService.audio.skip(device.id, function() {});
-    }
-
     function found(err, matching_serials) {
       if(matching_serials.length !== 1 || matching_serials[0].devices.length !== 1)
         return res.badRequest();
@@ -75,7 +70,6 @@ module.exports = (function() {
         return res.badRequest('invalid device creds [1]');
 
       DeviceSockets.add(req.socket, device.id);
-      DeviceStreamMapping.find({device: device.id}).exec(foundMapping);
     }
 
     log('looking for serials matching: ' + serial);
