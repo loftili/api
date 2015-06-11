@@ -97,13 +97,9 @@ module.exports = (function() {
         if(callback) callback();
       }
 
-      function removeMapping() {
-        DeviceStreamMapping.destroy({device: device_id}, finish);
-      }
-
       log("removing socket at ["+n+"] and updating state");
       connected.splice(n, 1);
-      DeviceStateService.update(device_id, STATE_RESET, removeMapping);
+      DeviceStateService.update(device_id, STATE_RESET, finish);
     }
 
     log("adding socket ["+id+"] for device["+device_id+"] and setting state");

@@ -56,16 +56,26 @@ module.exports = (function() {
   DeviceSocketController.open = function(req, res) {
     var query = req.query,
         serial = req.headers['x-loftili-device-serial'],
-        token = req.headers['x-loftili-device-token'];
+        token = req.headers['x-loftili-device-token'],
+        device;
+
+    function foundMapping(err, mappings) {
+      if(err || mappings.length !== 1) return;
+      DeviceControlService.audio.skip(device.id, function() {});
+    }
 
     function found(err, matching_serials) {
       if(matching_serials.length !== 1 || matching_serials[0].devices.length !== 1)
         return res.badRequest();
 
-      var serial = matching_serials[0],
-          device = serial.devices[0];
+      var serial = matching_serials[0];
+      device = serial.devices[0];
 
-      return device.token === token ? DeviceSockets.add(req.socket, device.id) : res.badRequest('invalid device credentials [1]');
+      if(device.token !== token)
+        return res.badRequest('invalid device creds [1]');
+
+      DeviceSockets.add(req.socket, device.id);
+      DeviceStreamMapping.find({device: device.id}).exec(foundMapping);
     }
 
     log('looking for serials matching: ' + serial);
