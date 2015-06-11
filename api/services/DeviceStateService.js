@@ -15,7 +15,7 @@ module.exports = (function() {
         client, found_info = null;
 
     function foundMapping(err, mapping) {
-      found_info.stream = mapping.stream;
+      found_info.stream = mapping ? mapping.stream : false;
       return callback(null, found_info);
     }
 
