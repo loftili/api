@@ -8,11 +8,11 @@ module.exports = function(sails) {
   function subscribe(req, res, next) {
     if(!/subscribe/i.test(req.method)) return next();
     log('device subscription attempt received, passing to DeviceStreamController');
-    return sails.controllers.devicestream.open(req, res);
+    return sails.controllers.devicesocket.open(req, res);
   }
 
   function addSockets() {
-    sails.hooks.http.app.all('/devicestreams', subscribe);
+    sails.hooks.http.app.all('/sockets/devices', subscribe);
   }
 
   Hook.initialize = function(cb) {

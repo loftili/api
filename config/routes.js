@@ -7,14 +7,9 @@ module.exports.routes = {
   'POST /auth': 'SessionController.login',
   'GET /logout': 'SessionController.logout',
 
-  // see bootstrap.js
-  // 'SUBSCRIBE /devicestreams': 'DeviceStreamController.open',
-  // depricated:
-  // 'GET /devicestreams/open': 'DeviceStreamController.open',
-
-  'GET /devicestreams': 'DeviceStreamController.find',
-  'DELETE /devicestreams/:id': 'DeviceStreamController.destroy',
-  'GET /devicestreams/:id': 'DeviceStreamController.subscribe',
+  'GET /sockets/devices': 'DeviceSocketController.find',
+  'DELETE /sockets/devices/:id': 'DeviceSocketController.destroy',
+  'GET /sockets/devices/:id': 'DeviceSocketController.subscribe',
 
   'GET /clients': 'ClientController.find',
   'POST /clients': 'ClientController.create',
@@ -22,8 +17,6 @@ module.exports.routes = {
   'DELETE /invitations/:id': 'InvitationsController.destroy',
   'GET /invitations': 'InvitationsController.find',
   'POST /invitations': 'InvitationsController.create',
-
-  'GET /devicehistory': 'DeviceHistoryController.find',
 
   'POST /clientauth': 'ClientAuthController.authenticate',
 
@@ -39,12 +32,6 @@ module.exports.routes = {
   'DELETE /users/:id/tracks/:track_id': 'UserController.dropTrack',
   'PUT /users/:id': 'UserController.update',
   'POST /passwordreset': 'UserController.passwordReset',
-  
-  /* Device serials */
-  'GET /deviceserials': 'DeviceSerialController.find',
-  'POST /deviceserials': 'DeviceSerialController.create',
-  'DELETE /deviceserials/:id': 'DeviceSerialController.destroy',
-  'GET /deviceserials/:id': 'DeviceSerialController.findOne',
 
   /* Account Requests */
   'GET /accountrequests': 'AccountRequestController.find',
@@ -58,15 +45,73 @@ module.exports.routes = {
   /* User Roles Mapping */
   'GET /userrolemapping': 'UserRoleMappingController.find',
 
+
   /* Device & Device management */
+
+  /* registration
+   * used by devices to allocate api tokens
+   */
+  'POST /registration': 'RegistrationController.register',
+
+  /* device routes
+   * used to manage device information, not necessarily the
+   * state of the device itself
+   */
   'POST /devices': 'DeviceController.create',
   'GET /devices': 'DeviceController.find',
   'GET /devices/:id': 'DeviceController.findOne',
   'PUT /devices/:id': 'DeviceController.update',
   'DELETE /devices/:id': 'DeviceController.destroy',
+  
+  /* device serials
+   * serials are used by devices when first connecting with the api.
+   * the majority of these routes have the admin policy associated with them
+   */
+  'GET /deviceserials': 'DeviceSerialController.find',
+  'POST /deviceserials': 'DeviceSerialController.create',
+  'DELETE /deviceserials/:id': 'DeviceSerialController.destroy',
+  'GET /deviceserials/:id': 'DeviceSerialController.findOne',
 
-  'GET /registration': 'RegistrationController.register',
-  'POST /registration': 'RegistrationController.register',
+  /* device history
+   * a device's "history" is the list of tracks it has "popped"
+   */
+  'GET /devicehistory': 'DeviceHistoryController.find',
+
+  /* queues 
+   * these endpoints are an abstraction of a combination of
+   * both the device and it's stream. They should be exclusively
+   * used by the core library.
+   */
+  'GET /queues/:id': 'QueueController.findOne',
+  'POST /queues/:id/pop': 'QueueController.pop',
+
+  /* device states
+   * the brains of the whole this. PATCH is used to change
+   * the state (which then gets reported to the device), and
+   * PUT is used by the device to report back.
+   */
+  'PATCH /devicestates/:id': 'DeviceStateController.stream',
+  'PUT /devicestates/:id': 'DeviceStateController.update',
+  'GET /devicestates/:id': 'DeviceStateController.findOne',
+
+  /* device stream mapping
+   * these routes are used to manage the association between a device and
+   * a stream. Although this is represented in schema by a join table, it should
+   * only ever be a one to many relationship between a stream and it's devices.
+   * This could have been represented by an "stream" foreign key in the 
+   * device table itself, but the concept of the stream's "alpha" 
+   * (the device that does the real popping during playback) can be captured
+   * in the join table
+   */
+  'GET /devicestreammappings': 'DeviceStreamMappingController.find',
+
+  /* device permissions
+   * the state of a device (which stream it is connected to) can be managed by
+   * more than one user. these routes help that.
+   */
+  'GET /devicepermissions': 'DevicepermissionController.find',
+  'POST /devicepermissions': 'DevicepermissionController.create',
+  'DELETE /devicepermissions/:id': 'DevicepermissionController.destroy',
 
   /* streams */
   'GET /streams': 'StreamController.find',
@@ -80,18 +125,6 @@ module.exports.routes = {
   'GET /streampermissions': 'StreamPermissionController.find',
   'POST /streampermissions': 'StreamPermissionController.create',
   'DELETE /streampermissions/:id': 'StreamPermissionController.destroy',
-
-  'GET /queues/:id': 'QueueController.findOne',
-  'POST /queues/:id/pop': 'QueueController.pop',
-
-  'PATCH /devicestates/:id': 'DeviceStateController.stream',
-  'PUT /devicestates/:id': 'DeviceStateController.update',
-  'GET /devicestates/:id': 'DeviceStateController.findOne',
-
-  /* Device visibility */
-  'GET /devicepermissions': 'DevicepermissionController.find',
-  'POST /devicepermissions': 'DevicepermissionController.create',
-  'DELETE /devicepermissions/:id': 'DevicepermissionController.destroy',
 
   /* Tracks */
   'GET /tracks': 'TrackController.find',

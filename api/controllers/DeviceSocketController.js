@@ -2,10 +2,10 @@ var Logger = require('../services/Logger');
 
 module.exports = (function() {
 
-  var DeviceStreamController = {},
-      log = Logger('DeviceStreamController');
+  var DeviceSocketController = {},
+      log = Logger('DeviceSocketController');
 
-  DeviceStreamController.destroy = function(req, res) {
+  DeviceSocketController.destroy = function(req, res) {
     var device_id = parseInt(req.params.id, 10);
 
     function finish(err, ok) {
@@ -17,7 +17,7 @@ module.exports = (function() {
     DeviceSockets.remove(device_id, finish);
   };
 
-  DeviceStreamController.find = function(req, res) {
+  DeviceSocketController.find = function(req, res) {
     function foundDevices(err, devices) {
       if(err) return res.serverError(err);
       return res.json(devices);
@@ -25,7 +25,7 @@ module.exports = (function() {
     Device.find({where: {id: DeviceSockets.devices()}}).exec(foundDevices);
   };
 
-  DeviceStreamController.subscribe = function(req, res) {
+  DeviceSocketController.subscribe = function(req, res) {
     if(!req.isSocket) return res.notFound();
     var socket_id = sails.sockets.id(req.socket),
         user_id = parseInt(req.session.userid, 10),
@@ -53,7 +53,7 @@ module.exports = (function() {
     Devicepermission.find({device: device_id, user: user_id}).exec(hasPermission);
   };
 
-  DeviceStreamController.open = function(req, res) {
+  DeviceSocketController.open = function(req, res) {
     var query = req.query,
         serial = req.headers['x-loftili-device-serial'],
         token = req.headers['x-loftili-device-token'];
@@ -72,6 +72,6 @@ module.exports = (function() {
     DeviceSerial.find({serial_number: serial}).populate('devices').exec(found);
   };
 
-  return DeviceStreamController;
+  return DeviceSocketController;
 
 })();
