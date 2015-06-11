@@ -22,11 +22,9 @@ module.exports = (function() {
     var fns = {};
 
     fns.restart = function(device, callback) {
-      log('restarting device['+device.registered_name+']');
-
       function finished(err, response) {
         if(err) return callback(err);
-        log('device restarted succesfully');
+        log('device['+device+'] restarted succesfully');
         return callback(null, response);
       }
 
@@ -34,11 +32,9 @@ module.exports = (function() {
     };
 
     fns.start = function(device, callback) {
-      log('starting device['+device.registered_name+']');
-
       function finished(err, response) {
         if(err) return callback(err);
-        log('device started succesfully');
+        log('device['+device+'] started succesfully');
         return callback(null, response);
       }
 
@@ -46,11 +42,10 @@ module.exports = (function() {
     };
 
     fns.stop = function(device, callback) {
-      log('stopping device['+device.registered_name+']');
 
       function finished(err, response) {
         if(err) return callback(err);
-        log('device stopped succesfully');
+        log('device['+device+'] stopped succesfully');
         return callback(null, response);
       }
 
@@ -58,11 +53,9 @@ module.exports = (function() {
     };
 
     fns.skip = function(device, callback) {
-      log('skipping device['+device.registered_name+']');
-
       function finished(err, response) {
         if(err) return callback(err);
-        log('device skipped succesfully');
+        log('device['+device+'] skipped succesfully');
         return callback(null, response);
       }
 

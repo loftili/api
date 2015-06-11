@@ -53,30 +53,63 @@ module.exports = (function() {
 
     function foundMappings(err, mappings) {
       if(err) return callback(err);
-      var c = mappings.length;
+      var c = mappings.length,
+          device_mapping,
+          new_streams_alpha;
 
       // no mappings all across the board - takeover
       if(c === 0)
         return DeviceStreamMapping.create({stream: stream_id, device: device_id, alpha: true}).exec(finished);
 
-      // if there is only one mapping, and it came from this 
-      // device, the device is switching to a stream without
-      // an alpha (it has no subscribers) - take over
-      if(c === 1 && mappings[0].device === device_id) {
-        mappings[0].stream = stream_id;
-        mappings[0].alpha = true;
-        return mappings[0].save(finished);
-      }
-
       for(var i = 0; i < c; i++) {
         var mapping = mappings[i],
             dev = mapping.device;
 
-        if(dev !== device_id) continue;
-        mapping.stream = stream_id;
-        mapping.alpha = false;
-        return mapping.save(finished);
+        if(dev !== device_id) {
+          if(mapping.alpha) new_streams_alpha = mapping;
+          continue;
+        }
+
+        device_mapping = mapping;
       }
+
+      function doMove() {
+        // we're joining a stream without an alpha.
+        if(!new_streams_alpha) {
+          log('stream ['+stream_id+'] was without an alpha, assigning device['+device_id+']');
+          device_mapping.alpha = true;
+        } else {
+          device_mapping.alpha = false;
+        }
+
+        device_mapping.stream = stream_id;
+        device_mapping.save(finished);
+      }
+
+      function replaceAlpha(err, old_mappings) {
+        if(err) callback(err);
+
+        // the stream we're leaving only had us subscribed to it, just go ahead and move
+        if(old_mappings.length === 1) {
+          log('device['+device_id+'] is leaving stream['+stream_id+'] which only had a single device, no need to replace');
+          return doMove();
+        }
+
+        for(var i = 0; i < old_mappings.length; i++) {
+          if(old_mappings[i].device === device_id) continue;
+          old_mappings[i].alpha = true;
+          return old_mappings[i].save(doMove);
+        }
+      }
+
+      // oh shit, we're leaving a stream we're the alpha of, assign a new one
+      if(device_mapping.alpha === true) {
+        var current_stream = device_mapping.stream;
+        log('alpha device['+device_id+'] is leaving it\'s stream['+current_stream+'] - assigning a new alpha...');
+        return DeviceStreamMapping.find({stream: current_stream}).exec(replaceAlpha);
+      }
+
+      return doMove();
     }
 
     DeviceStreamMapping.find({
@@ -120,8 +153,6 @@ module.exports = (function() {
       if(err) {
         return callback(err);
       }
-
-      log('[DeviceStateService][update] connected to redis, running update sequence');
 
       var count = state_map.length;
 

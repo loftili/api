@@ -36,7 +36,6 @@ module.exports = (function() {
 
     if(!(device_id > 0)) return res.badRequest('');
 
-    log('user['+user_id+'] trying to listen to device['+device_id+']');
 
     function hasPermission(err, permissions) {
       if(err) {
@@ -44,10 +43,13 @@ module.exports = (function() {
         return res.badRequest();
       }
 
-      if(permissions.length < 1) return res.notFound();
+      if(permissions.length < 1) {
+        log('WARN user['+user_id+'] attempted to list to device['+device_id+'] without pemission');
+        return res.notFound();
+      }
 
-      log('user checks out, adding');
       DeviceSockets.users.add(user_id, device_id, req.socket);
+      log('user['+user_id+'] now listening to device['+device_id+']');
     }
 
     Devicepermission.find({device: device_id, user: user_id}).exec(hasPermission);

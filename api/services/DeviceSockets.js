@@ -147,7 +147,6 @@ module.exports = (function() {
     for(i; i < c; i++) device_ids.push(connected[i].device);
 
     i = 0;
-    log('searching for device['+device_id+'] in connected['+device_ids+']');
 
     for(i; i < c; i++) {
       if(connected[i].device === device_id) { d = connected[i]; break; }
@@ -158,9 +157,7 @@ module.exports = (function() {
       return callback('missing device', false);
     }
 
-    log('writing ['+message+'] to device...');
     d.socket.write(message);
-    log('finished.');
     return callback(null, 'ok');
   };
 

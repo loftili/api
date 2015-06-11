@@ -152,7 +152,7 @@ module.exports = (function() {
       }
 
 
-      log('update success');
+      log('device['+device_id+'] successfully updated to state['+JSON.stringify(state_info)+']');
       DeviceSockets.users.broadcast(device_id, 'DEVICE_STATE');
       return res.status(200).send('');
     }
@@ -163,7 +163,6 @@ module.exports = (function() {
         return res.forbidden();
       }
 
-      log('updating device['+device_id+'] to state['+JSON.stringify(state_info)+']');
       DeviceStateService.update(device_id, state_info, finish);
     }
 
