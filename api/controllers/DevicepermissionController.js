@@ -26,7 +26,7 @@ module.exports = (function() {
       }
 
       log('found the permission with current user: [' + current_permission[0].level + ']');
-      if(current_permission[0].level !== DeviceShareService.LEVELS.DEVICE_OWNER) return  res.notFound();
+      if(current_permission[0].level !== DevicePermissionManager.LEVELS.DEVICE_OWNER) return  res.notFound();
       Devicepermission.destroy({id: permission_id}, finish);
     }
 
@@ -95,7 +95,7 @@ module.exports = (function() {
     }
 
     if(!level) return res.badRequest('missing permission level');
-    DeviceShareService.share(params, added);
+    DevicePermissionManager.grant(params, added);
   };
 
   return DevicePermissionController;

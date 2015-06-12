@@ -6,6 +6,7 @@ module.exports = (function() {
   var DeviceStateController = {},
       log = Logger('DeviceStateController');
 
+ 
   DeviceStateController.findOne = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid;
@@ -50,6 +51,30 @@ module.exports = (function() {
 
     Device.findOne(device_id).populate('permissions').exec(foundDevice);
   };
+
+  DeviceStateController.playback = function(req, res) {
+    var device_id = parseInt(req.params.id, 10),
+        playback_state = parseInt(req.body.playback, 10),
+        current_user = parseInt(req.session.userid, 10),
+        valid_playback = playback_state === 0 || playback_state === 1;
+
+    if(!valid_playback) return res.badRequest('invalid playback state [0]');
+
+    function finished(err) {
+      if(err) return res.badRequest('unable to stop device');
+      return res.status(204).send('');
+    }
+
+    function stop() {
+      return DeviceControlService.audio[playback_state ? 'start' : 'stop'](device_id, finished);
+    }
+
+    function canUpdate(can_update) {
+      return can_update ? stop() : res.forbidden();
+    }
+
+    DevicePermissionManager.validate(device_id, current_user, canUpdate);
+  }
 
   DeviceStateController.stream = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
@@ -105,31 +130,17 @@ module.exports = (function() {
       return StreamPermissionManager.is(current_user, stream_id, mask, canUpdate);
     }
 
-    function foundPermissions(err, permissions) {
-      if(err) { 
+    function checkPermission(can_update) {
+      if(!can_update) { 
         log('failed looking up device permissions for state patch: '+err);
         return res.serverError(err);
       }
-
-      if(permissions.length < 0) return res.notFound();
-
-      // checking device permission level
-      var level = permissions[0].level,
-          levels = DeviceShareService.LEVELS,
-          mask = levels.DEVICE_FRIEND | levels.DEVICE_OWNER;
-
-      // invalid device permission level
-      if(!(mask & level)) return res.notFound();
-
       // we're unsubscribing - special case
-      if(stream_id === 0) {
-        return DeviceStateService.subscribe(device_id, 0, finish);
-      }
-          
+      if(stream_id === 0) return DeviceStateService.subscribe(device_id, 0, finish);
       return Stream.findOne(stream_id).exec(foundStream);
     }
 
-    Devicepermission.find({user: current_user, device: device_id}).exec(foundPermissions);
+    DevicePermissionManager.validate(current_user, device_id, checkPermission);
   };
 
   DeviceStateController.update = function(req, res, next) {

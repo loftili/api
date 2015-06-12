@@ -56,10 +56,10 @@ module.exports = (function() {
 
       created_device = device;
 
-      DeviceShareService.share({
+      DevicePermissionManager.grant({
         device: device.id,
         target: user_id,
-        level: DeviceShareService.LEVELS.DEVICE_OWNER,
+        level: DevicePermissionManager.LEVELS.DEVICE_OWNER,
         force: true
       }, finish);
     }
@@ -121,7 +121,7 @@ module.exports = (function() {
       _log('found device, checking permissions');
 
       var allowed = false,
-          LEVELS = DeviceShareService.LEVELS;
+          LEVELS = DevicePermissionManager.LEVELS;
 
       for(var i = 0; i < device.permissions.length; i++) {
         var current = device.permissions[i],
@@ -173,7 +173,7 @@ module.exports = (function() {
 
       var can_destroy = false,
           permissions = device.permissions,
-          levels = DeviceShareService.LEVELS;
+          levels = DevicePermissionManager.LEVELS;
 
       for(var i = 0; i < permissions.length; i++) {
         var permission = permissions[i],

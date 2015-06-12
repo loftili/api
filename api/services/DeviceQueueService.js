@@ -42,7 +42,7 @@ module.exports = (function() {
       }
 
       var permissions = device ? device.permissions : [],
-          levels = DeviceShareService.LEVELS,
+          levels = DevicePermissionManager.LEVELS,
           allowed = false;
 
       for(var i = 0; i < permissions.length; i++) {

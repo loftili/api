@@ -90,7 +90,8 @@ module.exports.routes = {
    * the state (which then gets reported to the device), and
    * PUT is used by the device to report back.
    */
-  'PATCH /devicestates/:id': 'DeviceStateController.stream',
+  'PATCH /devicestates/:id/stream': 'DeviceStateController.stream',
+  'PATCH /devicestates/:id/playback': 'DeviceStateController.playback',
   'PUT /devicestates/:id': 'DeviceStateController.update',
   'GET /devicestates/:id': 'DeviceStateController.findOne',
 

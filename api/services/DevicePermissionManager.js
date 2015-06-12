@@ -2,16 +2,38 @@ var Logger = require('./Logger');
 
 module.exports = (function() {
 
-  var DeviceShareService = { },
+  var DevicePermissionManager = { },
       LEVELS = {
         DEVICE_OWNER: 1,
         DEVICE_FRIEND: (1 << 1)
       },
-      log = Logger('DeviceShareService');
+      log = Logger('DevicePermissionManager');
 
-  DeviceShareService.LEVELS = LEVELS;
+  DevicePermissionManager.LEVELS = LEVELS;
 
-  DeviceShareService.share = function(params, cb) {
+  DevicePermissionManager.validate = function(device, user, cb) {
+    function foundPermissions(err, permissions) {
+      if(err) { 
+        log('failed looking up device permissions for state patch: '+err);
+        return callback(false);
+      }
+
+      if(permissions.length < 0) return cb(true);
+
+      // checking device permission level
+      var level = permissions[0].level,
+          mask = LEVELS.DEVICE_FRIEND | LEVELS.DEVICE_OWNER;
+
+      // invalid device permission level
+      if(!(mask & level)) return cb(false);
+          
+      return cb(true);
+    }
+
+    Devicepermission.find({user: user, device: device}).exec(foundPermissions);
+  }
+
+  DevicePermissionManager.grant = function(params, cb) {
     var device_id = parseInt(params.device, 10),
         target_user = parseInt(params.target, 10),
         level = parseInt(params.level, 10),
@@ -62,6 +84,6 @@ module.exports = (function() {
     }
   };
 
-  return DeviceShareService;
+  return DevicePermissionManager;
 
 })();
