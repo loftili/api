@@ -49,6 +49,11 @@ module.exports = (function() {
         return callback('invalid mp3 data', false);
       }
 
+      if(!tags.title) {
+        log('invalid scout');
+        return callback('missing track title', false);
+      }
+
       upload(file_path, finish);
     }
 
