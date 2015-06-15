@@ -18,7 +18,7 @@ module.exports = (function() {
         return callback(false);
       }
 
-      if(permissions.length < 0) return cb(true);
+      if(permissions.length <= 0) return cb(false);
 
       // checking device permission level
       var level = permissions[0].level,
@@ -30,6 +30,7 @@ module.exports = (function() {
       return cb(true);
     }
 
+    log('SELECT FROM devicepermission WHERE user = '+user+' AND device = '+device+';');
     Devicepermission.find({user: user, device: device}).exec(foundPermissions);
   }
 

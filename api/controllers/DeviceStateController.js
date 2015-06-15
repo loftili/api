@@ -132,15 +132,15 @@ module.exports = (function() {
 
     function checkPermission(can_update) {
       if(!can_update) { 
-        log('failed looking up device permissions for state patch: '+err);
-        return res.serverError(err);
+        log('failed looking up device['+device_id+'] user['+current_user+'] permissions for state patch');
+        return res.forbidden('');
       }
       // we're unsubscribing - special case
       if(stream_id === 0) return DeviceStateService.subscribe(device_id, 0, finish);
       return Stream.findOne(stream_id).exec(foundStream);
     }
 
-    DevicePermissionManager.validate(current_user, device_id, checkPermission);
+    DevicePermissionManager.validate(device_id, current_user, checkPermission);
   };
 
   DeviceStateController.update = function(req, res, next) {
