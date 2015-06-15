@@ -4,7 +4,8 @@ var fs = require('fs'),
     jsftp = require('jsftp'),
     uuid = require('node-uuid'),
     http = require('http'),
-    Logger = require('./Logger');
+    Logger = require('./Logger'),
+    request = require('request');
 
 module.exports = (function() {
 
@@ -61,25 +62,19 @@ module.exports = (function() {
       id3({file: file_path, type: id3.OPEN_LOCAL}, tagged);
     }
 
-    function received() {
-      temp_uuid = uuid.v4();
-      file_path = ['/tmp', temp_uuid].join('/');
-      fs.writeFile(file_path, track_data, written);
+    function received(err, response, body) {
+      if(err) {
+        log('failed scouting: ' + err);
+        return callback(err);
+      }
+
+      written();
     }
 
-    function found(res) {
-      log('succeeded scouting url['+url+']');
-      res.on('data', load);
-      res.on('end', received);
-    }
-
-    function errored() {
-      log('FAILED scouting url['+url+']');
-      callback('failed connecting with scouting party', false);
-    }
-
-    log('scouting url['+url+']');
-    http.get(url, found).on('error', errored);
+    var temp_uuid = uuid.v4();
+    file_path = ['/tmp', temp_uuid].join('/');
+    log('scout starting, saving to: ' + file_path);
+    request.get(url, received).pipe(fs.createWriteStream(file_path));
   }
 
   function upload(local_file_path, callback) {

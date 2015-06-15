@@ -1,8 +1,10 @@
-var atob = require('atob');
+var atob = require('atob'),
+    Logger = require('../services/Logger');
 
 module.exports = (function() {
 
-  var TrackController = {};
+  var TrackController = {},
+      log = Logger('TrackController');
 
   TrackController.findOne = function(req, res) {
     var id = req.params.id;
@@ -24,8 +26,8 @@ module.exports = (function() {
 
     function callback(err, tracks) {
       if(err) {
-        sails.log('[TrackController][search] SQL error:');
-        sails.log(err);
+        log('SQL error:');
+        log(err);
         return res.status(500).send('');
       }
 
@@ -57,13 +59,13 @@ module.exports = (function() {
 
     function finish(err, tracks) {
       if(err) {
-        sails.log('[TrackController][find] errored getting track list: ' + err);
+        log('errored getting track list: ' + err);
         return res.status(404).send('');
       }
       return res.status(200).json(tracks);
     }
 
-    sails.log('[TrackController][find] getting whole list of tracks');
+    log('getting whole list of tracks');
     Track.find().populate('artist').exec(finish);
   };
 
@@ -73,25 +75,26 @@ module.exports = (function() {
 
     function finish(err, found_track) {
       if(err) {
-        sails.log('[TrackController][scout] Error scouting: ['+err+']');
+        log('Error scouting: ['+err+']');
         return res.status(404).send('');
       }
 
       return res.status(200).json(found_track)
     }
 
-    if(url) {
-      var decoded = false;
+    if(!url) return res.badRequest('missing url query parameter');
 
-      try {
-        decoded = atob(url);
-      } catch(e) {
-        sails.log('[TrackController][scout] Error decoding query url: ' + e);
-        return res.status(422).send('');
-      }
-      TrackManagementService.scout(decoded, finish);
-    } else
-      return res.status(404).send('');
+    var decoded = false;
+
+    try {
+      decoded = decodeURI(url);
+    } catch(e) {
+      log('Error decoding query url: ' + e);
+      return res.badRequest('');
+    }
+
+    log('attempting to scout ['+decoded+']');
+    TrackManagementService.scout(decoded, finish);
   };
 
   TrackController.upload = function(req, res) {
@@ -99,21 +102,21 @@ module.exports = (function() {
 
     function finish(err, track) {
       if(err) {
-        sails.log('[TrackController][upload][finish] FAILED adding user to track list: ' + err);
+        log('FAILED adding user to track list: ' + err);
         return res.status(422).send({error: 'UPLOAD_FAIL', summary: err});
       }
 
-      sails.log('[TrackController][upload][finish] finished uploading everything');
+      log('finished uploading everything');
       return res.status(201).json(track);
     }
 
     function uploaded(err, created_track) {
       if(err) {
-        sails.log('[TrackController][upload][uploaded] FAILED uploading track: ' + err);
+        log('FAILED uploading track: ' + err);
         return res.status(422).send({error: 'FILE_ERROR', summary: 'could not properly upload file to temporary space'});
       }
 
-      sails.log('[TrackController][upload][uploaded] uploaded track, associating user: ' + user);
+      log('uploaded track, associating user: ' + user);
       created_track.users.add(user);
       created_track.save(finish);
     }
