@@ -18,9 +18,7 @@ module.exports = (function() {
     }
 
     function find() {
-      return StreamPermission.find(query)
-        .populate('user')
-        .populate('stream').exec(foundPermissions);
+      return StreamPermission.find(query).exec(foundPermissions);
     }
 
     if(target_stream > 0) {

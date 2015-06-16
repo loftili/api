@@ -1,18 +1,26 @@
 var bcrypt = require('bcrypt'),
     crypto = require('crypto');
 
-module.exports = {
+module.exports = (function() {
 
-  writable: [
+  var User = {};
+
+  User.writable = [
     'email', 
     'password', 
     'first_name', 
     'last_name', 
     'privacy_level', 
     'username'
-  ],
+  ];
 
-  attributes: {
+  User.public_read = [
+    'gravatar_url',
+    'id',
+    'username'
+  ];
+
+  User.attributes = {
 
     email: {
       type: 'string',
@@ -81,9 +89,9 @@ module.exports = {
       return obj;
     }
 
-  },
+  };
 
-  beforeCreate: function(values, cb) {
+  User.beforeCreate = function(values, cb) {
     function finish(err, ok) {
       if(err)
         cb(err);
@@ -98,7 +106,9 @@ module.exports = {
       values.username = (values.username+'').toLowerCase();
 
     HashService(values, 'password', finish);
-  }
+  };
 
-};
+  return User;
+
+})();
 

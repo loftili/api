@@ -25,12 +25,16 @@ module.exports.routes = {
   'DELETE /clienttokens/:id': 'ClientTokenController.destroy',
 
   /* User information*/
-  'POST /users': 'UserController.create',
   'GET /users': 'UserController.find',
+  'POST /users': 'UserController.create',
+  'GET /users/:id': 'UserController.findOne',
+  'PUT /users/:id': 'UserController.update',
+
+  // depricated: //
   'GET /users/:id/tracks': 'UserController.tracks',
   'PUT /users/:id/tracks': 'UserController.addTrack',
   'DELETE /users/:id/tracks/:track_id': 'UserController.dropTrack',
-  'PUT /users/:id': 'UserController.update',
+
   'POST /passwordreset': 'UserController.passwordReset',
 
   /* Account Requests */

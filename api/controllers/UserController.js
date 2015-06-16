@@ -1,8 +1,10 @@
-var isAdmin = require('../policies/admin');
+var isAdmin = require('../policies/admin'),
+    Logger = require('../services/Logger');
 
 module.exports = (function() {
 
-  var UserController = {};
+  var UserController = {},
+      log = Logger('UserController');
 
   function to_s(str) { return ['', str].join(''); }
   function lower(str) { return to_s(str).toLowerCase(); }
@@ -18,15 +20,13 @@ module.exports = (function() {
 
     function madeUser(err, user) {
       if(err) {
-        sails.log('[UserController][create] failed creating a user: '+err);
+        log('failed creating a user: '+err);
         return res.status(422).json(err);
       }
 
 
-      sails.log('[UserController][create] createdUser finished, user['+user.id+']');
-
+      log('createdUser finished, user['+user.id+']');
       created_user = user;
-
       UserInvitation.create({invitation: found_invite.id, user: user.id}, finish);
     }
 
@@ -35,24 +35,21 @@ module.exports = (function() {
           is_invited = invite && lower(invite.to) === lower(req.body.email);
 
       if(err) {
-        sails.log('[UserController][create] errored while looking for invitation');
-        return res.status(404).send('');
+        log('errored while looking for invitation');
+        return res.serverError(err);
       }
 
       if(!invite || !is_invited) {
-        sails.log('[UserController][create] attempt without token - req.email['+req.body.email+'] invite['+invite+']');
-        return res.status(401).send('missing token');
+        log('attempt without token - req.email['+req.body.email+'] invite['+invite+']');
+        return res.forbidden();
       }
 
       if(invite.users.length > 0) {
-        sails.log('[UserController][create] token already used');
-        return res.status(401).send('already used');
+        log('token already used');
+        return res.forbidden();
       }
 
-      sails.log('[UserController][create] matched token to attempt, creating');
-
       found_invite = invite;
-
       User.findOrCreate({email: req.body.email}, req.body, madeUser);
     }
 
@@ -62,8 +59,43 @@ module.exports = (function() {
       username: req.body.username,
       token: req.body.token
     };
-    sails.log('[UserController][create] attempting to create a user from request body: '+JSON.stringify(info));
+
+    log('attempting to create a user from request body: '+JSON.stringify(info));
     Invitation.find({token: token}).populate('users').exec(foundToken);
+  };
+
+  UserController.findOne = function(req, res) {
+    var current_user = req.session.userid,
+        target_user = parseInt(req.params.id, 10),
+        is_admin = false;
+
+    if(!(target_user > 0)) return res.badRequest('invalid user id');
+
+    function found(err, user) {
+      if(err) {
+        return res.serverError(err);
+      }
+
+      if(!user) return res.notFound();
+
+      var json = user.toJSON(),
+          result = {};
+
+      if(is_admin) return res.json(user);
+
+      for(var prop in json) {
+        if(User.public_read.indexOf(prop) >= 0) result[prop] = json[prop];
+      }
+
+      return res.json(result);
+    }
+
+    function checkedAdmin(ia) {
+      is_admin = ia;
+      return User.findOne({id: target_user}).exec(found);
+    }
+
+    return isAdmin.check(current_user, checkedAdmin);
   };
 
   UserController.update = function(req, res) {
@@ -72,8 +104,8 @@ module.exports = (function() {
 
     function finished(err, user) {
       if(err) {
-        sails.log('[UserController][update] updating user failed err['+err+']');
-        return res.status(422).send(err);
+        log('updating user failed err['+err+']');
+        return res.badRequest(err);
       }
 
       return res.status(202).send(user);
@@ -100,14 +132,14 @@ module.exports = (function() {
       }
 
       if(updating_password)
-        HashService(user, 'password', save);
-      else
-        save();
+        return HashService(user, 'password', save);
+
+      save();
     }
 
     function found(err, user) {
       if(err) {
-        sails.log('[UserController][tracks] FAILED lookup: ' + err);
+        log('FAILED lookup: ' + err);
         return res.status(404).send('');
       }
 
@@ -117,7 +149,7 @@ module.exports = (function() {
     if(user_id !== session_user)
       return res.status(404).send('');
 
-    sails.log('[UserController][update] updating user['+user_id+'] session['+session_user+']');
+    log('updating user['+user_id+'] session['+session_user+']');
     User.findOne(user_id).exec(found);
   };
 
@@ -131,7 +163,7 @@ module.exports = (function() {
 
     function foundTrack(err, track) {
       if(err) {
-        sails.log('[UserController][addTrack] failed finding track after add');
+        log('failed finding track after add');
         return res.status(404).send('');
       }
 
@@ -140,7 +172,7 @@ module.exports = (function() {
 
     function finish(err, done) {
       if(err) {
-        sails.log('[UserController][addTrack] failed adding track['+track_id+'] err['+err+']');
+        log('failed adding track['+track_id+'] err['+err+']');
         return res.status(404).send('');
       }
 
@@ -149,7 +181,7 @@ module.exports = (function() {
 
     function found(err, user) {
       if(err) {
-        sails.log('[UserController][addTrack] unable to find the user sent via put...');
+        log('unable to find the user sent via put...');
         return res.status(404).send('');
       }
       user.tracks.add(track_id);
@@ -165,7 +197,7 @@ module.exports = (function() {
 
     function found(err, user) {
       if(err) {
-        sails.log('[UserController][tracks] FAILED lookup: ' + err);
+        log('FAILED lookup: ' + err);
         return res.status(404).send('');
       }
 
@@ -175,7 +207,7 @@ module.exports = (function() {
     if(user_id !== session_user)
       return res.status(404).send('');
 
-    sails.log('[UserController][tracks] Looking up tracks for user['+user_id+'] session['+session_user+']');
+    log('Looking up tracks for user['+user_id+'] session['+session_user+']');
     User.findOne({id: user_id}).populate('tracks').exec(found);
   };
 
@@ -245,7 +277,7 @@ module.exports = (function() {
       user.save(finish);
     }
 
-    sails.log('[UserController][dropTrack] Looking up tracks for user['+user_id+'] session['+session_user+']');
+    log('Looking up tracks for user['+user_id+'] session['+session_user+']');
     User.findOne({id: user_id}).populate('tracks').exec(found);
   };
 
