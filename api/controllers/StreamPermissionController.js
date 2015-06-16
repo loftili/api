@@ -80,6 +80,7 @@ module.exports = (function() {
       if(err) return res.badRequest(err);
       if(!permission) return res.notFound();
       if(permission.level === levels.OWNER) return res.badRequest('cannot delete owner permission');
+      if(permission.user === current_user) return destroy();
       StreamPermissionManager.is(current_user, permission.stream, levels.OWNER, destroy);
     }
 
