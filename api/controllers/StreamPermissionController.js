@@ -4,7 +4,8 @@ var Logger = require('../services/Logger'),
 module.exports = (function() {
 
   var StreamPermissionController = {},
-      log = Logger('StreamPermissionController');
+      log = Logger('StreamPermissionController'),
+      transport = sails.config.mail.transport;
 
   StreamPermissionController.find = function(req, res) {
     var target_stream = parseInt(req.query.stream, 10),
@@ -38,11 +39,41 @@ module.exports = (function() {
     var current_user = req.session.userid,
         target_user = parseInt(req.body.user, 10),
         target_stream = parseInt(req.body.stream, 10),
-        levels = StreamPermissionManager.LEVELS;
+        levels = StreamPermissionManager.LEVELS,
+        email_html = null,
+        created_permission = null;
+
+    function finish() {
+      return res.json(created_permission);
+    }
+
+    function sendEmail(err, found_user) {
+      transport.sendMail({
+        from: 'no-reply@loftili.com',
+        to: found_user.email,
+        subject: '[loftili] new stream permission',
+        html: email_html
+      }, finish);
+    }
+
+    function getUser(err, html) {
+      if(err) return res.serverError(err);
+      email_html = html;
+      User.findOne(current_user).exec(sendEmail);
+    }
+
+    function foundStream(err, stream) {
+      if(err) return res.serverError(err);
+      MailCompiler.compile('stream_permission_grant.jade', {
+        stream: stream.title,
+        stream_id: stream.id
+      }, getUser);
+    }
 
     function created(err, permission) {
       if(err) return res.serverError(err);
-      return res.json(permission);
+      created_permission = permission;
+      Stream.findOne(target_stream).exec(foundStream);
     }
 
     function create(err) {
