@@ -86,74 +86,12 @@ module.exports = (function() {
     var track_info = {
           uuid: uuid.v4()
         },
-        ftp = getftp();
+        ftp = getftp(),
+        created_track = null;
 
     function logall(type, data) {
       if(data && data.text && data.code)
         log('['+data.code+']: ' + data.text.replace(/\n/g, ''));
-    }
-
-    function finished(err, created) {
-      if(err) {
-        log('unable to create a new track row: ' + err);
-        return callback(err, false);
-      }
-
-      log('created a new track row successfully');
-      callback(false, created);
-    }
-
-    function associate(err, artist) {
-      if(err) {
-        log('unable to associate track with an artist: ' + err);
-        return callback(err, false);
-      }
-
-      if(artist) {
-        track_info.artist = artist.id;
-        found_artist = artist;
-      }
-
-      log('finsihed finding association for track');
-      Track.create(track_info).exec(finished);
-    }
-
-    function tagged(err, tags) {
-      var cleaned_artist_name;
-
-      if(err)
-        return callback(err, false);
-
-      track_info.title = tags.title ? tags.title.replace(/\0/ig, '') : null;
-      track_info.year = tags.year;
-      track_info.type = 'audio/mp3';
-      log('successfully loaded mp3 tags... title[' +track_info.title+ '] artist['+(tags.artist || '').replace(/\0/ig, '')+']');
-
-      function madeArtist(err, artist) {
-        log('created new artist');
-        track_info.artist = artist;
-        Track.create(track_info).exec(finished);
-      }
-
-      function foundArtist(err, artists) {
-        if(err) return callback(err, false);
-
-        if(artists.length != 1)
-          return Artist.create({name: cleaned_artist_name}).exec(madeArtist);
-
-        log('found existing artist - ['+artists[0].name+'] ['+artists[0].id+']');
-        track_info.artist = artists[0];
-        Track.create(track_info).exec(finished);
-      }
-
-      if(tags.artist) {
-        cleaned_artist_name = tags.artist.replace(/\0/ig, '');
-        log('found artist tag on track - attempting to match with db');
-        return Artist.find({name: cleaned_artist_name}).exec(foundArtist);
-      }
-
-      log('no artist tag on track - just making track');
-      Track.create(track_info).exec(finished);
     }
 
     function uploaded(err) {
@@ -163,8 +101,7 @@ module.exports = (function() {
       }
 
       ftp.destroy();
-      log('track was uploaded to ftp server successfully, checking tags');
-      id3({file: local_file_path, type: id3.OPEN_LOCAL}, tagged);
+      callback(false, created_track);
     }
 
     function read(err, data) {
@@ -173,14 +110,68 @@ module.exports = (function() {
 
       var path = [tracks_home, track_info.uuid].join('/');
 
-      log('file was successfully read, sending via ftp');
-      log('path['+path+'] uuid['+track_info.uuid+']');
+      log('file was successfully read, uploading to path['+path+'] uuid['+track_info.uuid+']');
       ftp.on('jsftp_debug', logall);
       ftp.put(data, path, uploaded);
     }
 
-    log('reading file fd['+local_file_path+']');
-    fs.readFile(local_file_path, read);
+    function finished(err, created) {
+      if(err) {
+        log('unable to create a new track row: ' + err);
+        return callback(err, false);
+      }
+
+      created_track = created;
+      fs.readFile(local_file_path, read);
+    }
+
+    function foundTrack(err, track) {
+      if(err) callback(err, false);
+
+      if(track.length) {
+        log('[TRACK DUPE] already have a track by name of ['+track_info.title+'] in the database, skipping upload');
+        return callback(false, track[0]);
+      }
+
+      Track.create(track_info).exec(finished);
+    }
+
+    function tagged(err, tags) {
+      if(err) return callback(err, false);
+
+      if(!tags.artist || !tags.title) {
+        log('invalid tags - missing track artist or track title');
+        return callback('no artist', false);
+      }
+
+      track_info.title = tags.title.replace(/\0/ig, '');
+      track_info.year = tags.year;
+      track_info.type = 'audio/mp3';
+
+      function madeArtist(err, artist) {
+        log('created new artist['+artist.name+'] id['+artist.id+']');
+        track_info.artist = artist;
+        Track.create(track_info).exec(finished);
+      }
+
+      function foundArtist(err, artists) {
+        if(err) return callback(err, false);
+
+        if(artists.length != 1) {
+          return Artist.create({name: cleaned_artist_name}).exec(madeArtist);
+        }
+
+        log('found existing artist - ['+artists[0].name+'] ['+artists[0].id+'], checking for existing track by name of ['+track_info.title+']');
+        track_info.artist = artists[0];
+        Track.find({title: track_info.title, artist: artists[0].id}).exec(foundTrack);
+      }
+
+      cleaned_artist_name = tags.artist.replace(/\0/ig, '');
+      log('[TRACK TAG] successfully loaded mp3 tags... title[' +track_info.title+ '] artist['+(tags.artist || '').replace(/\0/ig, '')+'] - checking for existing artist');
+      return Artist.find({name: cleaned_artist_name}).exec(foundArtist);
+    }
+
+    id3({file: local_file_path, type: id3.OPEN_LOCAL}, tagged);
   }
 
   function isValid(file) {

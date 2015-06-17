@@ -100,25 +100,13 @@ module.exports = (function() {
   TrackController.upload = function(req, res) {
     var user = req.session.userid;
 
-    function finish(err, track) {
-      if(err) {
-        log('FAILED adding user to track list: ' + err);
-        return res.status(422).send({error: 'UPLOAD_FAIL', summary: err});
-      }
-
-      log('finished uploading everything');
-      return res.status(201).json(track);
-    }
-
     function uploaded(err, created_track) {
       if(err) {
         log('FAILED uploading track: ' + err);
         return res.status(422).send({error: 'FILE_ERROR', summary: 'could not properly upload file to temporary space'});
       }
 
-      log('uploaded track, associating user: ' + user);
-      created_track.users.add(user);
-      created_track.save(finish);
+      return res.status(201).json(created_track);
     }
 
     function callback(err, files) {
