@@ -72,12 +72,6 @@ module.exports = (function() {
       via: 'user'
     },
 
-    tracks: {
-      collection: 'track',
-      via: 'users',
-      dominant: true
-    },
-
     toJSON: function() {
       var obj = this.toObject(),
           email = obj.email,

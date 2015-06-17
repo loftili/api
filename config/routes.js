@@ -143,6 +143,7 @@ module.exports.routes = {
   'PUT /tracks/:id': 'TrackController.update',
   'DELETE /tracks/:id': 'TrackController.destroy',
 
-  /* Tracks */
+  /* Artists */
+  'GET /artists': 'ArtistController.find',
   'GET /artists/:id': 'ArtistController.findOne'
 };

@@ -25,11 +25,6 @@ module.exports = (function() {
       model: 'artist'
     },
 
-    users: {
-      collection: 'user',
-      via: 'tracks'
-    },
-
     toJSON: function() {
       var obj = this.toObject(),
           url_base = process.env['STORAGE_URL'];

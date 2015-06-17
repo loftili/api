@@ -13,15 +13,20 @@ module.exports = (function() {
         serial = body ? body.serial_number : false;
 
     function updatedDevice(err, device) {
-      if(err) return res.badRequest('invalid serial number [2]');
+      if(err) {
+        log('error: ' + err);
+        return res.badRequest('invalid serial number [2]');
+      }
+
       return res.json({token: device.token, device: device.id});
     }
 
     function foundSerial(err, serial_record) {
       if(err) return res.badRequest('invalid serial number [1]');
 
-      if(!serial_record || serial_record.devices.length !== 1)
+      if(!serial_record || serial_record.devices.length !== 1) {
         return res.badRequest('invalid serial number [3]');
+      }
 
       var device = serial_record.devices[0];
       

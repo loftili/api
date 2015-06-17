@@ -1,6 +1,24 @@
+var Logger = require('../services/Logger');
+
 module.exports = (function() {
 
-  var ArtistController = {};
+  var ArtistController = {},
+      log = Logger('ArtistController');
+
+  ArtistController.find = function(req, res) {
+    var q = req.query.q;
+
+    function found(err, artists) {
+      if(err) {
+        log('error looking up artists: ' + err);
+        return res.serverError();
+      }
+
+      return res.json(artists);
+    }
+
+    Artist.find().exec(found);
+  };
 	
   ArtistController.findOne = function(req, res) {
     var id_param = req.params.id,
