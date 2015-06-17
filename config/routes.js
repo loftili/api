@@ -123,7 +123,10 @@ module.exports.routes = {
   'POST /streams': 'StreamController.create',
   'DELETE /streams/:id': 'StreamController.destroy',
   'PUT /streams/:id': 'StreamController.update',
+
   'PUT /streams/:id/queue': 'StreamController.enqueue',
+  'PATCH /streams/:id/queue': 'StreamController.move',
+
   'DELETE /streams/:id/queue/:position': 'StreamController.dequeue',
   'GET /streams/:id': 'StreamController.findOne',
 

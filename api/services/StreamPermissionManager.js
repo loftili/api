@@ -11,8 +11,10 @@ module.exports = (function() {
     function found(err, permissions) {
       if(err) return callback(err);
       if(permissions.length < 1) return callback('missing');
-      var p = permissions[0];
-      return mask & p.level ? callback(false, true) : callback(true);
+      var p = permissions[0],
+          matches = (mask & p.level) > 0;
+
+      return matches ? callback(false, true) : callback(true);
     }
     StreamPermission.find({user: user_id, stream: stream_id}).exec(found);
   };

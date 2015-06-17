@@ -5,6 +5,36 @@ module.exports = (function() {
   var StreamController = {},
       log = Logger('StreamController');
 
+  StreamController.move = function(req, res) {
+    var user = parseInt(req.session.userid, 10),
+        from = parseInt(req.body.from, 10),
+        to = parseInt(req.body.to, 10),
+        stream_id = parseInt(req.params.id, 10),
+        OWNER = StreamPermissionManager.LEVELS.OWNER,
+        CONTRIBUTOR = StreamPermissionManager.LEVELS.CONTRIBUTOR,
+        mask = OWNER | CONTRIBUTOR;
+
+    function canMove(err, can_move) {
+      if(err) {
+        log('unable to move tracks around user['+user+'] stream['+stream_id+']');
+        return res.forbidden();
+      }
+
+      function moved(err, new_queue) {
+        if(err) {
+          log('errored moving: ' + err);
+          return res.badRequest(err);
+        }
+
+        return res.json(new_queue);
+      }
+
+      return StreamManager.move(stream_id, from, to, moved);
+    }
+
+    return StreamPermissionManager.is(user, stream_id, mask, canMove);
+  };
+
   StreamController.dequeue = function(req, res) {
     var user = parseInt(req.session.userid),
         stream = req.params.id,
@@ -52,7 +82,7 @@ module.exports = (function() {
 
     function finished(err, stream_queue) {
       var js = found_stream.toJSON();
-      js.queue = stream_queue.queue;
+      js.queue = stream_queue ? stream_queue.queue : [];
       return res.json(js);
     }
 
@@ -207,7 +237,7 @@ module.exports = (function() {
 
     function foundListing(err, listing) {
       var js = found_stream.toJSON();
-      js.queue = listing.queue;
+      js.queue = listing ? listing.queue : [];
       return res.json(js);
     }
 

@@ -15,11 +15,99 @@ module.exports = (function() {
     return [base, 'tracks'].join(KEY_DELIM);
   }
 
+  StreamManager.move = function(stream_id, from_pos, to_pos, callback) {
+    var client,
+        new_list = [];
+
+    function finish(err, new_list) {
+      client.connection.quit();
+
+      if(err) {
+        log('[MOVING] failed lpushing new list, err['+err+']');
+        return callback('failed making new list!', null);
+      }
+
+      log('[MOVING] finished moving item['+from_pos+'] to['+to_pos+']');
+      return StreamManager.find(stream_id, callback);
+    }
+
+    function reAdd(err) {
+      if(err) {
+        log('[MOVING] failed deleting old track queue ' + err);
+        client.connection.quit();
+        return callback('failed deleting previous key list', null);
+      }
+
+      var keyname = listKey(stream_id),
+          lpush_args = [keyname].concat(new_list.reverse()).concat([finish]);
+
+      if(new_list.length > 0) 
+        client.connection.lpush.apply(client.connection, lpush_args);
+
+      else finish();
+    }
+
+    function foundList(err, list) {
+      var list_length = list.length,
+          valid_from = from_pos >= 0 && from_pos < list_length,
+          valid_to = (to_pos !== from_pos) && (to_pos >= 0) && (to_pos < list_length),
+          to_move = null;
+
+
+      if(!valid_from || !valid_to) {
+        client.connection.quit();
+        return callback('invalid position', null);
+      }
+
+      for(var i = 0; i < list_length; i++) {
+        if(i === from_pos) to_move = list[i];
+      }
+
+      if(to_move === null) {
+        client.connection.quit();
+        return callback('invalid position', null);
+      }
+
+      for(var i = 0; i < list_length; i++) {
+        if(i === from_pos) continue;
+
+        if(i === to_pos && from_pos > to_pos) {
+          new_list.push(to_move);
+        }
+
+        new_list.push(list[i]);
+        
+        if(i === to_pos && from_pos < to_pos) {
+          new_list.push(to_move);
+        }
+      }
+
+      var keyname = listKey(stream_id);
+      log('[MOVING] move['+from_pos+'] to['+to_pos+'] found queue list['+list+'] new list['+new_list+']');
+      client.connection.del(keyname, reAdd);
+    }
+
+    function connected(error) {
+      if(error) {
+        log('failed connecting to the redis server');
+        client.connection.quit();
+        return callback('redis fail');
+      }
+
+      var keyname = listKey(stream_id);
+      client.connection.lrange(keyname, 0, -1, foundList);
+    }
+
+    client = RedisConnection.getClient(connected);
+  };
+
   StreamManager.remove = function(stream_id, item_position, callback) {
     var client,
         new_list = [];
 
     function finish(err, new_list) {
+      client.connection.quit();
+
       if(err) {
         log('failed lpushing new list, err['+err+']');
         return callback('failed making new list!', null);
@@ -32,6 +120,7 @@ module.exports = (function() {
     function reAdd(err) {
       if(err) {
         log('failed getting track queue ' + err);
+        client.connection.quit();
         return callback('failed deleting previous key list', null);
       }
 
@@ -45,11 +134,14 @@ module.exports = (function() {
     function foundList(err, list) {
       if(err) {
         log('failed getting track queue, exiting: ' + err);
+        client.connection.quit();
         return callback('failed list retrieve', null);
       }
 
-      if(!list || item_position > list.length - 1)
+      if(!list || item_position > list.length - 1) {
+        client.connection.quit();
         return callback('invalid position', null);
+      }
 
       var keyname = listKey(stream_id);
 
@@ -121,6 +213,7 @@ module.exports = (function() {
         stream_tracks.push(id);
       }
 
+      log('found track ids for stream['+stream_id+'] - ['+stream_tracks.join(',')+']');
       Track.find().where({id: stream_tracks}).exec(finish);
     }
 
