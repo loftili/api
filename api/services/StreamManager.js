@@ -15,6 +15,31 @@ module.exports = (function() {
     return [base, 'tracks'].join(KEY_DELIM);
   }
 
+  function broadcastChange(stream_id, callback) {
+    var devices = [];
+
+    function found(err, mappings) {
+      if(err) return callback(err);
+      var c = mappings.length;
+
+      if(mappings.length === 0) {
+        log('stream ['+stream_id+'] was changed enough to warrant a change broadcast but had no subscribers');
+        return StreamManager.find(stream_id, callback);
+      }
+
+      for(var i = 0; i < c; i++) {
+        var device_id = mappings[i].device;
+        devices.push(device_id);
+        DeviceControlService.audio.skip(device_id, function(){ });
+      }
+
+      log('broadcasting stream['+stream_id+'] change to: ['+devices.join(',')+']');
+      return StreamManager.find(stream_id, callback);
+    }
+
+    DeviceStreamMapping.find({stream: stream_id}).exec(found);
+  }
+
   StreamManager.move = function(stream_id, from_pos, to_pos, callback) {
     var client,
         new_list = [];
@@ -28,6 +53,10 @@ module.exports = (function() {
       }
 
       log('[MOVING] finished moving item['+from_pos+'] to['+to_pos+']');
+
+      if(from_pos === 0 || to_pos === 0)
+        return broadcastChange(stream_id, callback);
+
       return StreamManager.find(stream_id, callback);
     }
 
