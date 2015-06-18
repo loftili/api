@@ -218,7 +218,7 @@ module.exports = (function() {
         for(var j = 0; j < tracks.length; j++) {
           var track = tracks[j];
           if(track.id === queued_id) {
-            results.push(track);
+            results.push(track.toJSON());
             break;
           }
         }
