@@ -84,13 +84,23 @@ module.exports = (function() {
 
     if(isNaN(stream_id) || stream_id < 0) return res.badRequest('invalid stream id');
 
-    function executed(err) {
+
+    function createdHistory(err, history) {
       if(err) {
         log('unable to execute device command based on stream update: '+err);
         return res.serverError();
       }
 
       return stream_id === 0 ? res.status(204).send('') : res.json(found_stream);
+    }
+
+    function executed(err) {
+      if(err) {
+        log('unable to execute device command based on stream update: '+err);
+        return res.serverError();
+      }
+
+      DeviceStreamHistory.create({device: device_id, stream: stream_id}).exec(createdHistory);
     }
 
     function finish(err) {

@@ -79,7 +79,8 @@ module.exports.routes = {
   /* device history
    * a device's "history" is the list of tracks it has "popped"
    */
-  'GET /devicehistory': 'DeviceHistoryController.find',
+  'GET /history/:id/tracks': 'DeviceTrackHistoryController.find',
+  'GET /history/:id/streams': 'DeviceStreamHistoryController.find',
 
   /* queues 
    * these endpoints are an abstraction of a combination of
@@ -90,7 +91,7 @@ module.exports.routes = {
   'POST /queues/:id/pop': 'QueueController.pop',
 
   /* device states
-   * the brains of the whole this. PATCH is used to change
+   * the brains of the whole operation. PATCH is used to change
    * the state (which then gets reported to the device), and
    * PUT is used by the device to report back.
    */
