@@ -1,19 +1,21 @@
 var btoa = require('btoa'),
     jade = require('jade'),
     path = require('path'),
-    crypto = require('crypto');
+    crypto = require('crypto'),
+    Logger = require('../services/Logger');
 
 module.exports = (function() {
 
   var PasswordResetService = {},
-      transport = sails.config.mail.transport;
+      transport = sails.config.mail.transport,
+      log = Logger('PasswordResetService');
 
   function makeToken(user) {
     var date = new Date(new Date().getTime() + (60 * 60 * 1000)).toISOString(),
         joined = [date, user.username].join(':'),
         token = btoa(joined);
 
-    sails.log("[PasswordResetService] Created token for " + user.username + " date[" + date + "]");
+    log("Created token for " + user.username + " date[" + date + "]");
     return token;
   }
 
@@ -24,7 +26,7 @@ module.exports = (function() {
       if(err)
         return callback(err, false);
       
-      sails.log("[PasswordResetService][finish] completely finished updating user");
+      log("completely finished updating user");
       return callback(false, user);
     }
 
@@ -43,11 +45,11 @@ module.exports = (function() {
       found_user.password = new_password;
       found_user.reset_token = null;
 
-      sails.log("[PasswordResetService][finish] user found, proceeding to update of model");
+      log("user found, proceeding to update of model");
       HashService(found_user, 'password', doSave);
     }
 
-    sails.log("[PasswordResetService][finish] attempting to finish password reset based on: " + reset_token);
+    log("attempting to finish password reset based on: " + reset_token);
     User.findOne({reset_token: reset_token}).exec(found);
   };
 
@@ -57,7 +59,7 @@ module.exports = (function() {
         is_id = parseInt(user_id, 10) > 0;
 
     function sent(err, info) {
-      sails.log("[PasswordResetService] Sent callback | err[" + err + "] info[" + info.response + "]");
+      log("Sent callback | err[" + err + "]");
       callback(err, found_user);
     }
 
@@ -65,8 +67,6 @@ module.exports = (function() {
       if(err) {
         return callback(err, null);
       }
-
-      sails.log("[PasswordResetService] finished compiling, sending");
 
       transport.sendMail({
         from: 'no-reply@loftili.com',
@@ -81,7 +81,6 @@ module.exports = (function() {
         return callback(err, false);
       }
 
-      sails.log("[PasswordResetService] creating html email");
       found_user = user;
 
       MailCompiler.compile('reset_password.jade', {token: user.reset_token}, sendMail);
@@ -89,7 +88,7 @@ module.exports = (function() {
 
     function generated(err, buffer) {
       if(err) {
-        sails.log('[PasswordResetService][reset] failed generating random token err['+err+']');
+        log('failed generating random token err['+err+']');
         return callback('failed token gen', null);
       }
 
