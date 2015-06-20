@@ -59,7 +59,7 @@ module.exports = (function() {
     function getUser(err, html) {
       if(err) return res.serverError(err);
       email_html = html;
-      User.findOne(current_user).exec(sendEmail);
+      User.findOne(target_user).exec(sendEmail);
     }
 
     function foundStream(err, stream) {

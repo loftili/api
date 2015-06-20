@@ -7,7 +7,8 @@ module.exports = (function() {
         DEVICE_OWNER: 1,
         DEVICE_FRIEND: (1 << 1)
       },
-      log = Logger('DevicePermissionManager');
+      log = Logger('DevicePermissionManager'),
+      transport = sails.config.mail.transport;
 
   DevicePermissionManager.LEVELS = LEVELS;
 
@@ -44,15 +45,43 @@ module.exports = (function() {
           device: device_id,
           user: target_user,
           level: level
-        };
+        },
+        created_record = null,
+        device_info = {},
+        email_html = null;
 
-    function finish(err, created) {
+    function finish() {
+      return cb(false, created_record);
+    }
+
+    function sendEmail(err, found_user) {
+      transport.sendMail({
+        from: 'no-reply@loftili.com',
+        to: found_user.email,
+        subject: '[loftili] new device permission',
+        html: email_html
+      }, finish);
+    }
+
+    function getUser(err, html) {
+      if(err) return res.serverError(err);
+      email_html = html;
+      User.findOne(target_user).exec(sendEmail);
+    }
+
+
+    function makeEmail(err, created) {
       if(err) {
         log('totally failed creating device permission');
         log(err);
       }
 
-      cb(err, created);
+      created_record = created;
+
+      MailCompiler.compile('device_permission_grant.jade', {
+        device: device_info.name,
+        device_id: device_info.id
+      }, getUser);
     }
 
     function foundOwner(err, record) {
@@ -66,23 +95,23 @@ module.exports = (function() {
         return cb('not the owner');
       }
 
-      log('found the valid owner during share, good to go, creating ' + JSON.stringify(params));
-      Devicepermission.findOrCreate(params, params, finish);
+      device_info = record[0].device;
+      log('found owner for device['+device_info.id+']');
+      Devicepermission.findOrCreate(params, params, makeEmail);
     }
 
     if(is_forced) {
-      log('forcing level ' + level);
-      log('forcing share of device, ' + JSON.stringify(params));
-      Devicepermission.findOrCreate(params, params, finish);
-    } else {
-      var ownership_params = {
-            user: sharer,
-            level: LEVELS.DEVICE_OWNER
-          };
-
-      log('looking up ownership of device, ' + JSON.stringify(ownership_params));
-      Devicepermission.find(ownership_params, foundOwner);
+      log('forcing level['+level+'] for device['+device_id+']');
+      return Devicepermission.findOrCreate(params, params, finish);
     }
+
+    var ownership_params = {
+          user: sharer,
+          level: LEVELS.DEVICE_OWNER
+        };
+
+    log('looking up ownership of device, ' + JSON.stringify(ownership_params));
+    Devicepermission.find(ownership_params).populate('device').exec(foundOwner);
   };
 
   return DevicePermissionManager;

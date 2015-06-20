@@ -1,0 +1,13 @@
+doctype html
+html(lang="en")
+  head
+    title Loftili device permission
+  body
+    .content
+      .information
+        .title-container
+          h1.title You've been control of a device
+        .details-container
+          p.details The owner of 
+            a.stream-name.blue(href="https://lofti.li/devices/#{device_id}") #{device}
+            |  have added you as a manager of their device.

@@ -83,7 +83,12 @@ module.exports = (function() {
         };
 
     function finish(err, record) {
-      return err ? res.notFound() : res.status(202).json(record);
+      if(err) {
+        log('unable to add ['+user_id+'] as an owner of ['+device_id+']:' + err);
+        return res.badRequest();
+      }
+
+      return res.status(202).json(record);
     }
 
     function populate(record) {
