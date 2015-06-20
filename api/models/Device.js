@@ -47,11 +47,18 @@ module.exports = (function() {
   Device.beforeDestroy = function(criteria, cb) {
     var id = criteria.where.id;
 
+    function destroyMappings(err, mappings) {
+      for(var i = 0; i < mappings.length; i++) {
+        mappings[i].destroy();
+      }
+      cb();
+    }
+
     function destroyPermissions(err, permissions) {
       for(var i = 0; i < permissions.length; i++) {
         permissions[i].destroy();
       }
-      cb();
+      DeviceStreamMapping.find({device: id}).exec(destroyMappings);
     }
 
     Devicepermission.find({device: id}).exec(destroyPermissions);

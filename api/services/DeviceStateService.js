@@ -102,6 +102,11 @@ module.exports = (function() {
         }
       }
 
+      if(!device_mapping) {
+        log('no device mapping found for device['+device_id+'] but the stream had mappings');
+        return DeviceStreamMapping.create({stream: stream_id, device: device_id, alpha: false}).exec(finished);
+      }
+
       // oh shit, we're leaving a stream we're the alpha of, assign a new one
       if(device_mapping.alpha === true) {
         var current_stream = device_mapping.stream;
