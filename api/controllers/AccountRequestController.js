@@ -1,15 +1,37 @@
+var Logger = require('../services/Logger');
+
 module.exports = (function() {
 
-  var AccountRequestController = {};
+  var AccountRequestController = {},
+      transport = sails.config.mail.transport,
+      log = Logger('AccountRequestController');
 
   AccountRequestController.create = function(req, res) {
     var body = req.body,
         email = body.email,
-        has_device = body.has_device || true;
+        has_device = body.has_device || true,
+        created_request = null;
+
+    function finish(err) {
+      return res.json(created_request);
+    }
+
+    function sendEmail(err, html) {
+      transport.sendMail({
+        from: 'no-reply@loftili.com',
+        to: 'support@loftili.com',
+        subject: '[loftili] new account request',
+        html: html
+      }, finish);
+    }
 
     function created(err, request) {
       if(err) return res.badRequest(err);
-      return res.json(request);
+      created_request = request;
+
+      MailCompiler.compile('account_request.jade', {
+        email: email
+      }, sendEmail);
     }
 
     return AccountRequest.create({email: email, has_device: has_device}).exec(created);
