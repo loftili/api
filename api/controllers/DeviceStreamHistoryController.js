@@ -20,7 +20,7 @@ module.exports = (function() {
 
     function hasPermission(has_permission) {
       if(!has_permission) {
-        log('failed getting permisions: ' + err);
+        log('failed getting permision for user['+user_id+'] for device['+device_id+']');
         return res.status(404).send('');
       }
 
