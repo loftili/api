@@ -67,6 +67,10 @@ module.exports = (function() {
       defaultsTo: null
     },
 
+    last_login: {
+      type: 'datetime'
+    },
+
     roles: {
       collection: 'UserRoleMapping',
       via: 'user'

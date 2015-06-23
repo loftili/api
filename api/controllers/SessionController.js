@@ -9,8 +9,7 @@ module.exports = (function()  {
       return res.status(401).send('');
 
     function finish(err, user) {
-      if(err || !user)
-        return res.status(401).send('');
+      if(err || !user) return res.status(401).send('');
 
       return res.json(user);
     }
@@ -28,15 +27,23 @@ module.exports = (function()  {
 
   SessionController.login = function(req, res) {
     var email = req.body.email,
-        password = req.body.password;
+        password = req.body.password,
+        found_user;
+
+    function finish(err, user) {
+      return res.json(found_user);
+    }
 
     function doLogin(user, hash) {
+      found_user = user;
       req.session.userid = user.id;
       req.session.username = user.username;
       req.session.role = user.role;
 
       var active_user = user.toJSON();
-      return res.json(active_user);
+
+      user.last_login = new Date();
+      user.save(finish);
     }
 
     function check(err, user) {
