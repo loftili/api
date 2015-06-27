@@ -19,7 +19,7 @@ module.exports = (function() {
     function sendEmail(err, html) {
       transport.sendMail({
         from: 'no-reply@loftili.com',
-        to: 'support@loftili.com',
+        to: process.env['SUPPORT_EMAIL'] || 'support@loftili.com',
         subject: '[loftili] new account request',
         html: html
       }, finish);

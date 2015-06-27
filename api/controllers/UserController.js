@@ -4,6 +4,7 @@ var isAdmin = require('../policies/admin'),
 module.exports = (function() {
 
   var UserController = {},
+      transport = sails.config.mail.transport,
       log = Logger('UserController');
 
   function to_s(str) { return ['', str].join(''); }
@@ -14,8 +15,24 @@ module.exports = (function() {
         found_invite = null,
         created_user = null;
 
-    function finish() {
+    function respond() {
       return res.status(201).json(created_user);
+    }
+
+    function sendEmail(err, html) {
+      transport.sendMail({
+        from: 'no-reply@loftili.com',
+        to: process.env['SUPPORT_EMAIL'] || 'support@loftili.com',
+        subject: '[loftili] new account',
+        html: html
+      }, respond);
+    }
+
+    function finish() {
+      MailCompiler.compile('new_user.jade', {
+        username: created_user.username,
+        email: created_user.email
+      }, sendEmail);
     }
 
     function madeUser(err, user) {
@@ -27,7 +44,24 @@ module.exports = (function() {
 
       log('createdUser finished, user['+user.id+']');
       created_user = user;
-      UserInvitation.create({invitation: found_invite.id, user: user.id}, finish);
+
+      if(req.body.token)
+        return UserInvitation.create({invitation: found_invite.id, user: user.id}, finish);
+
+      return finish();
+    }
+
+    function foundUser(err, users) {
+      if(err) {
+        log('failed looking up users during create ['+err+']');
+        return res.badRequest();
+      }
+
+      log('duplicate user check returned ['+users.length+'] users');
+
+      if(users.length) return res.badRequest('duplicate');
+
+      User.create(req.body).exec(madeUser);
     }
 
     function foundToken(err, invites) {
@@ -50,18 +84,32 @@ module.exports = (function() {
       }
 
       found_invite = invite;
-      User.findOrCreate({email: req.body.email}, req.body, madeUser);
+
+      User.find().where({
+        or: [{
+          email: req.body.email,
+          username: req.body.username
+        }]
+      }).exec(foundUser);
     }
 
     var info = {
       email: req.body.email,
       password: lower(req.body.password).replace(/.*/gi, '*'),
-      username: req.body.username,
-      token: req.body.token
+      username: req.body.username
     };
 
-    log('attempting to create a user from request body: '+JSON.stringify(info));
-    Invitation.find({token: token}).populate('users').exec(foundToken);
+    if(req.body.token)
+      return Invitation.find({token: token}).populate('users').exec(foundToken);
+
+    log('creating user without a token ['+req.body.email+'] and ['+req.body.username+']');
+    User.find().where({
+      or: [{
+        email: req.body.email
+      }, {
+        username: req.body.username
+      }]
+    }).exec(foundUser);
   };
 
   UserController.findOne = function(req, res) {
