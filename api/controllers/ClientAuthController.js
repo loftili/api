@@ -7,7 +7,8 @@ module.exports = (function() {
         email = body ? body.email : false,
         password = body ? body.password : false,
         client_key = body ? body.client : false,
-        resolved = {};
+        resolved = {},
+        sent = false;
 
     if(!email || !password || !client_key) {
       return res.status(404).send('');
@@ -35,6 +36,8 @@ module.exports = (function() {
       callback = function(err, value) {
         if(err || !value) {
           sails.log('[ClientAuthController] failed authenticating - ['+property+']');
+          if(sent) return;
+          sent = true;
           return res.status(404).send('');
         }
 
