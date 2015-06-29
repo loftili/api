@@ -12,7 +12,7 @@ module.exports = (function() {
     if(!(current_user > 0)) return res.forbidden();
 
     function error(err) {
-      sails._log(err);
+      _log(err);
       res.badRequest('');
     }
 
