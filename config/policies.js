@@ -57,9 +57,7 @@ module.exports.policies = (function() {
   
     QueueController: {
       findOne: ['corsHeaders'],
-      enqueue: ['corsHeaders'],
-      remove: ['corsHeaders'],
-      move: ['corsHeaders'],
+      stream: ['corsHeaders'],
       pop: ['corsHeaders']
     },
 

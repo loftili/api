@@ -26,18 +26,10 @@ module.exports = (function() {
 
     function connected(stream) {
       var h = stream.headers;
-
-      h['Content-Type'] = 'audio/mp3';
-
-      res.writeHead(stream.statusCode, h);
-
-      stream.on('data', function (data) {
-        res.write(data);
-      });
-
-      stream.on('end', function () {
-        res.end();
-      });
+      stream.pause();
+      res.writeHeader(stream.statusCode, stream.headers);
+      stream.pipe(res);
+      stream.resume();
     }
 
     function fail() {
@@ -56,14 +48,16 @@ module.exports = (function() {
         return res.notFound('stream empty');
       }
 
+      req.pause();
 
       var f = stream.queue[0],
           u = f['streaming_url'],
           r = http.get(u, connected);
 
       log('attempting to pipe ['+u+'] to ['+device_id+']');
-
       r.on('error', fail);
+      req.pipe(r);
+      req.resume();
     }
 
     DeviceQueueService.find(device_id, auth_info, finish);
