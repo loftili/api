@@ -5,6 +5,7 @@ var fs = require('fs'),
     uuid = require('node-uuid'),
     http = require('http'),
     Logger = require('./Logger'),
+    Soundcloud = require('./Soundcloud'),
     request = require('request');
 
 module.exports = (function() {
@@ -26,65 +27,10 @@ module.exports = (function() {
     return ftp;
   }
 
-  function scout(url, callback) {
-    var track_data = '',
-        file_path;
-
-    function load(data) {
-      track_data += data;
-    }
-
-    function finish(err, track) {
-      if(err)
-        return callback(err, false)
-
-      log('completely finished scouting, cleaning up track file from local');
-      fs.unlinkSync(file_path);
-      return callback(false, track);
-    }
-
-    function tagged(err, tags) {
-      if(err) {
-        log('invalid mp3 files found on the track: '+err);
-        return callback('invalid mp3 data', false);
-      }
-
-      if(!tags.title) {
-        log('invalid scout');
-        return callback('missing track title', false);
-      }
-
-      upload(file_path, finish);
-    }
-
-    function written(err) {
-      if(err) {
-        log('scout data could not be written to file: '+err);
-        return callback('unable to write scout data to file ['+err+']', false);
-      }
-
-      log('finished downloading and writing, checking tags.');
-      id3({file: file_path, type: id3.OPEN_LOCAL}, tagged);
-    }
-
-    function received(err, response, body) {
-      if(err) {
-        log('failed scouting: ' + err);
-        return callback(err);
-      }
-
-      written();
-    }
-
-    var temp_uuid = uuid.v4();
-    file_path = ['/tmp', temp_uuid].join('/');
-    log('scout starting, saving to: ' + file_path);
-    request.get(url, received).pipe(fs.createWriteStream(file_path));
-  }
-
   function upload(local_file_path, callback) {
     var track_info = {
-          uuid: uuid.v4()
+          uuid: uuid.v4(),
+          provider: 'LF'
         },
         ftp = getftp(),
         created_track = null;
@@ -161,13 +107,16 @@ module.exports = (function() {
           return Artist.create({name: cleaned_artist_name}).exec(madeArtist);
         }
 
-        log('found existing artist - ['+artists[0].name+'] ['+artists[0].id+'], checking for existing track by name of ['+track_info.title+']');
+        log(['found existing artist - ['+artists[0].name+'] ['+artists[0].id+']',
+             'checking for existing track by name of ['+track_info.title+']'].join(', '));
         track_info.artist = artists[0];
         Track.find({title: track_info.title, artist: artists[0].id}).exec(foundTrack);
       }
 
       cleaned_artist_name = tags.artist.replace(/\0/ig, '');
-      log('[TRACK TAG] successfully loaded mp3 tags... title[' +track_info.title+ '] artist['+(tags.artist || '').replace(/\0/ig, '')+'] - checking for existing artist');
+
+      log(['[TRACK TAG] successfully loaded mp3 tags... title[' +track_info.title+ ']',
+          'artist['+(tags.artist || '').replace(/\0/ig, '')+'] - checking for existing artist'].join(', '));
       return Artist.find({name: cleaned_artist_name}).exec(foundArtist);
     }
 
@@ -178,19 +127,129 @@ module.exports = (function() {
     return file && type_test.test(file.type) && name_test.test(file.fd);
   }
 
-  TrackManagementService.scout = function(url, callback) {
-    var has_protocol = url.match(/(https?\:\/\/)?(.*)/),
-        full_url = has_protocol ? [has_protocol[1] ? has_protocol[1] : "http://", has_protocol[2]].join('') : false;
+  TrackManagementService.search = function(query, callback) {
+    var found = false,
+        results = [],
+        errored = false,
+        finished = 0;
 
-    return full_url ? scout(full_url, callback) : callback('invalid url', false);
-  }
+    function finish() {
+      var ids = [],
+          clean = [],
+          c = results.length;
+
+      for(var i = 0; i < c; i++) {
+        var t = results[i];
+        if(ids.indexOf(t.id) >= 0) continue;
+        clean.push(t);
+        ids.push(t.id);
+      }
+
+      function send(err, result) {
+        if(err) return callback(false, clean);
+
+        var b, c;
+
+        try { 
+          b = JSON.parse(result.body);
+        } catch(e) {
+          b = false;
+        }
+
+        if(!b) return callback(false, clean);
+
+        c = b.length;
+        for(var i = 0; i < c; i++) {
+          var t = b[i],
+              tt = Soundcloud.Track.translate(t);
+
+          clean.push(tt);
+        }
+
+        callback(false, clean);
+      }
+
+      Soundcloud.Track.query({
+        q: query
+      }, send);
+    }
+
+    function queriedTracks(err, r) {
+      if(err) {
+        errored = err;
+        return callback(err);
+      }
+
+      results = results.concat(r);
+
+      if(++finished === 2 && !errored)
+        return finish();
+    }
+
+    function queriedArtists(err, r) {
+      if(err) {
+        errored = err;
+        return callback(err);
+      }
+
+      var l = 0,
+          c = r.length;
+
+      for(l; l < c; l++) {
+        var a = r[l];
+        results = results.concat(a.tracks);
+      }
+
+      if(++finished === 2 && !errored)
+        return finish();
+    }
+
+    Track.find({title: {contains: query}}).exec(queriedTracks);
+    Artist.find({name: {contains: query}}).populate('tracks').exec(queriedArtists);
+  };
 
   TrackManagementService.upload = function(file, callback) {
     if(!file.fd)
       return callback('file missing descriptor', false);
     
     return isValid(file) ? upload(file.fd, callback) : callback('invalid file', false);
-  }
+  };
+
+  TrackManagementService.steal = function(provider, pid, callback) {
+    var created_track;
+
+    function created(err, track) {
+      log('finished creating track from['+provider+'] - ['+track.id+']');
+      return callback(err, track);
+    }
+
+    function found(err, response) {
+      var b, p;
+
+      try {
+        b = JSON.parse(response.body);
+      } catch(e) {
+        b = false;
+      }
+
+      if(!b)
+        return callback('dasdsad');
+
+      p = /SC/i.test(provider) ? Soundcloud.Track.translate(b) : false;
+
+      if(!p)
+        return callback('dasdsad');
+
+      delete p['id'];
+      p.uuid = pid;
+      Track.create(p, created);
+    }
+
+    if(/SC/i.test(provider))
+      return Soundcloud.Track.get({id: pid}, found);
+
+    return callback('unknown provider');
+  };
 
   return TrackManagementService;
 

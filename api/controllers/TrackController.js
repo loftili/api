@@ -55,46 +55,21 @@ module.exports = (function() {
   };
 
   TrackController.find = function(req, res, next) {
-    var user_id = req.session.userid;
+    var user_id = req.session.userid,
+        query = req.query.q;
+
+    if(!query) return res.badRequest('missing query (q) parameter');
 
     function finish(err, tracks) {
       if(err) {
         log('errored getting track list: ' + err);
         return res.status(404).send('');
       }
+
       return res.status(200).json(tracks);
     }
 
-    log('getting whole list of tracks');
-    Track.find().populate('artist').exec(finish);
-  };
-
-  TrackController.scout = function(req, res) {
-    var query = req.query,
-        url = query && query.url ? query.url : false;
-
-    function finish(err, found_track) {
-      if(err) {
-        log('Error scouting: ['+err+']');
-        return res.status(404).send('');
-      }
-
-      return res.status(200).json(found_track)
-    }
-
-    if(!url) return res.badRequest('missing url query parameter');
-
-    var decoded = false;
-
-    try {
-      decoded = decodeURI(url);
-    } catch(e) {
-      log('Error decoding query url: ' + e);
-      return res.badRequest('');
-    }
-
-    log('attempting to scout ['+decoded+']');
-    TrackManagementService.scout(decoded, finish);
+    TrackManagementService.search(query, finish);
   };
 
   TrackController.upload = function(req, res) {

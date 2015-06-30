@@ -145,8 +145,11 @@ module.exports = (function() {
         log('failed looking up device['+device_id+'] user['+current_user+'] permissions for state patch');
         return res.forbidden('');
       }
+
       // we're unsubscribing - special case
-      if(stream_id === 0) return DeviceStateService.subscribe(device_id, 0, finish);
+      if(stream_id === 0)
+        return DeviceStateService.subscribe(device_id, 0, finish);
+
       return Stream.findOne(stream_id).exec(foundStream);
     }
 

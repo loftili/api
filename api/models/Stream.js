@@ -18,6 +18,11 @@ module.exports = (function() {
       required: true
     },
 
+    /* stream privacy:
+     * 0: anyone can subscribe, anyone can conribute
+     * 1: anyone can subscribe, contributors can contribute
+     * 2: contributors only
+     */
     privacy: {
       type: 'integer',
       required: true,

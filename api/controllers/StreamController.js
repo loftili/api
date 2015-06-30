@@ -58,7 +58,10 @@ module.exports = (function() {
       if(!stream) return res.notFound();
       found_stream = stream;
 
-      if(stream.privacy === 0) return StreamManager.remove(stream.id, position, finish);
+      // the stream is open to contibuting
+      if(stream.privacy === 0)
+        return StreamManager.remove(stream.id, position, finish);
+
       var permissions = stream.permissions,
           count = permissions.length;
 
@@ -75,7 +78,10 @@ module.exports = (function() {
 
   StreamController.enqueue = function(req, res) {
     var track_id = req.body.track,
+        provider = req.body.provider,
+        provider_id = req.body.pid,
         user = parseInt(req.session.userid),
+        stolen = /SC/i.test(provider) && track_id < 0 && provider_id > 0,
         stream = req.params.id,
         levels = StreamPermissionManager.LEVELS,
         found_stream = null;
@@ -96,17 +102,32 @@ module.exports = (function() {
       if(err) return res.serverError(err);
       if(!stream) return res.notFound();
       found_stream = stream;
-      if(stream.privacy === 0) return Track.findOne(track_id).exec(foundTrack);
+
+      // the stream is open to contibuting
+      if(stream.privacy === 0)
+        return Track.findOne(track_id).exec(foundTrack);
+
       var permissions = stream.permissions,
           count = permissions.length;
 
       for(var i = 0; i < count; i++) {
         var p = permissions[i];
-        if(p.user === user) return Track.findOne(track_id).exec(foundTrack);
+
+        if(p.user === user)
+          return Track.findOne(track_id).exec(foundTrack);
       }
 
-      return res.notFound();
+      return res.forbidden();
     }
+
+    function attempt(err, track) {
+      if(err) return res.badRequest('unable to queue[0]');
+      track_id = track.id;
+      Stream.findOne(stream).populate('permissions').exec(foundStream);
+    }
+
+    if(stolen)
+      return TrackManagementService.steal(provider, provider_id, attempt);
 
     Stream.findOne(stream).populate('permissions').exec(foundStream);
   };

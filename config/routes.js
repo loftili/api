@@ -120,26 +120,29 @@ module.exports.routes = {
   'POST /devicepermissions': 'DevicepermissionController.create',
   'DELETE /devicepermissions/:id': 'DevicepermissionController.destroy',
 
-  /* streams */
+  /* streams 
+   * the lists of tracks that will be played on devices subscribed to them.
+   * devices are subscribed via the:
+   *
+   * PATCH /devicestates/:id/stream
+   *
+   */
   'GET /streams': 'StreamController.find',
   'POST /streams': 'StreamController.create',
+  'GET /streams/:id': 'StreamController.findOne',
   'DELETE /streams/:id': 'StreamController.destroy',
   'PUT /streams/:id': 'StreamController.update',
-
   'PUT /streams/:id/queue': 'StreamController.enqueue',
   'PATCH /streams/:id/queue': 'StreamController.move',
-
   'DELETE /streams/:id/queue/:position': 'StreamController.dequeue',
-  'GET /streams/:id': 'StreamController.findOne',
 
+  /* stream permissions */
   'GET /streampermissions': 'StreamPermissionController.find',
   'POST /streampermissions': 'StreamPermissionController.create',
   'DELETE /streampermissions/:id': 'StreamPermissionController.destroy',
 
   /* Tracks */
   'GET /tracks': 'TrackController.find',
-  'GET /tracks/scout': 'TrackController.scout',
-  'GET /tracks/search': 'TrackController.search',
   'POST /tracks/upload': 'TrackController.upload',
   'GET /tracks/:id': 'TrackController.findOne',
   'PUT /tracks/:id': 'TrackController.update',

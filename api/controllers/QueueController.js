@@ -1,6 +1,7 @@
 var Logger = require('../services/Logger'),
     DeviceAuthentication = require('../services/DeviceAuthentication'),
-    http = require('http');
+    http = require('http'),
+    https = require('https');
 
 module.exports = (function() {
 
@@ -24,8 +25,22 @@ module.exports = (function() {
 
     if(!auth_info) return res.notFound('missing');
 
+    function proxy(url) {
+      var r = (/^https:\/\//i.test(url) ? https : http).get(url, connected);
+      log('attempting to pipe ['+url+'] to ['+device_id+']');
+      r.on('error', fail);
+    }
+
     function connected(stream) {
       var h = stream.headers;
+      log('received status['+stream.statusCode+'] from url');
+
+      if(stream.statusCode > 300 && stream.statusCode < 400) {
+        var location = stream.headers['location'];
+        log('received redirect to ['+location+']');
+        return proxy(location);
+      }
+
       stream.pause();
       res.writeHeader(stream.statusCode, stream.headers);
       stream.pipe(res);
@@ -48,16 +63,11 @@ module.exports = (function() {
         return res.notFound('stream empty');
       }
 
-      req.pause();
-
       var f = stream.queue[0],
-          u = f['streaming_url'],
-          r = http.get(u, connected);
+          u = f.streamUrl();
 
-      log('attempting to pipe ['+u+'] to ['+device_id+']');
-      r.on('error', fail);
-      req.pipe(r);
-      req.resume();
+      log('found track, streaming url['+u+']');
+      proxy(u);
     }
 
     DeviceQueueService.find(device_id, auth_info, finish);
