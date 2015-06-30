@@ -1,5 +1,6 @@
 var Logger = require('../services/Logger'),
-    DeviceAuthentication = require('../services/DeviceAuthentication');
+    DeviceAuthentication = require('../services/DeviceAuthentication'),
+    http = require('http');
 
 module.exports = (function() {
 
@@ -15,6 +16,58 @@ module.exports = (function() {
 
     return user_id > 0 ? {user: user_id} : false;
   }
+
+  QueueController.stream = function(req, res) {
+    var device_id = parseInt(req.params.id, 10),
+        user_id = req.session.userid,
+        auth_info = authInfo(req);
+
+    if(!auth_info) return res.notFound('missing');
+
+    function connected(stream) {
+      var h = stream.headers;
+
+      h['Content-Type'] = 'audio/mp3';
+
+      res.writeHead(stream.statusCode, h);
+
+      stream.on('data', function (data) {
+        res.write(data);
+      });
+
+      stream.on('end', function () {
+        res.end();
+      });
+    }
+
+    function fail() {
+      log('failed getting stream');
+      res.notFound('bad attempt [0]').end();
+    }
+
+    function finish(err, stream) {
+      if(err) return res.badRequest('');
+
+      if(!stream) {
+        return res.notFound('missing [1]');
+      }
+
+      if(!stream.queue || stream.queue.length < 1) {
+        return res.notFound('stream empty');
+      }
+
+
+      var f = stream.queue[0],
+          u = f['streaming_url'],
+          r = http.get(u, connected);
+
+      log('attempting to pipe ['+u+'] to ['+device_id+']');
+
+      r.on('error', fail);
+    }
+
+    DeviceQueueService.find(device_id, auth_info, finish);
+  };
 
   QueueController.findOne = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),

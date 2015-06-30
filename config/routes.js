@@ -89,6 +89,7 @@ module.exports.routes = {
    */
   'GET /queues/:id': 'QueueController.findOne',
   'POST /queues/:id/pop': 'QueueController.pop',
+  'GET /queues/:id/stream': 'QueueController.stream',
 
   /* device states
    * the brains of the whole operation. PATCH is used to change
