@@ -145,70 +145,12 @@ module.exports = (function() {
         ids.push(t.id);
       }
 
-      function send(err, result) {
+      function addSoundcloud(err, soundcloud_tracks) {
         if(err) return callback(false, clean);
-
-        var b, c, l = 0,
-            streamable = [],
-            streamable_count = 0;
-
-        try { 
-          b = JSON.parse(result.body);
-        } catch(e) {
-          b = false;
-        }
-
-        // soundcloud fetch bombed
-        if(!b || !b.length)
-          return callback(false, clean);
-
-        c = b.length;
-
-        function loadOne(err, data) {
-          if(err) 
-            return (++l === streamable_count) ? callback(false, clean) : false;
-
-          var single;
-
-          try { 
-            single = JSON.parse(data.body);
-          } catch(e) {
-            single = false;
-          }
-
-          // we found a lie...
-          if(!single || !single.streamable) {
-            log('soundlcoud lied about track['+single.title+'] id['+single.id+'], which is NOT streamable');
-            return (++l === streamable_count) ? callback(false, clean) : false;
-          }
-
-          single = Soundcloud.Track.translate(single);
-          clean.push(single);
-
-          if(++l === streamable_count)
-            return callback(false, clean);
-        }
-
-        // loop over the returned tracks, storing their ids
-        for(var i = 0; i < c; i++) {
-          var t = b[i];
-
-          if(!t.streamable)
-            continue;
-
-          streamable.push(t.id);
-        }
-
-        streamable_count = streamable.length;
-        
-        // loop over all streamable tracks, fetching their info
-        for(var i = 0; i < streamable_count; i++)
-          Soundcloud.Track.get({id: streamable[i]}, loadOne);
+        callback(false, clean.concat(soundcloud_tracks));
       }
 
-      Soundcloud.Track.query({
-        q: query
-      }, send);
+      Soundcloud.search(query, addSoundcloud);
     }
 
     function queriedTracks(err, r) {
