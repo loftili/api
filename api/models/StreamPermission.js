@@ -1,7 +1,8 @@
 module.exports = (function() {
 
   var StreamPermission = {};
-  StreamPermission.tableName = 'streampermission';
+
+  StreamPermission.tableName = 'stream_user_mapping';
 
   StreamPermission.attributes = {
 

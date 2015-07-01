@@ -3,7 +3,8 @@ module.exports = (function() {
   var UserRoleMapping = {};
 
   UserRoleMapping.identity = 'UserRoleMapping';
-  UserRoleMapping.tableName = 'user_role_users__user_user_roles';
+
+  UserRoleMapping.tableName = 'user_role_user_mapping';
 
   UserRoleMapping.attributes = {
 

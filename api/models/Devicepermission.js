@@ -2,6 +2,8 @@ module.exports = (function() {
 
   var DevicePermission = {};
 
+  DevicePermission.tableName = 'device_user_mapping';
+
   DevicePermission.attributes = {
 
     user: {
