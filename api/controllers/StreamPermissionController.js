@@ -84,7 +84,10 @@ module.exports = (function() {
 
       StreamPermission.findOrCreate({
         stream: target_stream, 
-        user: target_user, 
+        user: target_user
+      }, {
+        stream: target_stream, 
+        user: target_user,
         level: levels.CONTRIBUTOR
       }).exec(created);
     }
