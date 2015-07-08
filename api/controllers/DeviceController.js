@@ -138,10 +138,14 @@ module.exports = (function() {
       }
 
       var updates = {},
-          body = req.body || {};
+          body = req.body || {},
+          dnd = parseInt(body.do_not_disturb, 10);
 
       if(body.name)
         updates.name = body.name;
+
+      if(dnd === 0 || dnd === 1)
+        updates.do_not_disturb = dnd;
 
       Device.update({id: device_id}, updates).exec(finish);
     }
