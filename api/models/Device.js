@@ -31,6 +31,11 @@ module.exports = (function() {
       defaultsTo: true
     },
 
+    do_not_disturb: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
     permissions: {
       collection: 'Devicepermission',
       via: 'device'

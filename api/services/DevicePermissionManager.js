@@ -19,11 +19,17 @@ module.exports = (function() {
         return callback(false);
       }
 
-      if(permissions.length <= 0) return cb(false);
+      // no permission at all, cya!
+      if(permissions.length <= 0) 
+        return cb(false);
 
       // checking device permission level
       var level = permissions[0].level,
-          mask = LEVELS.DEVICE_FRIEND | LEVELS.DEVICE_OWNER;
+          is_dnd = permissions[0].device.do_not_disturb === true,
+          mask = is_dnd ? LEVELS.DEVICE_OWNER : (LEVELS.DEVICE_FRIEND | LEVELS.DEVICE_OWNER);
+
+      if(is_dnd)
+        log('deivce['+device+'] is in do not disturb mode...');
 
       // invalid device permission level
       if(!(mask & level)) return cb(false);
@@ -32,7 +38,10 @@ module.exports = (function() {
     }
 
     log('SELECT FROM devicepermission WHERE user = '+user+' AND device = '+device+';');
-    Devicepermission.find({user: user, device: device}).exec(foundPermissions);
+    Devicepermission.find({
+      user: user, 
+      device: device
+    }).populate('device').exec(foundPermissions);
   }
 
   DevicePermissionManager.grant = function(params, cb) {
