@@ -213,7 +213,7 @@ module.exports = (function() {
     function finish(err, device) {
       if(err) {
         _log('errored finding device: ' + err);
-        return rest.status(404).send('');
+        return res.status(404).send('');
       }
 
       return device ? res.json(device) : res.status(404).send('');
