@@ -9,11 +9,13 @@ module.exports = (function() {
     var device_id = parseInt(req.params.id, 10);
 
     function finish(err, ok) {
-      if(err) return res.badRequest(err);
-      return res.status(202);
+      if(err) 
+        return res.badRequest(err);
+
+      return res.status(202).send('');
     }
 
-    log('attempting to remove device stream ['+device_id+']');
+    log('attempting to remove socket for device['+device_id+']');
     DeviceSockets.remove(device_id, finish);
   };
 

@@ -46,8 +46,8 @@ module.exports = (function() {
     if(f < 0) return callback();
 
     users.splice(f, 1);
-    callback();
     log('successfully removed socket for user: ' + user_id);
+    callback();
   };
 
   DeviceSockets.users.broadcast = function(device_id, message) {
@@ -94,7 +94,9 @@ module.exports = (function() {
 
       function finish() {
         DeviceSockets.users.broadcast(device_id, "DEVICE_DISCONNECTED");
-        if(callback) callback();
+
+        if(callback && typeof(callback) === 'function')
+          callback();
       }
 
       log("removing socket at ["+n+"] and updating state");
@@ -113,7 +115,11 @@ module.exports = (function() {
 
     DeviceStateService.update(device_id, {connected: true}, noop);
     DeviceSockets.users.broadcast(device_id, "DEVICE_CONNECTED");
+
     socket.on('close', remove);
+    socket.on('data', function() {
+      log('received data from someone');
+    });
   };
 
   DeviceSockets.remove = function(device_id, callback) {
@@ -121,18 +127,19 @@ module.exports = (function() {
         c = connected.length,
         f = false;
 
-    console.log(connected);
-
     for(i; i < c; i++) {
-      log(connected[i].device);
-      if(!connected[i] || connected[i].device !== device_id) continue;
+      if(!connected[i] || connected[i].device !== device_id)
+        continue;
+
       f = connected[i];
       break;
     }
 
-    if(!f) return callback('couldnt find matching device socket', false);
+    if(!f)
+      return callback('couldnt find matching device socket', false);
 
     function finish() {
+      log('successfully removed device socket');
       callback(false, true);
     }
 
