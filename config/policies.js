@@ -19,7 +19,6 @@ module.exports.policies = (function() {
     },
 
     DeviceSerialController: {
-      create: admin,
       destroy: admin
     },
 
