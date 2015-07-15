@@ -132,7 +132,12 @@ module.exports = (function() {
 
   StreamManager.remove = function(stream_id, item_position, callback) {
     var client,
-        new_list = [];
+        new_list = [],
+        skipping = false;
+
+    function broadcasted() {
+      return StreamManager.find(stream_id, callback);
+    }
 
     function finish(err, new_list) {
       client.connection.quit();
@@ -142,8 +147,7 @@ module.exports = (function() {
         return callback('failed making new list!', null);
       }
 
-      log('finished removing item['+item_position+'] from stream['+stream_id+']');
-      return StreamManager.find(stream_id, callback);
+      return skipping ? broadcastChange(stream_id, broadcasted) : StreamManager.find(stream_id, callback);
     }
 
     function reAdd(err) {
@@ -156,8 +160,12 @@ module.exports = (function() {
       var keyname = listKey(stream_id),
           lpush_args = [keyname].concat(new_list.reverse()).concat([finish]);
 
-      if(new_list.length > 0) client.connection.lpush.apply(client.connection, lpush_args);
-      else finish();
+      if(new_list.length > 0) {
+        skipping = true;
+        return client.connection.lpush.apply(client.connection, lpush_args);
+      }
+
+      finish();
     }
 
     function foundList(err, list) {
@@ -175,15 +183,10 @@ module.exports = (function() {
       var keyname = listKey(stream_id);
 
       for(var i = 0; i < list.length; i++) {
-        if(i === item_position) {
-          log('skipping item at position['+item_position+']');
-          continue;
-        }
-
+        if(i === item_position) continue;
         new_list.push(list[i]);
       }
 
-      log('BLOWING AWAY OLD. found queue list['+list+'] new list['+new_list+']');
       client.connection.del(keyname, reAdd);
     }
 
@@ -198,7 +201,6 @@ module.exports = (function() {
       client.connection.lrange(keyname, 0, -1, foundList);
     }
 
-    log('attempting to remove item['+item_position+'] from stream['+stream_id+']');
     client = RedisConnection.getClient(connected);
   };
 
