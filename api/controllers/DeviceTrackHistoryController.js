@@ -10,12 +10,25 @@ module.exports = (function() {
         user_id = parseInt(req.session.userid, 10);
 
     function foundHistory(err, history) {
+      var tracks = [];
+
       if(err) {
         log('failed getting history: ' + err);
         return res.serverError(err);
       }
 
-      return res.status(200).json(history);
+      var c = history.length;
+      for(var i = 0; i < c; i++) {
+        var h = history[i].toJSON(),
+            t = h.track;
+
+        if(!t) continue;
+
+        h.track = t.id;
+        tracks.push(h);
+      }
+
+      return res.status(200).json(tracks);
     }
 
     function hasPermission(has_permission) {
@@ -23,7 +36,14 @@ module.exports = (function() {
         log('failed getting permisions: ' + err);
         return res.status(404).send('');
       }
-      DeviceHistory.find({device: device_id}).populate('track').exec(foundHistory);
+
+      DeviceHistory.find({
+        where: {
+          device: device_id
+        },
+        sort: 'createdAt DESC',
+        limit: 20
+      }).populate('track').exec(foundHistory);
     }
 
     if(device_id >= 0 && user_id >= 0) {
