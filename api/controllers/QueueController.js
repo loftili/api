@@ -25,6 +25,11 @@ module.exports = (function() {
 
     if(!auth_info) return res.notFound('missing');
 
+    function fail() {
+      log('failed getting stream');
+      return res.notFound('bad attempt [0]');
+    }
+
     function proxy(url) {
       var r = (/^https:\/\//i.test(url) ? https : http).get(url, connected);
       log('attempting to pipe ['+url+'] to ['+device_id+']');
@@ -47,13 +52,9 @@ module.exports = (function() {
       stream.resume();
     }
 
-    function fail() {
-      log('failed getting stream');
-      res.notFound('bad attempt [0]').end();
-    }
-
     function finish(err, stream) {
-      if(err) return res.badRequest('');
+      if(err)
+        return res.badRequest('');
 
       if(!stream) {
         return res.notFound('missing [1]');
