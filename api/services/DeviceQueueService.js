@@ -115,15 +115,11 @@ module.exports = (function() {
       StreamManager.remove(found_stream.id, 0, removed);
     }
 
-    function madeHistory(err, history) {
-      return found_mapping.alpha ? realPop() : callback(null, target_track);
-    }
-
     function foundMapping(err, mapping) {
       if(err) return callback(err);
       if(!mapping) return callback('no mapping - invalid stream state');
       found_mapping = mapping;
-      return DeviceHistory.create({device: device_id, track: target_track.id}).exec(madeHistory);    
+      return found_mapping.alpha ? realPop() : callback(null, target_track);
     }
 
     function hasStream(err, stream) {
@@ -138,6 +134,7 @@ module.exports = (function() {
       if(err) return callback(err);
       getStream(device_id, hasStream);
     }
+
     validatePermission(device_id, requester, getStreamId);
   };
 

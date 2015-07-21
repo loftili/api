@@ -21,7 +21,8 @@ module.exports = (function() {
   QueueController.stream = function(req, res) {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
-        auth_info = authInfo(req);
+        auth_info = authInfo(req),
+        track_to_play;
 
     if(!auth_info) return res.notFound('missing');
 
@@ -52,6 +53,16 @@ module.exports = (function() {
       stream.resume();
     }
 
+    function startPipe() {
+      var u = track_to_play.streamUrl();
+      proxy(u);
+    }
+
+    function foundDevice(err, device) {
+      if(err) return res.notFound('unable to locate device');
+      return DeviceHistory.create({device: device.id, track: track_to_play.id}).exec(startPipe);
+    }
+
     function finish(err, stream) {
       if(err)
         return res.badRequest('');
@@ -64,11 +75,13 @@ module.exports = (function() {
         return res.notFound('stream empty');
       }
 
-      var f = stream.queue[0],
-          u = f.streamUrl();
+      track_to_play = stream.queue[0];
 
-      log('found track, streaming url['+u+']');
-      proxy(u);
+      // if device is asking, add a history tag 
+      if(auth_info.token && auth_info.serial)
+        return Device.findOne({token: auth_info.token}, foundDevice);
+
+      startPipe();
     }
 
     DeviceQueueService.find(device_id, auth_info, finish);
@@ -124,6 +137,7 @@ module.exports = (function() {
       }
 
       DeviceSockets.users.broadcast(device_id, 'QUEUE_UPDATE');
+
       return res.status(200).json(popped_track);
     }
 
