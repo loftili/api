@@ -161,7 +161,7 @@ module.exports = (function() {
           lpush_args = [keyname].concat(new_list.reverse()).concat([finish]);
 
       if(new_list.length > 0) {
-        skipping = true;
+        skipping = item_position === 0;
         return client.connection.lpush.apply(client.connection, lpush_args);
       }
 
