@@ -66,7 +66,7 @@ module.exports = (function() {
     if(!where_clause.user && !where_clause.device)
       return res.status(404).send('missing parameters');
 
-    Devicepermission.find(where_clause).populate('user').populate('device').exec(found);
+    Devicepermission.find(where_clause).exec(found);
   };
 
 

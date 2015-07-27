@@ -31,7 +31,7 @@ module.exports = (function() {
       return res.status(200).json(tracks);
     }
 
-    function hasPermission(has_permission) {
+    function hasPermission(has_permission, err) {
       if(!has_permission) {
         log('failed getting permisions: ' + err);
         return res.status(404).send('');
