@@ -2,7 +2,7 @@ module.exports.routes = {
 
   'GET /system': 'SystemController.index',
 
-  /* Session */
+  /* session */
   'GET /auth': 'SessionController.index',
   'POST /auth': 'SessionController.login',
   'GET /logout': 'SessionController.logout',
@@ -11,9 +11,13 @@ module.exports.routes = {
   'DELETE /sockets/devices/:id': 'DeviceSocketController.destroy',
   'GET /sockets/devices/:id': 'DeviceSocketController.subscribe',
 
+  /* clients 
+   */
   'GET /clients': 'ClientController.find',
   'POST /clients': 'ClientController.create',
 
+  /* invitations
+   */
   'DELETE /invitations/:id': 'InvitationsController.destroy',
   'GET /invitations': 'InvitationsController.find',
   'POST /invitations': 'InvitationsController.create',
@@ -24,7 +28,8 @@ module.exports.routes = {
   'GET /clienttokens': 'ClientTokenController.find',
   'DELETE /clienttokens/:id': 'ClientTokenController.destroy',
 
-  /* User information*/
+  /* users
+   */
   'GET /users': 'UserController.find',
   'POST /users': 'UserController.create',
   'GET /users/:id': 'UserController.findOne',
@@ -37,20 +42,20 @@ module.exports.routes = {
 
   'POST /passwordreset': 'UserController.passwordReset',
 
-  /* Account Requests */
+  /* account requests
+   */
   'GET /accountrequests': 'AccountRequestController.find',
   'GET /accountrequests/:id': 'AccountRequestController.findOne',
   'POST /accountrequests': 'AccountRequestController.create',
   'DELETE /accountrequests/:id': 'AccountRequestController.destroy',
 
-  /* User Roles */
+  /* user roles
+   */
   'GET /userroles': 'UserRolesController.find',
-
-  /* User Roles Mapping */
   'GET /userrolemapping': 'UserRoleMappingController.find',
 
 
-  /* Device & Device management */
+  /* device & device management */
 
   /* registration
    * used by devices to allocate api tokens
@@ -125,7 +130,6 @@ module.exports.routes = {
    * devices are subscribed via the:
    *
    * PATCH /devicestates/:id/stream
-   *
    */
   'GET /streams': 'StreamController.find',
   'POST /streams': 'StreamController.create',
@@ -141,14 +145,14 @@ module.exports.routes = {
   'POST /streampermissions': 'StreamPermissionController.create',
   'DELETE /streampermissions/:id': 'StreamPermissionController.destroy',
 
-  /* Tracks */
+  /* tracks */
   'GET /tracks': 'TrackController.find',
   'POST /tracks/upload': 'TrackController.upload',
   'GET /tracks/:id': 'TrackController.findOne',
   'PUT /tracks/:id': 'TrackController.update',
   'DELETE /tracks/:id': 'TrackController.destroy',
 
-  /* Artists */
+  /* artists */
   'GET /artists': 'ArtistController.find',
   'GET /artists/:id': 'ArtistController.findOne'
 };
