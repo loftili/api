@@ -45,7 +45,7 @@ module.exports = (function() {
         return res.badRequest();
       }
 
-      if(permissions.length < 1) {
+      if(!permissions || permissions.length < 1) {
         log('WARN user['+user_id+'] attempted to list to device['+device_id+'] without pemission');
         return res.notFound();
       }
@@ -64,7 +64,7 @@ module.exports = (function() {
         device;
 
     function found(err, matching_serials) {
-      if(matching_serials.length !== 1 || matching_serials[0].devices.length !== 1)
+      if(!matching_serials || matching_serials.length !== 1 || matching_serials[0].devices.length !== 1)
         return res.badRequest();
 
       var serial = matching_serials[0];
