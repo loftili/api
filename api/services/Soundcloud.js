@@ -26,7 +26,6 @@ module.exports = (function() {
         };
 
     return Resource(url, mappings, actions, config, query);
-
   })();
 
   Soundcloud.Track.translate = function(track) {

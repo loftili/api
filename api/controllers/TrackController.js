@@ -1,5 +1,8 @@
 var atob = require('atob'),
-    Logger = require('../services/Logger');
+    Logger = require('../services/Logger'),
+    Soundcloud = require('../services/Soundcloud'),
+    TrackStreamer = require('../services/TrackStreamer'),
+    TrackManagementService = require('../services/TrackManagementService');
 
 module.exports = (function() {
 
@@ -17,41 +20,47 @@ module.exports = (function() {
     Track.findOne(id).exec(found);
   };
 
-  TrackController.search = function(req, res) {
+  TrackController.preview = function(req, res) {
     var query = req.query,
-        track_query = query ? (query.q||'').toLowerCase() : false;
+        provider = query.provider,
+        uuid = query.uuid;
 
-    if(!track_query)
-      return res.status(404).send('not found');
+    if(!provider || !uuid) return res.badRequest('must provide the provider and uuid of the track');
 
-    function callback(err, tracks) {
-      if(err) {
-        log('SQL error:');
-        log(err);
-        return res.status(500).send('');
-      }
-
-      var matching = [];
-      for(var i = 0; i < tracks.length; i++) {
-        var track = tracks[i],
-            t_title = track.track_title,
-            a_name = track.artist_name,
-            t_id = track.track_id,
-            artist_match = a_name && (a_name.toLowerCase().indexOf(track_query) >= 0),
-            track_match = t_title && (t_title.toLowerCase().indexOf(track_query) >= 0);
-
-        if(artist_match || track_match)
-          matching.push({id: t_id, title: t_title, artist: {name: a_name}});
-      }
-      
-      return res.status(200).json(matching);
+    function preview(track) {
+      return TrackStreamer.pipe(track, res);
     }
 
-    var selections = 't.id as track_id, t.title as track_title, a.id as artist_id, a.name as artist_name',
-        join = 'left join artist as a on t.artist = a.id',
-        sql_query = ['select', selections, 'from track as t', join].join(' ');
+    function stolen(err, track) {
+      return err ? res.badRequest('unable to create preview [3]') : preview(track);
+    }
 
-    Track.query(sql_query, callback);
+    function steal() {
+      log('stealing track['+uuid+'] for preview...');
+      return TrackManagementService.steal(provider, uuid, stolen);
+    }
+
+    function foundTrack(err, tracks) {
+      var match;
+
+      if(err)
+        return res.badRequest('no matching tracks [0]');
+
+      if(!tracks || tracks.length !== 1)
+        return /sc/i.test(provider) ? steal() : res.badRequest('no matching tracks [1]');
+
+      return preview(tracks[0]);
+    }
+
+    Track.find().where({
+      or: [{
+        uuid: uuid,
+        provider: (provider+'').toUpperCase()
+      }, {
+        id: uuid,
+        provider: (provider+'').toUpperCase()
+      }]
+    }).exec(foundTrack);
   };
 
   TrackController.find = function(req, res, next) {

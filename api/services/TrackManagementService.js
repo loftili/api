@@ -212,12 +212,12 @@ module.exports = (function() {
       }
 
       if(!b)
-        return callback('dasdsad');
+        return callback('unable to translate soundcloud track');
 
       p = /SC/i.test(provider) ? Soundcloud.Track.translate(b) : false;
 
       if(!p)
-        return callback('dasdsad');
+        return callback('unable to translate soundcloud track');
 
       delete p['id'];
       p.uuid = pid;

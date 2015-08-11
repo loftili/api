@@ -148,6 +148,7 @@ module.exports.routes = {
   /* tracks */
   'GET /tracks': 'TrackController.find',
   'POST /tracks/upload': 'TrackController.upload',
+  'GET /tracks/preview': 'TrackController.preview',
   'GET /tracks/:id': 'TrackController.findOne',
   'PUT /tracks/:id': 'TrackController.update',
   'DELETE /tracks/:id': 'TrackController.destroy',

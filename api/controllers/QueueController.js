@@ -26,10 +26,6 @@ module.exports = (function() {
 
     if(!auth_info) return res.notFound('missing');
 
-    function fail() {
-      log('failed getting stream');
-      return res.notFound('bad attempt [0]');
-    }
 
     function proxy(url) {
       var r = (/^https:\/\//i.test(url) ? https : http).get(url, connected);
