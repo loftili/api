@@ -1,6 +1,6 @@
 ![image](https://cloud.githubusercontent.com/assets/1545348/9281373/9adebb96-4292-11e5-8883-2089f1beb23c.png)
 
-The loftili api is the "center-piece" of the loftili platform. It is responsible for maintaining all persistant platform data as well as acting as the bridge between the [ui](https://github.com/loftili/ui) and [ios](https://github.com/loftili/ios) clients. The api is built off the [sailsjs](https://sailsjs.org) mvc framework, but has parted from the framework in several areas:
+The loftili api is the "center-piece" of the loftili platform. It is responsible for maintaining all persistant platform data as well as acting as the bridge between the [core](https://github.com/loftili/core) and [ui](https://github.com/loftili/ui)/[ios](https://github.com/loftili/ios) clients. The api is built off the [sailsjs](https://sailsjs.org) mvc framework, but has parted from the framework in several areas:
 
 1. controllers return only json data (with other formats in the backlog) - no ejs or html views
 2. configuration using [dotenv](https://www.npmjs.com/package/dotenv) instead of the [local.js](http://sailsjs.org/documentation/concepts/configuration/the-local-js-file) configuration file mentioned in the documentation
