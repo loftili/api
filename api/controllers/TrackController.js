@@ -9,6 +9,43 @@ module.exports = (function() {
   var TrackController = {},
       log = Logger('TrackController');
 
+  function getFromProvider(provider, uuid, callback) {
+    function synced(err, track) {
+      return err ? callback('unable to create preview [3]') : callback(false, track);
+    }
+
+    function sync() {
+      log('syncing track['+uuid+'] from['+provider+']');
+      return TrackManagementService.sync(provider, uuid, synced);
+    }
+
+    function foundTrack(err, tracks) {
+      var match;
+
+      if(err)
+        return callback('no matching tracks [0]');
+
+      if(!tracks || tracks.length !== 1)
+        return /sc|lftxs/i.test(provider) ? sync() : callback('no matching tracks [1]');
+
+      return callback(false, tracks[0]);
+    }
+
+    Track.find().where({
+      or: [{
+        pid: uuid,
+        provider: (provider+'').toUpperCase()
+      }, {
+        uuid: uuid,
+        provider: (provider+'').toUpperCase()
+      }, {
+        id: uuid,
+        provider: (provider+'').toUpperCase()
+      }]
+    }).exec(foundTrack);
+
+  }
+
   TrackController.findOne = function(req, res) {
     var id = req.params.id;
 
@@ -20,47 +57,35 @@ module.exports = (function() {
     Track.findOne(id).exec(found);
   };
 
-  TrackController.preview = function(req, res) {
+
+  TrackController.sync = function(req, res) {
     var query = req.query,
         provider = query.provider,
         uuid = query.uuid;
 
-    if(!provider || !uuid) return res.badRequest('must provide the provider and uuid of the track');
+    if(!provider || !uuid)
+      return res.badRequest('must provide the provider and uuid of the track');
 
-    function preview(track) {
-      return TrackStreamer.pipe(track, res);
+    function finish(err, track) {
+      return err ? res.badRequest(err) : res.json(track);
     }
 
-    function stolen(err, track) {
-      return err ? res.badRequest('unable to create preview [3]') : preview(track);
+    getFromProvider(provider, uuid, finish);
+  };
+
+
+  TrackController.preview = function(req, res) {
+    var params = req.params,
+        id = parseInt(params.id);
+
+    if(isNaN(id) || id <= 0)
+      return res.badRequest('must provide the provider and uuid of the track');
+
+    function preview(err, track) {
+      return (err || !track) ? res.badRequest(err) : TrackStreamer.pipe(track, res);
     }
 
-    function steal() {
-      log('stealing track['+uuid+'] for preview...');
-      return TrackManagementService.steal(provider, uuid, stolen);
-    }
-
-    function foundTrack(err, tracks) {
-      var match;
-
-      if(err)
-        return res.badRequest('no matching tracks [0]');
-
-      if(!tracks || tracks.length !== 1)
-        return /sc/i.test(provider) ? steal() : res.badRequest('no matching tracks [1]');
-
-      return preview(tracks[0]);
-    }
-
-    Track.find().where({
-      or: [{
-        uuid: uuid,
-        provider: (provider+'').toUpperCase()
-      }, {
-        id: uuid,
-        provider: (provider+'').toUpperCase()
-      }]
-    }).exec(foundTrack);
+    Track.findOne(id, preview);
   };
 
   TrackController.find = function(req, res, next) {

@@ -6,12 +6,13 @@ var fs = require('fs'),
     http = require('http'),
     Logger = require('./Logger'),
     Soundcloud = require('./Soundcloud'),
+    Lftxs = require('./Lftxs'),
     request = require('request');
 
 module.exports = (function() {
 
   var TrackManagementService = {},
-      type_test = /audio\/(mp3)/,
+      type_test = /audio\/mp3|mpeg/i,
       name_test = /^.*\/(\S+)\.\w+$/,
       tracks_home = process.env['STORAGE_ROOT'],
       found_artist = null,
@@ -113,10 +114,8 @@ module.exports = (function() {
         Track.find({title: track_info.title, artist: artists[0].id}).exec(foundTrack);
       }
 
-      cleaned_artist_name = tags.artist.replace(/\0/ig, '');
-
-      log(['[TRACK TAG] successfully loaded mp3 tags... title[' +track_info.title+ ']',
-          'artist['+(tags.artist || '').replace(/\0/ig, '')+'] - checking for existing artist'].join(', '));
+      cleaned_artist_name = (tags.artist || '').replace(/\0/ig, '');
+      log('[TRACK TAG] title[' +track_info.title+ '] artist['+cleaned_artist_name+']');
       return Artist.find({name: cleaned_artist_name}).exec(foundArtist);
     }
 
@@ -136,7 +135,10 @@ module.exports = (function() {
     function finish() {
       var ids = [],
           clean = [],
-          c = results.length;
+          c = results.length,
+          soundlcoud_results = null,
+          lftxs_results = null,
+          responded = false;
 
       for(var i = 0; i < c; i++) {
         var t = results[i];
@@ -145,12 +147,32 @@ module.exports = (function() {
         ids.push(t.id);
       }
 
+      function respond() {
+        var complete_set = clean.concat(
+          (soundlcoud_results || []), 
+          (lftxs_results || [])
+        );
+        return responded ? false : callback(false, complete_set);
+      }
+
       function addSoundcloud(err, soundcloud_tracks) {
-        if(err) return callback(false, clean);
-        callback(false, clean.concat(soundcloud_tracks));
+        if(err)
+          log('failed searching soundcloud');
+
+        soundlcoud_results = err ? false : soundcloud_tracks;
+        if(lftxs_results !== null) respond();
+      }
+
+      function addLftxs(err, info) {
+        if(err)
+          log('failed searching lftxs ['+err.messge+']');
+
+        lftxs_results = err ? false : info;
+        if(soundlcoud_results !== null) respond();
       }
 
       Soundcloud.search(query, addSoundcloud);
+      Lftxs.search(query, addLftxs);
     }
 
     function queriedTracks(err, r) {
@@ -191,10 +213,10 @@ module.exports = (function() {
     if(!file.fd)
       return callback('file missing descriptor', false);
     
-    return isValid(file) ? upload(file.fd, callback) : callback('invalid file', false);
+    return isValid(file) ? upload(file.fd, callback) : callback('invalid file [pre-test]', false);
   };
 
-  TrackManagementService.steal = function(provider, pid, callback) {
+  TrackManagementService.sync = function(provider, pid, callback) {
     var created_track;
 
     function created(err, track) {
@@ -202,8 +224,8 @@ module.exports = (function() {
       return callback(err, track);
     }
 
-    function found(err, response) {
-      var b, p;
+    function foundSoundcloud(err, response) {
+      var b, p, e;
 
       try {
         b = JSON.parse(response.body);
@@ -214,18 +236,25 @@ module.exports = (function() {
       if(!b)
         return callback('unable to translate soundcloud track');
 
-      p = /SC/i.test(provider) ? Soundcloud.Track.translate(b) : false;
+      p = Soundcloud.Track.translate(b);
 
-      if(!p)
+      if(!p) {
+        log('soundcloud body was not able to translate to track['+response.body+']');
         return callback('unable to translate soundcloud track');
+      }
 
       delete p['id'];
       p.uuid = pid;
       Track.create(p, created);
     }
 
-    if(/SC/i.test(provider))
-      return Soundcloud.Track.get({id: pid}, found);
+    if(/sc/i.test(provider)) {
+      log('syncing from soundcloud!');
+      return Soundcloud.Track.get({id: pid}, foundSoundcloud);
+    }
+
+    if(/lftxs/i.test(provider))
+      return Lftxs.register(pid, callback);
 
     return callback('unknown provider');
   };

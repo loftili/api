@@ -29,16 +29,12 @@ module.exports = (function() {
   })();
 
   Soundcloud.Track.translate = function(track) {
-    var r = {
-          id: -1,
-          title: track.title,
-          provider: 'SC',
-          foundAt: new Date(),
-          year: track.year,
-          pid: track.id
-        };
+    var title = track.title,
+        year = track.year,
+        pid = track.id,
+        valid = title && pid;
 
-    return r;
+    return valid ? {title: title, id: -1, pid: pid, provider: 'SC'} : false;
   };
 
   Soundcloud.search = function(query, callback) {

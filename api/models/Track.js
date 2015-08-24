@@ -10,6 +10,10 @@ module.exports = (function() {
       type: 'string',
     },
 
+    pid: {
+      type: 'string'
+    },
+
     uuid: {
       type: 'string',
       required: true
@@ -37,12 +41,16 @@ module.exports = (function() {
           result = "";
 
       switch(provider) {
+        case "LFTXS":
         case "LF":
           var url_base = process.env['STORAGE_URL'];
           result = [url_base, this.uuid].join('/');
           break;
         case "SC":
           result = Soundcloud.streamUrl(this);
+          break;
+        default:
+          result = false;
           break;
       }
 

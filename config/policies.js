@@ -11,6 +11,10 @@ module.exports.policies = (function() {
       index: []
     },
 
+    TrackController: {
+      upload: ['corsHeaders']
+    },
+
     AccountRequestController: {
       create: ['corsHeaders'],
       find: admin,
