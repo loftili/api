@@ -22,10 +22,15 @@ module.exports = (function() {
     var device_id = parseInt(req.params.id, 10),
         user_id = req.session.userid,
         auth_info = authInfo(req),
+        did_fail = false,
         track_to_play;
 
     if(!auth_info) return res.notFound('missing');
 
+    function fail() {
+      did_fail = true;
+      res.badRequest('unable to proxy');
+    }
 
     function proxy(url) {
       var r = (/^https:\/\//i.test(url) ? https : http).get(url, connected);
@@ -42,6 +47,9 @@ module.exports = (function() {
         log('received redirect to ['+location+']');
         return proxy(location);
       }
+
+      if(did_fail)
+        return false;
 
       stream.pause();
       res.writeHeader(stream.statusCode, stream.headers);
