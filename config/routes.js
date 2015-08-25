@@ -156,5 +156,9 @@ module.exports.routes = {
 
   /* artists */
   'GET /artists': 'ArtistController.find',
-  'GET /artists/:id': 'ArtistController.findOne'
+  'GET /artists/:id': 'ArtistController.findOne',
+
+  /* async operations */
+  'GET /async/:id': 'AsyncController.lookup',
+  'GET /async': 'AsyncController.list'
 };

@@ -2,7 +2,8 @@ var atob = require('atob'),
     Logger = require('../services/Logger'),
     Soundcloud = require('../services/Soundcloud'),
     TrackStreamer = require('../services/TrackStreamer'),
-    TrackManagementService = require('../services/TrackManagementService');
+    TrackManagementService = require('../services/TrackManagementService'),
+    HttpAsync = require('../services/HttpAsync');
 
 module.exports = (function() {
 
@@ -43,7 +44,6 @@ module.exports = (function() {
         provider: (provider+'').toUpperCase()
       }]
     }).exec(foundTrack);
-
   }
 
   TrackController.findOne = function(req, res) {
@@ -57,20 +57,27 @@ module.exports = (function() {
     Track.findOne(id).exec(found);
   };
 
-
   TrackController.sync = function(req, res) {
     var query = req.query,
         provider = query.provider,
-        uuid = query.uuid;
+        uuid = query.uuid,
+        process_id;
 
     if(!provider || !uuid)
       return res.badRequest('must provide the provider and uuid of the track');
 
     function finish(err, track) {
-      return err ? res.badRequest(err) : res.json(track);
+      if(err) {
+        log('failed syncing['+uuid+'] from ['+provider+']');
+        return HttpAsync.finish(process_id, HttpAsync.STATUSES.ERRORED);
+      }
+      
+      return HttpAsync.finish(process_id, HttpAsync.STATUSES.FINISHED);
     }
 
     getFromProvider(provider, uuid, finish);
+
+    process_id = HttpAsync.start(req, res);
   };
 
 

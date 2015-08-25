@@ -15,6 +15,10 @@ module.exports.policies = (function() {
       upload: ['corsHeaders']
     },
 
+    AsyncController: {
+      list: admin
+    },
+
     AccountRequestController: {
       create: ['corsHeaders'],
       find: admin,
