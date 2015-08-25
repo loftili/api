@@ -92,8 +92,13 @@ module.exports = (function() {
     var search_url = [LFTXS_HOME, 'search'].join('/');
 
     function fail(err, response, body) {
-      log('failed lftxs search; body['+body+'], code['+response.statusCode+'] err['+err+']');
-      return callback({message: 'lftxs error', code: response.statusCode});
+      var code = response ? response.statusCode : -1;
+      log('failed lftxs search; body['+body+'], code['+(code)+'] err['+err+']');
+
+      return callback({
+        message: 'lftxs error',
+        code: code
+      });
     }
 
     function receive(err, response, body) {
