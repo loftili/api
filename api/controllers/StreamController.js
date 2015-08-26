@@ -81,7 +81,7 @@ module.exports = (function() {
         provider = req.body.provider,
         provider_id = req.body.pid,
         user = parseInt(req.session.userid),
-        stolen = /SC/i.test(provider) && track_id < 0 && provider_id > 0,
+        needs_sync = /SC|LFTXS/i.test(provider) && track_id < 0 && provider_id,
         stream = req.params.id,
         levels = StreamPermissionManager.LEVELS,
         found_stream = null;
@@ -126,8 +126,11 @@ module.exports = (function() {
       Stream.findOne(stream).populate('permissions').exec(foundStream);
     }
 
-    if(stolen)
-      return TrackManagementService.steal(provider, provider_id, attempt);
+
+    if(needs_sync) {
+      log('attempting to enqueue track needing sync');
+      return TrackManagementService.sync(provider, provider_id, attempt);
+    }
 
     Stream.findOne(stream).populate('permissions').exec(foundStream);
   };
