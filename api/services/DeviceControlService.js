@@ -10,12 +10,7 @@ module.exports = (function() {
 
   function sendRequest(command, device, requestCallback) {
     var message = "CMD " + command;
-
-    function finished(err, state) {
-      return requestCallback(err, state);
-    }
-
-    DeviceSockets.send(message, device, finished);
+    DeviceSockets.send(message, device, requestCallback);
   }
 
   function engine(name) {

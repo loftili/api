@@ -58,10 +58,13 @@ module.exports = (function() {
         current_user = parseInt(req.session.userid, 10),
         valid_playback = playback_state === 0 || playback_state === 1;
 
-    if(!valid_playback) return res.badRequest('invalid playback state [0]');
+    if(!valid_playback)
+      return res.badRequest('invalid playback state [0]');
 
     function finished(err) {
-      if(err) return res.badRequest('unable to stop device');
+      if(err) 
+        return res.badRequest('unable to stop device');
+
       return res.status(204).send('');
     }
 
