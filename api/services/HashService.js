@@ -15,8 +15,7 @@ module.exports = function(object, property, cb) {
   }
 
   if(object[property])
-    doHash();
-  else
-    cb('no property', false);
+    return doHash();
 
+  cb('no property', false);
 };

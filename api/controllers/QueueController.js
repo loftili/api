@@ -1,12 +1,12 @@
-var Logger = require('../services/Logger'),
-    DeviceAuthentication = require('../services/DeviceAuthentication'),
-    http = require('http'),
-    https = require('https');
+var Logger = require("../services/Logger"),
+    DeviceAuthentication = require("../services/DeviceAuthentication"),
+    http = require("http"),
+    https = require("https");
 
 module.exports = (function() {
 
   var QueueController = {},
-      log = Logger('QueueController');
+      log = Logger("QueueController");
 
   function authInfo(req) {
     var user_id = parseInt(req.session.userid, 10),
@@ -25,26 +25,26 @@ module.exports = (function() {
         did_fail = false,
         track_to_play;
 
-    if(!auth_info) return res.notFound('missing');
+    if(!auth_info) return res.notFound("missing");
 
     function fail() {
       did_fail = true;
-      res.badRequest('unable to proxy');
+      res.badRequest("unable to proxy");
     }
 
     function proxy(url) {
       var r = (/^https:\/\//i.test(url) ? https : http).get(url, connected);
-      log('attempting to pipe ['+url+'] to ['+device_id+']');
-      r.on('error', fail);
+      log("attempting to pipe ["+url+"] to ["+device_id+"]");
+      r.on("error", fail);
     }
 
     function connected(stream) {
       var h = stream.headers;
-      log('received status['+stream.statusCode+'] from url');
+      log("received status["+stream.statusCode+"] from url");
 
       if(stream.statusCode > 300 && stream.statusCode < 400) {
-        var location = stream.headers['location'];
-        log('received redirect to ['+location+']');
+        var location = stream.headers["location"];
+        log("received redirect to ["+location+"]");
         return proxy(location);
       }
 
@@ -63,24 +63,28 @@ module.exports = (function() {
     }
 
     function foundDevice(err, device) {
-      if(err) return res.notFound('unable to locate device');
+      if(err) return res.notFound("unable to locate device");
       return DeviceHistory.create({device: device.id, track: track_to_play.id}).exec(startPipe);
     }
 
     function finish(err, stream) {
       if(err)
-        return res.badRequest('');
+        return res.badRequest("");
 
-      if(!stream) {
-        return res.notFound('missing [1]');
-      }
+      if(!stream)
+        return res.notFound("missing [1]");
 
-      if(!stream.queue || stream.queue.length < 1) {
-        return res.notFound('stream empty');
-      }
+      if(!stream.queue || stream.queue.length < 1)
+        return res.notFound("stream empty");
 
       track_to_play = stream.queue[0];
 
+      if(!track_to_play) {
+        log("stream for device["+device_id+"] was empty - no track");
+        return res.notFound("missing [4]");
+      }
+
+      log("found track for stream["+stream.id+"] - track["+track_to_play.title+"]");
       // if device is asking, add a history tag 
       if(auth_info.token && auth_info.serial)
         return Device.findOne({token: auth_info.token}, foundDevice);
@@ -97,21 +101,21 @@ module.exports = (function() {
         auth_info = authInfo(req);
 
     if(!auth_info)
-      return res.notFound('not found [0]');
+      return res.notFound("not found [0]");
 
     function finish(err, stream) {
       if(err) {
-        log('failed getting queue for device['+device_id+']: ' + err);
+        log("failed getting queue for device["+device_id+"]: " + err);
         return res.notFound();
       }
 
       if(!stream) {
-        log('device['+device_id+'] has no stream!');
+        log("device["+device_id+"] has no stream!");
         return res.notFound();
       }
 
       if(!stream.queue || !(stream.queue.length > 0)) {
-        log('device['+device_id+'] has discovered stream['+stream.id+'] is empty!');
+        log("device["+device_id+"] has discovered stream["+stream.id+"] is empty!");
         return res.notFound();
       }
 
@@ -127,20 +131,20 @@ module.exports = (function() {
         auth_info = authInfo(req);
 
     if(!auth_info)
-      return res.notFound('not found [0]');
+      return res.notFound("not found [0]");
 
     function finish(err, popped_track) {
       if(err) {
-        log('failed popping: ' + err);
+        log("failed popping: " + err);
         return res.notFound();
       }
 
       if(!popped_track) {
-        log('nothing left to pop!');
+        log("nothing left to pop!");
         return res.notFound();
       }
 
-      DeviceSockets.users.broadcast(device_id, 'QUEUE_UPDATE');
+      DeviceSockets.users.broadcast(device_id, "QUEUE_UPDATE");
 
       return res.status(200).json(popped_track);
     }

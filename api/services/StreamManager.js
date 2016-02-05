@@ -1,18 +1,18 @@
-var Logger = require('./Logger');
+var Logger = require("./Logger");
 
 module.exports = (function() {
 
   var StreamManager = {},
-      log = Logger('StreamManager'),
-      KEY_DELIM = ':';
+      log = Logger("StreamManager"),
+      KEY_DELIM = ":";
 
   function keyName(stream_id) {
-    return ['stream', stream_id].join(KEY_DELIM);
+    return ["stream", stream_id].join(KEY_DELIM);
   }
 
   function listKey(stream_id) {
     var base = keyName(stream_id);
-    return [base, 'tracks'].join(KEY_DELIM);
+    return [base, "tracks"].join(KEY_DELIM);
   }
 
   function broadcastChange(stream_id, callback) {
@@ -23,7 +23,7 @@ module.exports = (function() {
       var c = mappings.length;
 
       if(mappings.length === 0) {
-        log('stream ['+stream_id+'] was changed enough to warrant a change broadcast but had no subscribers');
+        log("stream ["+stream_id+"] was changed enough to warrant a change broadcast but had no subscribers");
         return StreamManager.find(stream_id, callback);
       }
 
@@ -33,7 +33,7 @@ module.exports = (function() {
         DeviceControlService.audio.skip(device_id, function(){ });
       }
 
-      log('broadcasting stream['+stream_id+'] change to: ['+devices.join(',')+']');
+      log("broadcasting stream["+stream_id+"] change to: ["+devices.join(",")+"]");
       return StreamManager.find(stream_id, callback);
     }
 
@@ -48,11 +48,11 @@ module.exports = (function() {
       client.connection.quit();
 
       if(err) {
-        log('[MOVING] failed lpushing new list, err['+err+']');
-        return callback('failed making new list!', null);
+        log("[MOVING] failed lpushing new list, err["+err+"]");
+        return callback("failed making new list!", null);
       }
 
-      log('[MOVING] finished moving item['+from_pos+'] to['+to_pos+']');
+      log("[MOVING] finished moving item["+from_pos+"] to["+to_pos+"]");
 
       if(from_pos === 0 || to_pos === 0)
         return broadcastChange(stream_id, callback);
@@ -62,9 +62,9 @@ module.exports = (function() {
 
     function reAdd(err) {
       if(err) {
-        log('[MOVING] failed deleting old track queue ' + err);
+        log("[MOVING] failed deleting old track queue " + err);
         client.connection.quit();
-        return callback('failed deleting previous key list', null);
+        return callback("failed deleting previous key list", null);
       }
 
       var keyname = listKey(stream_id),
@@ -85,7 +85,7 @@ module.exports = (function() {
 
       if(!valid_from || !valid_to) {
         client.connection.quit();
-        return callback('invalid position', null);
+        return callback("invalid position", null);
       }
 
       for(var i = 0; i < list_length; i++) {
@@ -94,7 +94,7 @@ module.exports = (function() {
 
       if(to_move === null) {
         client.connection.quit();
-        return callback('invalid position', null);
+        return callback("invalid position", null);
       }
 
       for(var i = 0; i < list_length; i++) {
@@ -112,15 +112,15 @@ module.exports = (function() {
       }
 
       var keyname = listKey(stream_id);
-      log('[MOVING] move['+from_pos+'] to['+to_pos+'] found queue list['+list+'] new list['+new_list+']');
+      log("[MOVING] move["+from_pos+"] to["+to_pos+"] found queue list["+list+"] new list["+new_list+"]");
       client.connection.del(keyname, reAdd);
     }
 
     function connected(error) {
       if(error) {
-        log('failed connecting to the redis server');
+        log("failed connecting to the redis server");
         client.connection.quit();
-        return callback('redis fail');
+        return callback("redis fail");
       }
 
       var keyname = listKey(stream_id);
@@ -143,8 +143,8 @@ module.exports = (function() {
       client.connection.quit();
 
       if(err) {
-        log('failed lpushing new list, err['+err+']');
-        return callback('failed making new list!', null);
+        log("failed lpushing new list, err["+err+"]");
+        return callback("failed making new list!", null);
       }
 
       return skipping ? broadcastChange(stream_id, broadcasted) : StreamManager.find(stream_id, callback);
@@ -152,9 +152,9 @@ module.exports = (function() {
 
     function reAdd(err) {
       if(err) {
-        log('failed getting track queue ' + err);
+        log("failed getting track queue " + err);
         client.connection.quit();
-        return callback('failed deleting previous key list', null);
+        return callback("failed deleting previous key list", null);
       }
 
       var keyname = listKey(stream_id),
@@ -170,14 +170,14 @@ module.exports = (function() {
 
     function foundList(err, list) {
       if(err) {
-        log('failed getting track queue, exiting: ' + err);
+        log("failed getting track queue, exiting: " + err);
         client.connection.quit();
-        return callback('failed list retrieve', null);
+        return callback("failed list retrieve", null);
       }
 
       if(!list || item_position > list.length - 1) {
         client.connection.quit();
-        return callback('invalid position', null);
+        return callback("invalid position", null);
       }
 
       var keyname = listKey(stream_id);
@@ -192,9 +192,9 @@ module.exports = (function() {
 
     function connected(error) {
       if(error) {
-        log('failed connecting to the redis server');
+        log("failed connecting to the redis server");
         client.connection.quit();
-        return callback('redis fail');
+        return callback("redis fail");
       }
 
       var keyname = listKey(stream_id);
@@ -219,10 +219,11 @@ module.exports = (function() {
 
         for(var j = 0; j < tracks.length; j++) {
           var track = tracks[j];
-          if(track.id === queued_id) {
-            results.push(track.toJSON());
-            break;
-          }
+
+          if(track.id !== queued_id) continue;
+
+          results.push(track);
+          break;
         }
       }
 
@@ -231,7 +232,7 @@ module.exports = (function() {
 
     function getTracks(err, values) {
       if(err) {
-        log('failed translating tracks: ' + err);
+        log("failed translating tracks: " + err);
         client.connection.quit();
         return callback(err);
       }
@@ -244,13 +245,13 @@ module.exports = (function() {
         stream_tracks.push(id);
       }
 
-      log('found track ids for stream['+stream_id+'] - ['+stream_tracks.join(',')+']');
+      log("found track ids for stream["+stream_id+"] - ["+stream_tracks.join(",")+"]");
       Track.find().where({id: stream_tracks}).exec(finish);
     }
 
     function connected(err) {
       if(err) {
-        log('failed connecting to redis');
+        log("failed connecting to redis");
         return callback(true);
       }
 
@@ -270,7 +271,7 @@ module.exports = (function() {
 
     function added(err, result) {
       if(err) {
-        log('failed getting queue for ['+stream_id+']' + err);
+        log("failed getting queue for ["+stream_id+"]" + err);
         return callback(err, null)
       }
 
@@ -280,12 +281,12 @@ module.exports = (function() {
 
     function connected(err) {
       if(err) {
-        log('failed connecting to redis');
+        log("failed connecting to redis");
         return callback(true);
       }
 
       var keyname = listKey(stream_id);
-      client.connection.send_command('rpush', [keyname, track_id], added);
+      client.connection.send_command("rpush", [keyname, track_id], added);
     }
 
     client = RedisConnection.getClient(connected);

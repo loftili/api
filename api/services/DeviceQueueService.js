@@ -60,11 +60,11 @@ module.exports = (function() {
       if(allowed)
         return callback(null, device);
 
-      log('permission failed for device[' + device.name + ']');
-      callback('not allowed', null);
+      log("permission failed for device[" + device.name + "]");
+      callback("not allowed", null);
     }
 
-    Device.findOne(device_id).populate('permissions').exec(foundDevice);
+    Device.findOne(device_id).populate("permissions").exec(foundDevice);
   }
 
   function getStream(device_id, callback) {
@@ -73,13 +73,13 @@ module.exports = (function() {
     function foundStream(err, stream) {
       if(err) return callback(err);
       stream.id = stream_id;
+      log(JSON.stringify(stream));
       callback(null, stream);
     }
 
     function gotState(err, state) {
       if(err) return callback(err);
       stream_id = parseInt(state.stream, 10);
-      if(stream_id > 0) log('device['+device_id+'] appears to be connected to a stream, getting stream');
       return stream_id > 0 ? StreamManager.find(stream_id, foundStream) : callback(null, false);
     }
 
