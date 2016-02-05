@@ -1,5 +1,5 @@
-var request = require('request'),
-    lodash = require('lodash');
+var request = require("request"),
+    lodash = require("lodash");
 
 module.exports = (function() {
 
@@ -7,7 +7,7 @@ module.exports = (function() {
         get: { method: "GET" },
         update: { method: "PUT", has_body: true },
         save: { method: "POST", has_body: true },
-        query: { method: 'GET', isArray: true },
+        query: { method: "GET", isArray: true },
         destroy: { method: "DELETE" }
       },
       extend = lodash.extend,
@@ -15,9 +15,9 @@ module.exports = (function() {
 
   function isValidDottedPath(path) {
     var not_null = path != null,
-        not_empty = path !== '',
-        not_prop = path !== 'hasOwnProperty',
-        dot_path = ['.', path].join(''),
+        not_empty = path !== "",
+        not_prop = path !== "hasOwnProperty",
+        dot_path = [".", path].join(""),
         is_member = /^(\.[a-zA-Z_$][0-9a-zA-Z_$]*)+$/.test(dot_path);
 
     return not_null && not_empty && not_prop && is_member;
@@ -30,7 +30,7 @@ module.exports = (function() {
     if(!valid_path)
       return false;
 
-    keys = path.split('.');
+    keys = path.split(".");
     i = 0;
     ii = keys.length;
 
@@ -52,10 +52,10 @@ module.exports = (function() {
       var map = mappings[name],
           extracted = false;
 
-      if(typeof(map) === 'function') {
+      if(typeof(map) === "function") {
         extracted = map(data);
-      } else if(typeof(map) === 'string') {
-        extracted = map.charAt(0) === '@' ? lookupDottedPath(data, map.substr(1)) : map;
+      } else if(typeof(map) === "string") {
+        extracted = map.charAt(0) === "@" ? lookupDottedPath(data, map.substr(1)) : map;
       }
 
       if(extracted)
@@ -72,7 +72,7 @@ module.exports = (function() {
   }
 
   function clearParam(match, leading_slashes, tail) {
-    var has_lead = tail.charAt(0) == '/';
+    var has_lead = tail.charAt(0) == "/";
     return has_lead ? tail : leading_slashes + tail;
   }
 
@@ -81,12 +81,12 @@ module.exports = (function() {
         param_count = splits.length,
         template_params = {},
         i = 0,
-        result = template.replace(/\\:/g, ':');
+        result = template.replace(/\\:/g, ":");
 
     for(i; i < param_count; i++) {
       var param = splits[i];
       
-      if(param === 'hasOwnProperty') continue;
+      if(param === "hasOwnProperty") continue;
 
       var is_param_rgx = new RegExp("(^|[^\\\\]):"+param+"(\\W|$)"),
           is_num = /^\d+$/.test(param);
@@ -104,7 +104,7 @@ module.exports = (function() {
 
           // encoded_val = encodeUriSegment(val),
           replacement_fn, replacement_rgx,
-          additional_params = '';
+          additional_params = "";
 
       if(is_defined && not_null) {
         replacement_fn = replacementFactory(val);
@@ -115,7 +115,7 @@ module.exports = (function() {
       }
 
       result = result.replace(replacement_rgx, replacement_fn);
-      result = result.replace(/\/\.(?=\w+($|\?))/, '.');
+      result = result.replace(/\/\.(?=\w+($|\?))/, ".");
     }
 
     return result;
@@ -135,7 +135,7 @@ module.exports = (function() {
             extracted = [],
             compiled_path = compileUrl(url_template, url_params),
             leftover = {},
-            query_string = '',
+            query_string = "",
             request_config = {
               method: method,
               headers: extend({}, (http_config || {}).headers)
@@ -146,10 +146,10 @@ module.exports = (function() {
         each(extend({}, additional_query, data), function(value, name) {
           if(extracted.indexOf(name) >= 0) return;
           leftover[name] = value;
-          query_string += '&' + [name, value].join('=');
+          query_string += "&" + [name, value].join("=");
         });
 
-        query_string = query_string.replace(/^&/, '');
+        query_string = query_string.replace(/^&/, "");
 
         function finished(err, data) {
           if(err)
@@ -158,7 +158,7 @@ module.exports = (function() {
           callback(null, data);
         }
 
-        request_config.url = has_body ? compiled_path : [compiled_path, query_string].join('?');
+        request_config.url = has_body ? compiled_path : [compiled_path, query_string].join("?");
 
         if(has_body)
           request_config.json = leftover;

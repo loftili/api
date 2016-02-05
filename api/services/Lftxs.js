@@ -1,49 +1,49 @@
-var Logger = require('./Logger'),
-    request = require('request'),
-    crypto = require('crypto');
+var Logger = require("./Logger"),
+    request = require("request"),
+    crypto = require("crypto");
 
 module.exports = (function() {
 
   var Lftxs = {},
-      log = Logger('Soundcloud'),
-      LFTXS_HOME = process.env['LFTXS_HOME'],
-      ID_KEY = process.env['LFTXS_ID_AES_KEY'] || '123456789';
+      log = Logger("Soundcloud"),
+      LFTXS_HOME = process.env["LFTXS_HOME"],
+      ID_KEY = process.env["LFTXS_ID_AES_KEY"] || "123456789";
 
   function getArtistName(data) {
-    var artists = data['Artists'],
-        main = artists.length > 0 ? artists[0]['Artist'] : false;
+    var artists = data["Artists"],
+        main = artists.length > 0 ? artists[0]["Artist"] : false;
 
-    return main ? main['Name'] : false;
+    return main ? main["Name"] : false;
   }
 
   function encryptId(id) {
-    var cipher = crypto.createCipher('aes-128-cbc', ID_KEY),
+    var cipher = crypto.createCipher("aes-128-cbc", ID_KEY),
         id_buffer = new Buffer(id);
 
     return Buffer.concat([
       cipher.update(id_buffer),
       cipher.final()
-    ]).toString('hex');
+    ]).toString("hex");
   };
   
   function decryptId(id) {
-    var cipher = crypto.createDecipher('aes-128-cbc', ID_KEY),
-        id_buffer = new Buffer(id, 'hex');
+    var cipher = crypto.createDecipher("aes-128-cbc", ID_KEY),
+        id_buffer = new Buffer(id, "hex");
 
     return Buffer.concat([
       cipher.update(id_buffer),
       cipher.final()
-    ]).toString('utf8');
+    ]).toString("utf8");
   };
 
   Lftxs.translate = function(data) {
-    var uuid = encryptId(data['Id']),
+    var uuid = encryptId(data["Id"]),
         result = {
-          title: data['Name'],
+          title: data["Name"],
           artist: {
             name: getArtistName(data)
           },
-          provider: 'LFTXS',
+          provider: "LFTXS",
           id: -1,
           foundAt: new Date(),
           pid: uuid,
@@ -55,7 +55,7 @@ module.exports = (function() {
 
   Lftxs.register = function(track_id, callback) {
     var decrypted_id = decryptId(track_id),
-        reg_url = [LFTXS_HOME, decrypted_id, 'register'].join('/');
+        reg_url = [LFTXS_HOME, decrypted_id, "register"].join("/");
 
     function updated(err, data) {
       return callback(err, data ? data[0] : false);
@@ -65,22 +65,22 @@ module.exports = (function() {
       var code = response ? response.statusCode : 999,
           data;
 
-      log('lftxs to register['+decrypted_id+']: code['+code+']');
+      log("lftxs to register["+decrypted_id+"]: code["+code+"]");
 
       if(err)
-        return callback('unable to register');
+        return callback("unable to register");
 
       try {
         data = JSON.parse(body);
       } catch(e) { data = false; }
 
       if(!data)
-        return callback('lftxs registration bad body');
+        return callback("lftxs registration bad body");
 
       Track.update({
         id: data.id
       }, {
-        provider: 'LFTXS',
+        provider: "LFTXS",
         pid: track_id
       }, updated);
     }
@@ -89,14 +89,14 @@ module.exports = (function() {
   }
 
   Lftxs.search = function(query, callback) {
-    var search_url = [LFTXS_HOME, 'search'].join('/');
+    var search_url = [LFTXS_HOME, "search"].join("/");
 
     function fail(err, response, body) {
       var code = response ? response.statusCode : -1;
-      log('failed lftxs search; body['+body+'], code['+(code)+'] err['+err+']');
+      log("failed lftxs search; body["+body+"], code["+(code)+"] err["+err+"]");
 
       return callback({
-        message: 'lftxs error',
+        message: "lftxs error",
         code: code
       });
     }
@@ -109,11 +109,11 @@ module.exports = (function() {
 
       try {
         var data = JSON.parse(body);
-        tracks = data['Tracks'] ? data['Tracks']['Items'] : false;
+        tracks = data["Tracks"] ? data["Tracks"]["Items"] : false;
       } catch(e) { tracks = false; }
 
       if(!tracks) {
-        return callback({messge: 'invalid lftxs body'});
+        return callback({messge: "invalid lftxs body"});
       }
 
       var count = tracks.length;

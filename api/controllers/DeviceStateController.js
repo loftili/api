@@ -1,10 +1,10 @@
-var Logger = require('../services/Logger'),
-    DeviceAuthentication = require('../services/DeviceAuthentication');
+var Logger = require("../services/Logger"),
+    DeviceAuthentication = require("../services/DeviceAuthentication");
 
 module.exports = (function() {
 
   var DeviceStateController = {},
-      log = Logger('DeviceStateController');
+      log = Logger("DeviceStateController");
 
  
   DeviceStateController.findOne = function(req, res, next) {
@@ -27,7 +27,7 @@ module.exports = (function() {
       }
 
       if(!device) {
-        log('unable to find device');
+        log("unable to find device");
         return res.notFound();
       }
 
@@ -45,11 +45,11 @@ module.exports = (function() {
       if(can_check)
         return DeviceStateService.find(device_id, foundState);
 
-      log('user has no right');
+      log("user has no right");
       return res.notFound();
     }
 
-    Device.findOne(device_id).populate('permissions').exec(foundDevice);
+    Device.findOne(device_id).populate("permissions").exec(foundDevice);
   };
 
   DeviceStateController.playback = function(req, res) {
@@ -59,17 +59,17 @@ module.exports = (function() {
         valid_playback = playback_state === 0 || playback_state === 1;
 
     if(!valid_playback)
-      return res.badRequest('invalid playback state [0]');
+      return res.badRequest("invalid playback state [0]");
 
     function finished(err) {
       if(err) 
-        return res.badRequest('unable to stop device');
+        return res.badRequest("unable to stop device");
 
-      return res.status(204).send('');
+      return res.status(204).send("");
     }
 
     function stop() {
-      return DeviceControlService.audio[playback_state ? 'start' : 'stop'](device_id, finished);
+      return DeviceControlService.audio[playback_state ? "start" : "stop"](device_id, finished);
     }
 
     function canUpdate(can_update) {
@@ -85,21 +85,21 @@ module.exports = (function() {
         current_user = parseInt(req.session.userid, 10),
         found_stream = null;
 
-    if(isNaN(stream_id) || stream_id < 0) return res.badRequest('invalid stream id');
+    if(isNaN(stream_id) || stream_id < 0) return res.badRequest("invalid stream id");
 
 
     function createdHistory(err, history) {
       if(err) {
-        log('unable to execute device command based on stream update: '+err);
+        log("unable to execute device command based on stream update: "+err);
         return res.serverError();
       }
 
-      return stream_id === 0 ? res.status(204).send('') : res.json(found_stream);
+      return stream_id === 0 ? res.status(204).send("") : res.json(found_stream);
     }
 
     function executed(err) {
       if(err) {
-        log('unable to execute device command based on stream update: '+err);
+        log("unable to execute device command based on stream update: "+err);
         return res.serverError();
       }
 
@@ -108,7 +108,7 @@ module.exports = (function() {
 
     function finish(err) {
       if(err) {
-        log('unable to update device\'s stream state: ' + err);
+        log("unable to update device\"s stream state: " + err);
         return res.serverError(err);
       }
 
@@ -119,7 +119,7 @@ module.exports = (function() {
 
     function canUpdate(err) {
       if(err) {
-        log('user does not have permission to update device['+device_id+'] to stream['+stream_id+'] err['+err+']');
+        log("user does not have permission to update device["+device_id+"] to stream["+stream_id+"] err["+err+"]");
         return res.notFound();
       }
 
@@ -128,7 +128,7 @@ module.exports = (function() {
 
     function foundStream(err, stream) {
       if(err) {
-        log('failed finding stream to path to: '+err);
+        log("failed finding stream to path to: "+err);
         return res.serverError(err);
       }
 
@@ -145,11 +145,11 @@ module.exports = (function() {
 
     function checkPermission(can_update) {
       if(!can_update) { 
-        log('failed looking up device['+device_id+'] user['+current_user+'] permissions for state patch');
-        return res.forbidden('');
+        log("failed looking up device["+device_id+"] user["+current_user+"] permissions for state patch");
+        return res.forbidden("");
       }
 
-      // we're unsubscribing - special case
+      // we"re unsubscribing - special case
       if(stream_id === 0)
         return DeviceStateService.subscribe(device_id, 0, finish);
 
@@ -165,12 +165,12 @@ module.exports = (function() {
         state_info = req.body;
 
     if(!auth_info) {
-      log('attempt made to update device state without any auth info');
+      log("attempt made to update device state without any auth info");
       return res.forbidden();
     }
  
     if(!state_info)
-      return res.badRequest('no state data');
+      return res.badRequest("no state data");
    
     function finish(err) {
       if(err) {
@@ -179,14 +179,14 @@ module.exports = (function() {
       }
 
 
-      log('device['+device_id+'] successfully updated to state['+JSON.stringify(state_info)+']');
-      DeviceSockets.users.broadcast(device_id, 'DEVICE_STATE');
-      return res.status(200).send('');
+      log("device["+device_id+"] successfully updated to state["+JSON.stringify(state_info)+"]");
+      DeviceSockets.users.broadcast(device_id, "DEVICE_STATE");
+      return res.status(200).send("");
     }
 
     function foundDevice(err, device) {
       if(err || !device) {
-        log('errored or unable to find device - err['+err+']');
+        log("errored or unable to find device - err["+err+"]");
         return res.forbidden();
       }
 

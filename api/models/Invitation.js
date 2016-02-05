@@ -3,29 +3,29 @@ module.exports = {
   attributes: {
 
     from: {
-      model: 'user',
+      model: "user",
       required: true
     },
 
     token: {
-      type: 'string',
+      type: "string",
       required: true,
       size: 10
     },
 
     to: {
-      type: 'email',
+      type: "email",
       required: true
     },
 
     state: {
-      type: 'integer',
+      type: "integer",
       defaultsTo: 0
     },
 
     users: {
-      collection: 'UserInvitation',
-      via: 'invitation'
+      collection: "UserInvitation",
+      via: "invitation"
     }
 
   }

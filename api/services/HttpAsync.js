@@ -1,7 +1,7 @@
-var uuid = require('node-uuid'),
-    lodash = require('lodash'),
+var uuid = require("node-uuid"),
+    lodash = require("lodash"),
     core = {
-      events: require('events')
+      events: require("events")
     };
 
 module.exports = (function() {
@@ -9,9 +9,9 @@ module.exports = (function() {
   var HttpAsync = {},
       registers = [],
       STATUSES = {
-        OPEN: 'OPEN',
-        FINISHED: 'FINISHED',
-        ERRORED: 'ERRORED'
+        OPEN: "OPEN",
+        FINISHED: "FINISHED",
+        ERRORED: "ERRORED"
       };
 
   function lookup(id, callback) {
@@ -28,7 +28,7 @@ module.exports = (function() {
     }
 
     if(!found)
-      return callback('missing');
+      return callback("missing");
 
     return callback(false, found.op);
   }

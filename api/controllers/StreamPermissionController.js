@@ -1,10 +1,10 @@
-var Logger = require('../services/Logger'),
-    isAdmin = require('../policies/admin');
+var Logger = require("../services/Logger"),
+    isAdmin = require("../policies/admin");
 
 module.exports = (function() {
 
   var StreamPermissionController = {},
-      log = Logger('StreamPermissionController'),
+      log = Logger("StreamPermissionController"),
       transport = sails.config.mail.transport;
 
   StreamPermissionController.find = function(req, res) {
@@ -32,7 +32,7 @@ module.exports = (function() {
       return find();
     }
 
-    isAdmin.check(current_user, function(is_admin) { is_admin ? find() : res.badRequest(''); });
+    isAdmin.check(current_user, function(is_admin) { is_admin ? find() : res.badRequest(""); });
   };
 
   StreamPermissionController.create = function(req, res) {
@@ -49,9 +49,9 @@ module.exports = (function() {
 
     function sendEmail(err, found_user) {
       transport.sendMail({
-        from: 'no-reply@loftili.com',
+        from: "no-reply@loftili.com",
         to: found_user.email,
-        subject: '[loftili] new stream permission',
+        subject: "[loftili] new stream permission",
         html: email_html
       }, finish);
     }
@@ -64,7 +64,7 @@ module.exports = (function() {
 
     function foundStream(err, stream) {
       if(err) return res.serverError(err);
-      MailCompiler.compile('stream_permission_grant.jade', {
+      MailCompiler.compile("stream_permission_grant.jade", {
         stream: stream.title,
         stream_id: stream.id
       }, getUser);
@@ -78,7 +78,7 @@ module.exports = (function() {
 
     function create(err) {
       if(err) {
-        log('unable to create new permission, mask did not check out');
+        log("unable to create new permission, mask did not check out");
         return res.badRequest(err);
       }
 
@@ -102,7 +102,7 @@ module.exports = (function() {
 
     function destroyed(err) {
       if(err) return res.serverError();
-      return res.status(200).send('');
+      return res.status(200).send("");
     }
 
     function destroy(err) {
@@ -113,7 +113,7 @@ module.exports = (function() {
     function foundPermission(err, permission) {
       if(err) return res.badRequest(err);
       if(!permission) return res.notFound();
-      if(permission.level === levels.OWNER) return res.badRequest('cannot delete owner permission');
+      if(permission.level === levels.OWNER) return res.badRequest("cannot delete owner permission");
       if(permission.user === current_user) return destroy();
       StreamPermissionManager.is(current_user, permission.stream, levels.OWNER, destroy);
     }

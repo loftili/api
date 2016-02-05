@@ -1,9 +1,9 @@
-var AWS = require('aws-sdk'),
-    path = require('path');
+var AWS = require("aws-sdk"),
+    path = require("path");
 
 module.exports = (function() {
 
-  var config_file = path.join(__dirname, '..', '..', 'config', 'aws.json'),
+  var config_file = path.join(__dirname, "..", "..", "config", "aws.json"),
       config = require(config_file);
  
   AWS.config.loadFromPath(config_file);
@@ -18,7 +18,7 @@ module.exports = (function() {
             Body: data
           };
 
-      sails.log.info('uploading to amazon: ' + path);
+      sails.log.info("uploading to amazon: " + path);
 
       function finish(err, data) {
         if(err)

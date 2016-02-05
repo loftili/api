@@ -1,18 +1,18 @@
-var HttpAsync = require('../services/HttpAsync'),
-    Logger = require('../services/Logger');
+var HttpAsync = require("../services/HttpAsync"),
+    Logger = require("../services/Logger");
 
 module.exports = (function() {
 
   var AsyncController = {},
-      log = Logger('AsyncController');
+      log = Logger("AsyncController");
 
   AsyncController.lookup = function(req, res) {
     var id = req.params.id;
 
     function finish(err, op) {
       if(!op) {
-        log('operation not found['+id+']');
-        return res.notFound('no operation found');
+        log("operation not found["+id+"]");
+        return res.notFound("no operation found");
       }
 
       res.json({

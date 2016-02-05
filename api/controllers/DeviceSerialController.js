@@ -1,12 +1,12 @@
-var crypto = require('crypto'),
-    isAdmin = require('../policies/admin');
+var crypto = require("crypto"),
+    isAdmin = require("../policies/admin");
 
 module.exports = (function() {
 
   var DeviceSerialController = {};
 
   function log(msg) {
-    sails.log('[DeviceSerialController]['+new Date()+'] ' + msg);
+    sails.log("[DeviceSerialController]["+new Date()+"] " + msg);
   }
 
   DeviceSerialController.findOne = function(req, res) {
@@ -17,7 +17,7 @@ module.exports = (function() {
       return serial ? res.json(serial) : res.notFound();
     }
 
-    return DeviceSerial.findOne({id: id}).populate('devices').exec(found);
+    return DeviceSerial.findOne({id: id}).populate("devices").exec(found);
   };
 
   DeviceSerialController.destroy = function(req, res) {
@@ -25,7 +25,7 @@ module.exports = (function() {
 
     function destroyed(err) {
       if(err) return res.serverError(err);
-      return res.status(200).send('');
+      return res.status(200).send("");
     }
 
     function found(err, serial) {
@@ -33,8 +33,8 @@ module.exports = (function() {
       return serial ? serial.destroy(destroyed) : res.notFound();
     }
 
-    log('destroying ['+id+']');
-    return DeviceSerial.findOne({id: id}).populate('devices').exec(found);
+    log("destroying ["+id+"]");
+    return DeviceSerial.findOne({id: id}).populate("devices").exec(found);
   };
 
   DeviceSerialController.find = function(req, res) {
@@ -71,10 +71,10 @@ module.exports = (function() {
     }
 
     if(device_id > 0)
-      return DeviceSerial.find().populate('devices', {id: device_id}).exec(found);
+      return DeviceSerial.find().populate("devices", {id: device_id}).exec(found);
 
     function getAll() {
-      return DeviceSerial.find().populate('devices').exec(found);
+      return DeviceSerial.find().populate("devices").exec(found);
     }
 
     return isAdmin(req, res, getAll);
@@ -96,7 +96,7 @@ module.exports = (function() {
     function auto() {
       function generated(err, buf) {
         if(err) return res.serverError(err);
-        number = buf.toString('hex').substr(0,40);
+        number = buf.toString("hex").substr(0,40);
         create();
       }
       crypto.randomBytes(40, generated);

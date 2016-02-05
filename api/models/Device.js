@@ -5,45 +5,45 @@ module.exports = (function() {
   Device.attributes = {
 
     name: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     registered_name: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     serial_number: {
-      model: 'DeviceSerial'
+      model: "DeviceSerial"
     },
 
     last_checked: {
-      type: 'datetime'
+      type: "datetime"
     },
 
     token: {
-      type: 'string'
+      type: "string"
     },
 
     loop_flag: {
-      type: 'boolean',
+      type: "boolean",
       defaultsTo: true
     },
 
     do_not_disturb: {
-      type: 'boolean',
+      type: "boolean",
       defaultsTo: false
     },
 
     permissions: {
-      collection: 'Devicepermission',
-      via: 'device'
+      collection: "DevicePermission",
+      via: "device"
     },
 
     toJSON: function() {
       var obj = this.toObject();
-      delete obj['token'];
+      delete obj["token"];
       return obj;
     }
 
@@ -66,7 +66,7 @@ module.exports = (function() {
       DeviceStreamMapping.find({device: id}).exec(destroyMappings);
     }
 
-    Devicepermission.find({device: id}).exec(destroyPermissions);
+    DevicePermission.find({device: id}).exec(destroyPermissions);
   };
 
   return Device;

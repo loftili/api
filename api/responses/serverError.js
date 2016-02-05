@@ -5,9 +5,9 @@ module.exports = (function() {
         res = this.res;
 
     if(data)
-      sails.log('[response][serverError] data['+data+']');
+      sails.log("[response][serverError] data["+data+"]");
 
-    res.status(500).send('server error');
+    res.status(500).send("server error");
   };
 
   return serverError;

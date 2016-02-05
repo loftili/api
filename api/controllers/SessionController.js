@@ -1,4 +1,4 @@
-var bcrypt = require('bcrypt');
+var bcrypt = require("bcrypt");
 
 module.exports = (function()  {
 
@@ -6,15 +6,15 @@ module.exports = (function()  {
 
   SessionController.index = function(req, res) {
     if(!req.session.userid)
-      return res.status(401).send('');
+      return res.status(401).send("");
 
     function finish(err, user) {
-      if(err || !user) return res.status(401).send('');
+      if(err || !user) return res.status(401).send("");
 
       return res.json(user);
     }
 
-    var user = User.findOne({id: req.session.userid}).populate('roles').exec(finish);
+    var user = User.findOne({id: req.session.userid}).populate("roles").exec(finish);
   };
 
   SessionController.logout = function(req, res) {
@@ -48,7 +48,7 @@ module.exports = (function()  {
 
     function check(err, user) {
       if(err || !user || !password)
-        return res.status(401).send('');
+        return res.status(401).send("");
 
       bcrypt.compare(password, user.password, function(err, hash) {
         return (err || !hash) ? res.status(401).send() : doLogin(user, hash);

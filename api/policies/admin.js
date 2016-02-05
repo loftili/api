@@ -29,7 +29,7 @@ module.exports = (function() {
       return callback(false);
     }
 
-    UserRoleMapping.find({user: user_id}).populate('role').exec(foundRoles);
+    UserRoleMapping.find({user: user_id}).populate("role").exec(foundRoles);
   };
 
   return isAdmin;

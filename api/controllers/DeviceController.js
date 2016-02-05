@@ -1,10 +1,10 @@
-var net = require('net'),
-    Logger = require('../services/Logger');
+var net = require("net"),
+    Logger = require("../services/Logger");
 
 module.exports = (function() {
 
   var DeviceController = {},
-      _log = Logger('DeviceController');
+      _log = Logger("DeviceController");
 
   DeviceController.find = function(req, res) { 
     var current_user = parseInt(req.session.userid, 10);
@@ -13,7 +13,7 @@ module.exports = (function() {
 
     function error(err) {
       _log(err);
-      res.badRequest('');
+      res.badRequest("");
     }
 
     function found(err, devices) {
@@ -28,8 +28,8 @@ module.exports = (function() {
       return res.json(valid);
     }
 
-    _log('looking for devies for user: ' + current_user);
-    Device.find().populate('permissions', {user: current_user}).exec(found);
+    _log("looking for devies for user: " + current_user);
+    Device.find().populate("permissions", {user: current_user}).exec(found);
   };
 
   DeviceController.create = function(req, res, next) {
@@ -43,7 +43,7 @@ module.exports = (function() {
       return res.forbidden();
 
     if(!serial || !name) 
-      return res.badRequest('missing device name or serial');
+      return res.badRequest("missing device name or serial");
 
     function finish(err) {
       if(err) return res.badRequest(err);
@@ -68,8 +68,8 @@ module.exports = (function() {
       if(err) return res.badRequest(err);
 
       if(devices.length > 0) {
-        _log('duplicated device, uh oh');
-        return res.badRequest('invalid serial');
+        _log("duplicated device, uh oh");
+        return res.badRequest("invalid serial");
       }
 
       Device.create({
@@ -83,8 +83,8 @@ module.exports = (function() {
       if(err) return res.badRequest(err);
 
       if(!serial_record) {
-        _log('attempt made to create device with bad serial');
-        return res.badRequest('invalid serial');
+        _log("attempt made to create device with bad serial");
+        return res.badRequest("invalid serial");
       }
 
       found_serial = serial_record;
@@ -100,7 +100,7 @@ module.exports = (function() {
 
     function finish(err, device) {
       if(err) {
-        _log('failed saving after update err['+err+']');
+        _log("failed saving after update err["+err+"]");
         return res.status(422).json(err);
       }
 
@@ -109,16 +109,16 @@ module.exports = (function() {
 
     function foundDevice(err, device) {
       if(err) {
-        _log('failed getting device for updating');
+        _log("failed getting device for updating");
         return res.notFound();
       }
 
       if(!device) {
-        _log('unable to find device for update');
+        _log("unable to find device for update");
         return res.notFound();
       }
 
-      _log('found device, checking permissions');
+      _log("found device, checking permissions");
 
       var allowed = false,
           LEVELS = DevicePermissionManager.LEVELS;
@@ -133,7 +133,7 @@ module.exports = (function() {
       }
 
       if(!allowed) {
-        _log('current user not allowed to update the device, fail out');
+        _log("current user not allowed to update the device, fail out");
         return res.notFound();
       }
 
@@ -150,8 +150,8 @@ module.exports = (function() {
       Device.update({id: device_id}, updates).exec(finish);
     }
 
-    _log('attempting to get device info for device['+device_id+']');
-    Device.findOne({id: device_id}).populate('permissions').exec(foundDevice);
+    _log("attempting to get device info for device["+device_id+"]");
+    Device.findOne({id: device_id}).populate("permissions").exec(foundDevice);
   };
 
   DeviceController.destroy = function(req, res, next) {
@@ -159,21 +159,21 @@ module.exports = (function() {
         user_id = req.session.userid;
 
     function destroyed(err, device) {
-      return res.status(200).send('');
+      return res.status(200).send("");
     }
 
     function finish(err, device) {
       if(err) {
-        _log('errored finding device: ' + err);
-        return res.status(404).send('');
+        _log("errored finding device: " + err);
+        return res.status(404).send("");
       }
 
       if(!device) {
-        _log('unable to find device for destroy');
-        return res.status(404).send('');
+        _log("unable to find device for destroy");
+        return res.status(404).send("");
       }
 
-      _log('found device');
+      _log("found device");
 
       var can_destroy = false,
           permissions = device.permissions,
@@ -198,13 +198,13 @@ module.exports = (function() {
       if(can_destroy) 
         device.destroy(destroyed);
       else
-        return res.status(404).send('');
+        return res.status(404).send("");
     }
 
     if(device_id >= 0)
-      Device.findOne(device_id).populate('permissions').exec(finish);
+      Device.findOne(device_id).populate("permissions").exec(finish);
     else
-      return res.status(404).send('');
+      return res.status(404).send("");
   };
 
   DeviceController.findOne = function(req, res, next) {
@@ -212,17 +212,17 @@ module.exports = (function() {
 
     function finish(err, device) {
       if(err) {
-        _log('errored finding device: ' + err);
-        return res.status(404).send('');
+        _log("errored finding device: " + err);
+        return res.status(404).send("");
       }
 
-      return device ? res.json(device) : res.status(404).send('');
+      return device ? res.json(device) : res.status(404).send("");
     }
 
-    if(!(device_id >= 0)) return res.badRequest('invalid device id');
+    if(!(device_id >= 0)) return res.badRequest("invalid device id");
 
     Device.findOne(device_id)
-      .populate('permissions')
+      .populate("permissions")
       .exec(finish);
   };
 

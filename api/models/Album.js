@@ -3,12 +3,12 @@ module.exports = {
   attributes: {
 
     name: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     artist: {
-      model: 'artist'
+      model: "artist"
     }
     
   }

@@ -3,7 +3,7 @@ module.exports = (function() {
   var UserRolesController = {};
 
   function log(msg) {
-    return sails.log('[UserRolesController]['+new Date()+'] '+msg);
+    return sails.log("[UserRolesController]["+new Date()+"] "+msg);
   }
 
   UserRolesController.find = function(req, res) {

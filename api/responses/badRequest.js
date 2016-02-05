@@ -5,11 +5,11 @@ module.exports = (function() {
         res = this.res;
 
     if(data)
-      sails.log('[response][badRequest] data['+data+']');
+      sails.log("[response][badRequest] data["+data+"]");
 
     res.status(400);
 
-    return data ? res.json(data) : res.send('');
+    return data ? res.json(data) : res.send("");
   }
 
   return badRequest;

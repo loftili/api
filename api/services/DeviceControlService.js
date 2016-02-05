@@ -1,12 +1,12 @@
-var request = require('request'),
-    domains = require('../../config/domain'),
-    Logger = require('./Logger');
+var request = require("request"),
+    domains = require("../../config/domain"),
+    Logger = require("./Logger");
 
 module.exports = (function() {
 
   var DeviceControlService = {},
-      supported_engines = ['audio'],
-      log = Logger('DeviceControlService');
+      supported_engines = ["audio"],
+      log = Logger("DeviceControlService");
 
   function sendRequest(command, device, requestCallback) {
     var message = "CMD " + command;
@@ -19,42 +19,42 @@ module.exports = (function() {
     fns.restart = function(device, callback) {
       function finished(err, response) {
         if(err) return callback(err);
-        log('device['+device+'] restarted succesfully');
+        log("device["+device+"] restarted succesfully");
         return callback(null, response);
       }
 
-      sendRequest([name, 'restart'].join(':'), device, finished);
+      sendRequest([name, "restart"].join(":"), device, finished);
     };
 
     fns.start = function(device, callback) {
       function finished(err, response) {
         if(err) return callback(err);
-        log('device['+device+'] started succesfully');
+        log("device["+device+"] started succesfully");
         return callback(null, response);
       }
 
-      sendRequest([name, 'start'].join(':'), device, finished);
+      sendRequest([name, "start"].join(":"), device, finished);
     };
 
     fns.stop = function(device, callback) {
 
       function finished(err, response) {
         if(err) return callback(err);
-        log('device['+device+'] stopped succesfully');
+        log("device["+device+"] stopped succesfully");
         return callback(null, response);
       }
 
-      sendRequest([name, 'stop'].join(':'), device, finished);
+      sendRequest([name, "stop"].join(":"), device, finished);
     };
 
     fns.skip = function(device, callback) {
       function finished(err, response) {
         if(err) return callback(err);
-        log('device['+device+'] skipped succesfully');
+        log("device["+device+"] skipped succesfully");
         return callback(null, response);
       }
 
-      sendRequest([name, 'skip'].join(':'), device, finished);
+      sendRequest([name, "skip"].join(":"), device, finished);
     };
 
     return fns;

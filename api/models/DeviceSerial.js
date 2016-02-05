@@ -2,18 +2,18 @@ module.exports = (function() {
 
   var DeviceSerial = {};
 
-  DeviceSerial.tableName = 'device_serial';
+  DeviceSerial.tableName = "device_serial";
 
   DeviceSerial.attributes = {
 
     serial_number: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     devices: {
-      collection: 'Device',
-      via: 'serial_number'
+      collection: "Device",
+      via: "serial_number"
     }
 
   };

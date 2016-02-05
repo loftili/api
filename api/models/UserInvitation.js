@@ -1,16 +1,16 @@
 module.exports = {
 
-  tableName: 'user_invitation',
+  tableName: "user_invitation",
 
   attributes: {
 
     user: {
-      model: 'User'
+      model: "User"
     },
 
     invitation: {
-      model: 'Invitation', 
-      columnName: 'invitation' 
+      model: "Invitation", 
+      columnName: "invitation" 
     }
 
   }

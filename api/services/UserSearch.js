@@ -1,22 +1,22 @@
-var Logger = require('./Logger');
+var Logger = require("./Logger");
 
 module.exports = (function() {
 
   var UserSearch = {},
-      log = Logger('UserSearch'),
+      log = Logger("UserSearch"),
       query_able = [
-        'username',
-        'first_name',
-        'last_name',
-        'email'
+        "username",
+        "first_name",
+        "last_name",
+        "email"
       ],
       hidden = [
-        'createdAt',
-        'updatedAt',
-        'privacy_level',
-        'first_name',
-        'last_name',
-        'email'
+        "createdAt",
+        "updatedAt",
+        "privacy_level",
+        "first_name",
+        "last_name",
+        "email"
       ];
 
   function cleanse(user) {
@@ -35,7 +35,7 @@ module.exports = (function() {
 
     for(var i = 0; i < query_able.length; i++) {
       var q = {};
-      q[query_able[i]] = { 'contains': query };
+      q[query_able[i]] = { "contains": query };
       results.push(q);
     }
 
@@ -46,15 +46,15 @@ module.exports = (function() {
 
     function found(err, users) {
       if(err) {
-        log('admin user search failed hard - ' + err);
+        log("admin user search failed hard - " + err);
         return callback(err);
       }
 
-      log('search result ['+users.length+']');
+      log("search result ["+users.length+"]");
       return callback(false, users);
     }
 
-    log('admin search running - query['+query+']');
+    log("admin search running - query["+query+"]");
     User.find({
       or: queryOr(query)
     }).exec(found);
@@ -63,7 +63,7 @@ module.exports = (function() {
   UserSearch.visible = function(query, callback) {
     function found(err, users) {
       if(err) {
-        log('error searching: ' + err);
+        log("error searching: " + err);
         return callback(err);
       }
 
@@ -82,7 +82,7 @@ module.exports = (function() {
 
     function foundVisible(err, visible) {
       if(err) {
-        log('error searching: ' + err);
+        log("error searching: " + err);
         return callback(err);
       }
       var ids = [],
@@ -96,7 +96,7 @@ module.exports = (function() {
 
     User.find().where({
       or: [{
-        privacy_level: { '<': 5 }
+        privacy_level: { "<": 5 }
       }, {
         privacy_level: null
       }]

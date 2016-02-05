@@ -1,4 +1,4 @@
-var isAdmin = require('../policies/admin');
+var isAdmin = require("../policies/admin");
 
 module.exports = (function() {
 
@@ -16,7 +16,7 @@ module.exports = (function() {
     }
 
     if(stream > 0)
-      return DeviceStreamMapping.find({stream: stream}).populate('device').exec(found);
+      return DeviceStreamMapping.find({stream: stream}).populate("device").exec(found);
 
     return isAdmin.check(req.session.userid, adminCheck);
   };

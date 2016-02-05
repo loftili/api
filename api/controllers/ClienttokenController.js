@@ -7,28 +7,28 @@ module.exports = (function() {
         user_id = req.session.userid;
 
     function destroyed(err) {
-      return res.status(200).send('');
+      return res.status(200).send("");
     }
 
     function finish(err, token) {
       if(err || !token) {
-        sails.log('[ClientTokenController] unable to destroy');
-        return res.status(404).send('');
+        sails.log("[ClientTokenController] unable to destroy");
+        return res.status(404).send("");
       }
 
       if(token.user !== user_id) {
-        sails.log('[ClientTokenController] unable to destroy - wrong user');
-        return res.status(404).send('');
+        sails.log("[ClientTokenController] unable to destroy - wrong user");
+        return res.status(404).send("");
       }
 
       token.destroy(destroyed);
     }
 
     if(token_id >= 0) {
-      sails.log('[ClientTokenController] attempting to destroy token['+token_id+']');
+      sails.log("[ClientTokenController] attempting to destroy token["+token_id+"]");
       Clienttoken.findOne(token_id).exec(finish);
     } else {
-      return res.status(404).send('');
+      return res.status(404).send("");
     }
   };
 
@@ -38,11 +38,11 @@ module.exports = (function() {
         valid_user = user_id >= 0;
 
     if(!valid_user)
-      return res.status(404).send('');
+      return res.status(404).send("");
 
     function foundKeys(err, keys) {
       if(err) {
-        return res.status(404).send('');
+        return res.status(404).send("");
       }
 
       return res.status(200).json(keys);
@@ -57,12 +57,12 @@ module.exports = (function() {
         user_id = parseInt(req.session.userid, 10);
 
     if(!user_id)
-      return res.status(404).send('');
+      return res.status(404).send("");
 
     function finish(err, client_token) {
       if(err) {
-        sails.log('[ClienttokenController] unable to create client token');
-        return res.status(404).send('');
+        sails.log("[ClienttokenController] unable to create client token");
+        return res.status(404).send("");
       }
 
       return res.status(200).json(client_token);

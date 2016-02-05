@@ -1,8 +1,8 @@
 module.exports = (function() {
 
   var DeviceAuthentication = {},
-      TOKEN_HEADER = 'x-loftili-device-token',
-      SERIAL_HEADER = 'x-loftili-device-serial';
+      TOKEN_HEADER = "x-loftili-device-token",
+      SERIAL_HEADER = "x-loftili-device-serial";
 
   DeviceAuthentication.parseRequest = function(req) {
     var serial = req.headers[SERIAL_HEADER],

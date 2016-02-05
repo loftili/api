@@ -1,4 +1,4 @@
-var Logger = require('./Logger');
+var Logger = require("./Logger");
 
 module.exports = (function() {
 
@@ -7,7 +7,7 @@ module.exports = (function() {
         DEVICE_OWNER: 1,
         DEVICE_FRIEND: (1 << 1)
       },
-      log = Logger('DevicePermissionManager'),
+      log = Logger("DevicePermissionManager"),
       transport = sails.config.mail.transport;
 
   DevicePermissionManager.LEVELS = LEVELS;
@@ -15,7 +15,7 @@ module.exports = (function() {
   DevicePermissionManager.validate = function(device, user, cb) {
     function foundPermissions(err, permissions) {
       if(err) { 
-        log('failed looking up device permissions for state patch: '+err);
+        log("failed looking up device permissions for state patch: "+err);
         return callback(false);
       }
 
@@ -29,7 +29,7 @@ module.exports = (function() {
           mask = is_dnd ? LEVELS.DEVICE_OWNER : (LEVELS.DEVICE_FRIEND | LEVELS.DEVICE_OWNER);
 
       if(is_dnd)
-        log('deivce['+device+'] is in do not disturb mode...');
+        log("deivce["+device+"] is in do not disturb mode...");
 
       // invalid device permission level
       if(!(mask & level)) return cb(false);
@@ -37,11 +37,11 @@ module.exports = (function() {
       return cb(true);
     }
 
-    log('SELECT FROM devicepermission WHERE user = '+user+' AND device = '+device+';');
-    Devicepermission.find({
+    log("SELECT FROM devicepermission WHERE user = "+user+" AND device = "+device+";");
+    DevicePermission.find({
       user: user, 
       device: device
-    }).populate('device').exec(foundPermissions);
+    }).populate("device").exec(foundPermissions);
   }
 
   DevicePermissionManager.grant = function(params, cb) {
@@ -65,9 +65,9 @@ module.exports = (function() {
 
     function sendEmail(err, found_user) {
       transport.sendMail({
-        from: 'no-reply@loftili.com',
+        from: "no-reply@loftili.com",
         to: found_user.email,
-        subject: '[loftili] new device permission',
+        subject: "[loftili] new device permission",
         html: email_html
       }, finish);
     }
@@ -81,13 +81,13 @@ module.exports = (function() {
 
     function makeEmail(err, created) {
       if(err) {
-        log('totally failed creating device permission');
+        log("totally failed creating device permission");
         log(err);
       }
 
       created_record = created;
 
-      MailCompiler.compile('device_permission_grant.jade', {
+      MailCompiler.compile("device_permission_grant.jade", {
         device: device_info.name,
         device_id: device_info.id
       }, getUser);
@@ -95,23 +95,23 @@ module.exports = (function() {
 
     function foundOwner(err, record) {
       if(err) {
-        log('failed very hard, ' + err);
+        log("failed very hard, " + err);
         return cb(err);
       }
 
       if(!record) {
-        log('unable to find a valid ownership based on that which was requested');
-        return cb('not the owner');
+        log("unable to find a valid ownership based on that which was requested");
+        return cb("not the owner");
       }
 
       device_info = record[0].device;
-      log('found owner for device['+device_info.id+']');
-      Devicepermission.findOrCreate(params, params, makeEmail);
+      log("found owner for device["+device_info.id+"]");
+      DevicePermission.findOrCreate(params, params, makeEmail);
     }
 
     if(is_forced) {
-      log('forcing level['+level+'] for device['+device_id+']');
-      return Devicepermission.findOrCreate(params, params, finish);
+      log("forcing level["+level+"] for device["+device_id+"]");
+      return DevicePermission.findOrCreate(params, params, finish);
     }
 
     var ownership_params = {
@@ -119,8 +119,8 @@ module.exports = (function() {
           level: LEVELS.DEVICE_OWNER
         };
 
-    log('looking up ownership of device, ' + JSON.stringify(ownership_params));
-    Devicepermission.find(ownership_params).populate('device').exec(foundOwner);
+    log("looking up ownership of device, " + JSON.stringify(ownership_params));
+    DevicePermission.find(ownership_params).populate("device").exec(foundOwner);
   };
 
   return DevicePermissionManager;

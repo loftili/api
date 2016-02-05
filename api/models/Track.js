@@ -1,4 +1,4 @@
-var Soundcloud = require('../services/Soundcloud');
+var Soundcloud = require("../services/Soundcloud");
 
 module.exports = (function() {
 
@@ -7,33 +7,33 @@ module.exports = (function() {
   Track.attributes = {
 
     title: {
-      type: 'string',
+      type: "string",
     },
 
     pid: {
-      type: 'string'
+      type: "string"
     },
 
     uuid: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     year: {
-      type: 'integer'
+      type: "integer"
     },
 
     provider: {
-      type: 'string',
+      type: "string",
       regex: /SC|LF/i
     },
 
     album: {
-      model: 'album'
+      model: "album"
     },
 
     artist: {
-      model: 'artist'
+      model: "artist"
     },
 
     streamUrl: function() {
@@ -43,8 +43,8 @@ module.exports = (function() {
       switch(provider) {
         case "LFTXS":
         case "LF":
-          var url_base = process.env['STORAGE_URL'];
-          result = [url_base, this.uuid].join('/');
+          var url_base = process.env["STORAGE_URL"];
+          result = [url_base, this.uuid].join("/");
           break;
         case "SC":
           result = Soundcloud.streamUrl(this);
