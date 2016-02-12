@@ -2,16 +2,16 @@ module.exports = (function() {
 
   var DeviceHistory = { };
 
-  DeviceHistory.tableName = 'device_history';
+  DeviceHistory.tableName = "device_history";
 
   DeviceHistory.attributes = {
 
     track: {
-      model: 'track'
+      model: "track"
     },
   
     device: {
-      model: 'device'
+      model: "device"
     }
 
   };

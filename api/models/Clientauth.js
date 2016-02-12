@@ -3,18 +3,18 @@ module.exports = {
   attributes: {
 
     client: {
-      model: 'client',
+      model: "client",
       required: true
     },
 
     token: {
-      type: 'string',
+      type: "string",
       required: true,
       size: 40
     },
 
     user: {
-      model: 'user',
+      model: "user",
       required: true
     }
 

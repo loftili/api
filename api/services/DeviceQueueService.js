@@ -1,23 +1,23 @@
-var Logger = require('../services/Logger');
+var Logger = require("../services/Logger");
 
 module.exports = (function() {
 
   var DeviceQueueService = {},
-      KEY_DELIM = ':',
+      KEY_DELIM = ":",
       log = Logger("DeviceQueueService");
 
   function keyName(device_id) {
-    return ['queue', device_id].join(KEY_DELIM);
+    return ["queue", device_id].join(KEY_DELIM);
   }
 
   function listKey(device_id) {
     var base = keyName(device_id);
-    return [base, 'tracks'].join(KEY_DELIM);
+    return [base, "tracks"].join(KEY_DELIM);
   }
 
   function currentKey(device_id) {
     var base = keyName(device_id);
-    return [base, 'current'].join(KEY_DELIM);
+    return [base, "current"].join(KEY_DELIM);
   }
 
   function validatePermission(device_id, auth_info, callback) {
@@ -27,17 +27,17 @@ module.exports = (function() {
 
     function foundDevice(err, device) {
       if(err) {
-        log('failed getting device['+device_id+'] err['+err+']');
+        log("failed getting device["+device_id+"] err["+err+"]");
         return callback(err, null);
       }
 
       if(!device) {
-        log('unable to find device['+device_id+']');
-        return callback('no device', null);
+        log("unable to find device["+device_id+"]");
+        return callback("no device", null);
       }
       
       if(token && serial) {
-        if(device.token !== token) return callback('no permission to act', null);
+        if(device.token !== token) return callback("no permission to act", null);
         return callback(null, device);
       }
 
@@ -60,11 +60,11 @@ module.exports = (function() {
       if(allowed)
         return callback(null, device);
 
-      log('permission failed for device[' + device.name + ']');
-      callback('not allowed', null);
+      log("permission failed for device[" + device.name + "]");
+      callback("not allowed", null);
     }
 
-    Device.findOne(device_id).populate('permissions').exec(foundDevice);
+    Device.findOne(device_id).populate("permissions").exec(foundDevice);
   }
 
   function getStream(device_id, callback) {
@@ -73,13 +73,13 @@ module.exports = (function() {
     function foundStream(err, stream) {
       if(err) return callback(err);
       stream.id = stream_id;
+      log(JSON.stringify(stream));
       callback(null, stream);
     }
 
     function gotState(err, state) {
       if(err) return callback(err);
       stream_id = parseInt(state.stream, 10);
-      if(stream_id > 0) log('device['+device_id+'] appears to be connected to a stream, getting stream');
       return stream_id > 0 ? StreamManager.find(stream_id, foundStream) : callback(null, false);
     }
 
@@ -111,13 +111,13 @@ module.exports = (function() {
     }
 
     function realPop() {
-      log('alpha has finished! popping track from stream');
+      log("alpha has finished! popping track from stream");
       StreamManager.remove(found_stream.id, 0, removed);
     }
 
     function foundMapping(err, mapping) {
       if(err) return callback(err);
-      if(!mapping) return callback('no mapping - invalid stream state');
+      if(!mapping) return callback("no mapping - invalid stream state");
       found_mapping = mapping;
       return found_mapping.alpha ? realPop() : callback(null, target_track);
     }

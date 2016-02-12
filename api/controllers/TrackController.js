@@ -1,22 +1,22 @@
-var atob = require('atob'),
-    Logger = require('../services/Logger'),
-    Soundcloud = require('../services/Soundcloud'),
-    TrackStreamer = require('../services/TrackStreamer'),
-    TrackManagementService = require('../services/TrackManagementService'),
-    HttpAsync = require('../services/HttpAsync');
+var atob = require("atob"),
+    Logger = require("../services/Logger"),
+    Soundcloud = require("../services/Soundcloud"),
+    TrackStreamer = require("../services/TrackStreamer"),
+    TrackManagementService = require("../services/TrackManagementService"),
+    HttpAsync = require("../services/HttpAsync");
 
 module.exports = (function() {
 
   var TrackController = {},
-      log = Logger('TrackController');
+      log = Logger("TrackController");
 
   function getFromProvider(provider, uuid, callback) {
     function synced(err, track) {
-      return err ? callback('unable to create preview [3]') : callback(false, track);
+      return err ? callback("unable to create preview [3]") : callback(false, track);
     }
 
     function sync() {
-      log('syncing track['+uuid+'] from['+provider+']');
+      log("syncing track["+uuid+"] from["+provider+"]");
       return TrackManagementService.sync(provider, uuid, synced);
     }
 
@@ -24,10 +24,10 @@ module.exports = (function() {
       var match;
 
       if(err)
-        return callback('no matching tracks [0]');
+        return callback("no matching tracks [0]");
 
       if(!tracks || tracks.length !== 1)
-        return /sc|lftxs/i.test(provider) ? sync() : callback('no matching tracks [1]');
+        return /sc|lftxs/i.test(provider) ? sync() : callback("no matching tracks [1]");
 
       return callback(false, tracks[0]);
     }
@@ -35,13 +35,13 @@ module.exports = (function() {
     Track.find().where({
       or: [{
         pid: uuid,
-        provider: (provider+'').toUpperCase()
+        provider: (provider+"").toUpperCase()
       }, {
         uuid: uuid,
-        provider: (provider+'').toUpperCase()
+        provider: (provider+"").toUpperCase()
       }, {
         id: uuid,
-        provider: (provider+'').toUpperCase()
+        provider: (provider+"").toUpperCase()
       }]
     }).exec(foundTrack);
   }
@@ -64,11 +64,11 @@ module.exports = (function() {
         process_id;
 
     if(!provider || !uuid)
-      return res.badRequest('must provide the provider and uuid of the track');
+      return res.badRequest("must provide the provider and uuid of the track");
 
     function finish(err, track) {
       if(err) {
-        log('failed syncing['+uuid+'] from ['+provider+']');
+        log("failed syncing["+uuid+"] from ["+provider+"]");
         return HttpAsync.finish(process_id, HttpAsync.STATUSES.ERRORED);
       }
       
@@ -86,7 +86,7 @@ module.exports = (function() {
         id = parseInt(params.id);
 
     if(isNaN(id) || id <= 0)
-      return res.badRequest('must provide the provider and uuid of the track');
+      return res.badRequest("must provide the provider and uuid of the track");
 
     function preview(err, track) {
       return (err || !track) ? res.badRequest(err) : TrackStreamer.pipe(track, res);
@@ -99,12 +99,12 @@ module.exports = (function() {
     var user_id = req.session.userid,
         query = req.query.q;
 
-    if(!query) return res.badRequest('missing query (q) parameter');
+    if(!query) return res.badRequest("missing query (q) parameter");
 
     function finish(err, tracks) {
       if(err) {
-        log('errored getting track list: ' + err);
-        return res.status(404).send('');
+        log("errored getting track list: " + err);
+        return res.status(404).send("");
       }
 
       return res.status(200).json(tracks);
@@ -118,8 +118,8 @@ module.exports = (function() {
 
     function uploaded(err, created_track) {
       if(err) {
-        log('FAILED uploading track: ' + err);
-        return res.status(422).send({error: 'FILE_ERROR', summary: 'could not properly upload file to temporary space'});
+        log("FAILED uploading track: " + err);
+        return res.status(422).send({error: "FILE_ERROR", summary: "could not properly upload file to temporary space"});
       }
 
       return res.status(201).json(created_track);
@@ -127,15 +127,15 @@ module.exports = (function() {
 
     function callback(err, files) {
       if (err)
-        return res.status(500).send({error: 'FILE_ERROR', summary: 'unable to handle reques\'s file information'});
+        return res.status(500).send({error: "FILE_ERROR", summary: "unable to handle reques\"s file information"});
 
       if(files.length < 1)
-        return res.status(400).send({error: 'NO_FILE', summary: 'no file attatched to request'});
+        return res.status(400).send({error: "NO_FILE", summary: "no file attatched to request"});
 
       return TrackManagementService.upload(files[0], uploaded);
     }
 
-    req.file('file').upload(callback);
+    req.file("file").upload(callback);
   };
 
   TrackController.update = function(req, res) {
@@ -144,14 +144,14 @@ module.exports = (function() {
 
     function updated(err, track) {
       if(err)
-        return res.status(422).send('');
+        return res.status(422).send("");
 
       return res.json(track);
     }
 
     function found(err, track) {
       if(err || !track)
-        return res.status(404).send('');
+        return res.status(404).send("");
 
       track.title = track_title;
       track.save(updated);

@@ -7,7 +7,7 @@ module.exports = function modelPermission(req, res, next) {
     return next();
 
   if(!user_query || session_user !== user_query)
-    return res.status(404).send('');
-  else
-    return next();
+    return res.status(404).send("");
+
+  return next();
 };

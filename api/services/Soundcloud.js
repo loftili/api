@@ -1,28 +1,28 @@
-var Resource = require('../lib/Resource'),
-    Logger = require('./Logger');
+var Resource = require("../lib/Resource"),
+    Logger = require("./Logger");
 
 module.exports = (function() {
 
   var Soundcloud = {},
-      api_url = 'https://api.soundcloud.com',
-      log = Logger('Soundcloud');
+      api_url = "https://api.soundcloud.com",
+      log = Logger("Soundcloud");
 
   Soundcloud.streamUrl = function(track) {
-    var url = [api_url, 'tracks', track.uuid, 'stream'].join('/'),
-        query = ['client_id', process.env['SOUNDCLOUD_CLIENT_ID']].join('=');
+    var url = [api_url, "tracks", track.uuid, "stream"].join("/"),
+        query = ["client_id", process.env["SOUNDCLOUD_CLIENT_ID"]].join("=");
 
-    return [url, query].join('?');
+    return [url, query].join("?");
   };
 
   Soundcloud.Track = (function() {
-    var url = [api_url, 'tracks/:id'].join('/'),
+    var url = [api_url, "tracks/:id"].join("/"),
         mappings = {
-          'id': '@id'
+          "id": "@id"
         },
         actions = {},
         config = {},
         query = {
-          client_id: process.env['SOUNDCLOUD_CLIENT_ID']
+          client_id: process.env["SOUNDCLOUD_CLIENT_ID"]
         };
 
     return Resource(url, mappings, actions, config, query);
@@ -34,7 +34,7 @@ module.exports = (function() {
         pid = track.id,
         valid = title && pid;
 
-    return valid ? {title: title, id: -1, pid: pid, provider: 'SC'} : false;
+    return valid ? {title: title, id: -1, pid: pid, provider: "SC"} : false;
   };
 
   Soundcloud.search = function(query, callback) {
@@ -74,7 +74,7 @@ module.exports = (function() {
 
         // we found a lie...
         if(!single || !single.streamable) {
-          log('soundlcoud lied about track['+single.title+'] id['+single.id+'], which is NOT streamable');
+          log("soundlcoud lied about track["+single.title+"] id["+single.id+"], which is NOT streamable");
           return (++l === streamable_count) ? callback(false, clean) : false;
         }
 
@@ -94,7 +94,7 @@ module.exports = (function() {
         if(!t.streamable)
           continue;
 
-        streamable.push(t.id+'');
+        streamable.push(t.id+"");
         titles.push(t.title);
       }
 
@@ -102,18 +102,18 @@ module.exports = (function() {
 
       function checkDupes(err, tracks) {
         if(err) {
-          log('error while checking duplicates in search - ' + err);
+          log("error while checking duplicates in search - " + err);
           return callback(false, clean);
         }
 
         var dupe_count = tracks.length;
 
         for(var i = 0; i < dupe_count; i++) {
-          var dupe = tracks[i].uuid+'',
+          var dupe = tracks[i].uuid+"",
               indx = streamable.indexOf(dupe);
 
           if(indx < 0) {
-            log('for some reason, ['+dupe+'] was found as a duplicate, but its not in streamable['+streamable.join()+']');
+            log("for some reason, ["+dupe+"] was found as a duplicate, but its not in streamable["+streamable.join()+"]");
             continue;
           }
 

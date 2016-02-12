@@ -1,5 +1,5 @@
-var crypto = require('crypto'),
-    dotenv = require('dotenv');
+var crypto = require("crypto"),
+    dotenv = require("dotenv");
 
 module.exports = (function() {
 
@@ -8,11 +8,11 @@ module.exports = (function() {
   dotenv.load();
 
   DeviceTokenService.generate = function(device_name) {
-    var device_token = process.env['DEVICE_SECRET'],
-        token_unhashed = [device_token, device_name].join(':'),
-        hasher = crypto.createHash('sha1');
+    var device_token = process.env["DEVICE_SECRET"],
+        token_unhashed = [device_token, device_name].join(":"),
+        hasher = crypto.createHash("sha1");
 
-    hasher.setEncoding('hex');
+    hasher.setEncoding("hex");
     hasher.write(token_unhashed);
     hasher.end();
 

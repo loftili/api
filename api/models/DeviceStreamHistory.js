@@ -2,16 +2,16 @@ module.exports = (function() {
 
   var DeviceStreamHistory = { };
 
-  DeviceStreamHistory.tableName = 'device_stream_history';
+  DeviceStreamHistory.tableName = "device_stream_history";
 
   DeviceStreamHistory.attributes = {
 
     stream: {
-      model: 'stream'
+      model: "stream"
     },
   
     device: {
-      model: 'device'
+      model: "device"
     }
 
   };

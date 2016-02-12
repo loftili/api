@@ -3,26 +3,26 @@ module.exports = {
   attributes: {
 
     name: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     consumer_key: {
-      type: 'string',
+      type: "string",
       required: true,
       size: 15 
     },
 
     consumer_secret: {
-      type: 'string',
+      type: "string",
       required: true,
       size: 40
     },
 
     toJSON: function() {
       var obj = this.toObject();
-      delete obj['consumer_secret'];
-      delete obj['consumer_key'];
+      delete obj["consumer_secret"];
+      delete obj["consumer_key"];
       return obj;
     }
 

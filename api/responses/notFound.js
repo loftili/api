@@ -6,7 +6,7 @@ module.exports = (function() {
 
     res.status(404);
 
-    return res.send('not found');
+    return res.send("not found");
   }
 
   return notFound;

@@ -5,13 +5,13 @@ module.exports = (function() {
   Artist.attributes = {
 
     name: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     tracks: {
-      collection: 'track',
-      via: 'artist'
+      collection: "track",
+      via: "artist"
     }
 
   };

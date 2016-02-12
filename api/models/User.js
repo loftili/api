@@ -1,89 +1,89 @@
-var bcrypt = require('bcrypt'),
-    crypto = require('crypto');
+var bcrypt = require("bcrypt"),
+    crypto = require("crypto");
 
 module.exports = (function() {
 
   var User = {};
 
   User.writable = [
-    'email', 
-    'password', 
-    'first_name', 
-    'last_name', 
-    'privacy_level', 
-    'username'
+    "email", 
+    "password", 
+    "first_name", 
+    "last_name", 
+    "privacy_level", 
+    "username"
   ];
 
   User.public_read = [
-    'gravatar_url',
-    'id',
-    'username'
+    "gravatar_url",
+    "id",
+    "username"
   ];
 
   User.attributes = {
 
     email: {
-      type: 'string',
+      type: "string",
       required: true,
       unique: true,
       email: true
     },
 
     devices: {
-      collection: 'devicepermission',
-      via: 'user'
+      collection: "devicepermission",
+      via: "user"
     },
 
     first_name: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     privacy_level: {
-      type: 'integer',
+      type: "integer",
       defaultsTo: 1
     },
 
     last_name: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     username: {
-      type: 'string',
+      type: "string",
       required: true,
       unique: true
     },
 
     password: {
-      type: 'string',
+      type: "string",
       required: true,
       minLength: 6
     },
 
     reset_token: {
-      type: 'string',
+      type: "string",
       size: 20,
       defaultsTo: null
     },
 
     last_login: {
-      type: 'datetime'
+      type: "datetime"
     },
 
     roles: {
-      collection: 'UserRoleMapping',
-      via: 'user'
+      collection: "UserRoleMapping",
+      via: "user"
     },
 
     toJSON: function() {
       var obj = this.toObject(),
           email = obj.email,
-          hasher = crypto.createHash('md5');
+          hasher = crypto.createHash("md5");
       hasher.update(email);
-      obj['gravatar_url'] = 'https://gravatar.com/avatar/' + hasher.digest('hex');
-      delete obj['password'];
-      delete obj['reset_token'];
+      obj["gravatar_url"] = "https://gravatar.com/avatar/" + hasher.digest("hex");
+      delete obj["password"];
+      delete obj["reset_token"];
       return obj;
     }
 
@@ -98,12 +98,12 @@ module.exports = (function() {
     }
 
     if(values.email)
-      values.email = (values.email+'').toLowerCase();
+      values.email = (values.email+"").toLowerCase();
 
     if(values.username)
-      values.username = (values.username+'').toLowerCase();
+      values.username = (values.username+"").toLowerCase();
 
-    HashService(values, 'password', finish);
+    HashService(values, "password", finish);
   };
 
   return User;

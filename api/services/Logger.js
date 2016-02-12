@@ -1,9 +1,9 @@
 module.exports = (function() {
 
   function pad(s, n) { 
-    var ss = s+'';
+    var ss = s+"";
     while(ss.length < 2)
-      ss = '0' + ss;
+      ss = "0" + ss;
     return ss;
   }
 
@@ -13,16 +13,16 @@ module.exports = (function() {
           d.getFullYear(),
           pad(d.getMonth() + 1, 2),
           pad(d.getDate(), 2)
-        ].join('-'),
+        ].join("-"),
         time_str = [
           pad(d.getHours(), 2),
           pad(d.getMinutes(), 2),
           pad(d.getSeconds(), 2)
-        ].join(':'),
+        ].join(":"),
         date_str = [
           date_fact,
           time_str
-        ].join(' ');
+        ].join(" ");
 
     return date_str;
   }
@@ -31,7 +31,7 @@ module.exports = (function() {
     var Log;
 
     Log = function(msg) {
-      sails.log('['+name+']['+timestamp()+'] ' + msg);
+      sails.log("["+name+"]["+timestamp()+"] " + msg);
     };
 
     return Log;

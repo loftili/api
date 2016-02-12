@@ -3,18 +3,18 @@ module.exports = (function() {
   var Stream = {};
 
   Stream.writable = [
-    'title', 'description', 'privacy'
+    "title", "description", "privacy"
   ];
 
   Stream.attributes = {
 
     title: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
     description: {
-      type: 'string',
+      type: "string",
       required: true
     },
 
@@ -24,14 +24,14 @@ module.exports = (function() {
      * 2: contributors only
      */
     privacy: {
-      type: 'integer',
+      type: "integer",
       required: true,
       defaultsTo: 0
     },
 
     permissions: {
-      collection: 'StreamPermission',
-      via: 'stream'
+      collection: "StreamPermission",
+      via: "stream"
     }
 
   };

@@ -1,4 +1,4 @@
-var crypto = require('crypto');
+var crypto = require("crypto");
 
 module.exports = (function() {
 
@@ -13,18 +13,18 @@ module.exports = (function() {
         return;
 
       if(found_token.client !== found_client.id)
-        return callback('token mismatch', null);
+        return callback("token mismatch", null);
       else
         return callback(null, found_token.user);
     }
 
     function foundToken(err, token) {
       if(err || !token) {
-        sails.log('[ClientManagerService] unable to find user');
-        return callback('invalid token', null);
+        sails.log("[ClientManagerService] unable to find user");
+        return callback("invalid token", null);
       }
 
-      sails.log('[ClientManagerService] successfully found user');
+      sails.log("[ClientManagerService] successfully found user");
       found_token = token;
 
       check();
@@ -32,19 +32,19 @@ module.exports = (function() {
     
     function foundClient(err, client) {
       if(err || !client) {
-        sails.log('[ClientManagerService] unable to find client');
-        return callback('invalid client', null);
+        sails.log("[ClientManagerService] unable to find client");
+        return callback("invalid client", null);
       }
 
-      sails.log('[ClientManagerService] successfully found client');
+      sails.log("[ClientManagerService] successfully found client");
       found_client = client;
       
       check();
     }
 
-    sails.log('[ClientManagerService] looking for client['+client_key+'] and token['+user_token+']');
+    sails.log("[ClientManagerService] looking for client["+client_key+"] and token["+user_token+"]");
     Client.findOne({consumer_key: client_key}).exec(foundClient);
-    Clientauth.findOne({token: user_token}).populate('user').exec(foundToken);
+    Clientauth.findOne({token: user_token}).populate("user").exec(foundToken);
   };
 
   ClientManagerService.createClientAuth = function(client_id, user_id, callback) {
@@ -58,7 +58,7 @@ module.exports = (function() {
     }
 
     function generated(err, buffer) {
-      var hex_buffer = buffer.toString('hex');
+      var hex_buffer = buffer.toString("hex");
       new_token.token = hex_buffer.substring(0, 40);
       Clientauth.create(new_token).exec(finish);
     }
@@ -73,30 +73,30 @@ module.exports = (function() {
   ClientManagerService.generateClientToken = function(client_id, user_id, callback) {
     var new_token = {},
         found_client,
-        hasher = crypto.createHash('sha1');
+        hasher = crypto.createHash("sha1");
 
     function finish(err, client_token) {
       return callback(err, client_token);
     }
 
     function generatedConsumer(err, buffer) {
-      var token_buffer = buffer.toString('hex'),
-          mixed = [token_buffer, found_client.consumer_secret].join(':');
+      var token_buffer = buffer.toString("hex"),
+          mixed = [token_buffer, found_client.consumer_secret].join(":");
 
-      hasher.setEncoding('hex');
+      hasher.setEncoding("hex");
       hasher.write(mixed);
       hasher.end();
 
       new_token.token = hasher.read().substring(0, 9);
 
-      sails.log('[ClientManagerService] generated random bytes, creating token');
+      sails.log("[ClientManagerService] generated random bytes, creating token");
       Clienttoken.create(new_token).exec(finish);
     }
 
     function foundClient(err, client) {
       if(err || !client) {
-        sails.log('[ClientManagerService] unable to find matching client to request');
-        return callback('missing client', null);
+        sails.log("[ClientManagerService] unable to find matching client to request");
+        return callback("missing client", null);
       }
       
       found_client = client;
@@ -124,12 +124,12 @@ module.exports = (function() {
     }
 
     function generatedSecret(err, buffer) {
-      new_client.consumer_secret = buffer.toString('hex').substring(0, 40);
+      new_client.consumer_secret = buffer.toString("hex").substring(0, 40);
       tryCreate();
     }
 
     function generatedConsumer(err, buffer) {
-      new_client.consumer_key = buffer.toString('hex').substring(0, 15);
+      new_client.consumer_key = buffer.toString("hex").substring(0, 15);
       tryCreate();
     }
 

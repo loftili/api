@@ -1,10 +1,10 @@
-var Logger = require('../services/Logger');
+var Logger = require("../services/Logger");
 
 module.exports = (function() {
 
   var AccountRequestController = {},
       transport = sails.config.mail.transport,
-      log = Logger('AccountRequestController');
+      log = Logger("AccountRequestController");
 
   AccountRequestController.create = function(req, res) {
     var body = req.body,
@@ -18,9 +18,9 @@ module.exports = (function() {
 
     function sendEmail(err, html) {
       transport.sendMail({
-        from: 'no-reply@loftili.com',
-        to: process.env['SUPPORT_EMAIL'] || 'support@loftili.com',
-        subject: '[loftili] new account request',
+        from: "no-reply@loftili.com",
+        to: process.env["SUPPORT_EMAIL"] || "support@loftili.com",
+        subject: "[loftili] new account request",
         html: html
       }, finish);
     }
@@ -29,7 +29,7 @@ module.exports = (function() {
       if(err) return res.badRequest(err);
       created_request = request;
 
-      MailCompiler.compile('account_request.jade', {
+      MailCompiler.compile("account_request.jade", {
         email: email
       }, sendEmail);
     }
@@ -42,7 +42,7 @@ module.exports = (function() {
 
     function destroyed(err) {
       if(err) return res.serverError(err);
-      return res.status(200).send('');
+      return res.status(200).send("");
     }
 
     function found(err, serial) {
@@ -64,7 +64,7 @@ module.exports = (function() {
     if(req_id >= 0)
       return AccountRequest.findOne(req_id).exec(found);
 
-    return res.badRequest('invalid id');
+    return res.badRequest("invalid id");
   };
 
   AccountRequestController.find = function(req, res) {

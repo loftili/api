@@ -4,7 +4,7 @@
  * Usage:
  * return res.ok();
  * return res.ok(data);
- * return res.ok(data, 'auth/login');
+ * return res.ok(data, "auth/login");
  *
  * @param  {Object} data
  * @param  {String|Object} options
@@ -18,7 +18,7 @@ module.exports = function sendOK (data, options) {
   var res = this.res;
   var sails = req._sails;
 
-  sails.log.silly('res.ok() :: Sending 200 ("OK") response');
+  sails.log.silly("res.ok() :: Sending 200 (\"OK\") response");
 
   // Set status code
   res.status(200);
@@ -30,10 +30,10 @@ module.exports = function sendOK (data, options) {
 
   // If second argument is a string, we take that to mean it refers to a view.
   // If it was omitted, use an empty object (`{}`)
-  options = (typeof options === 'string') ? { view: options } : options || {};
+  options = (typeof options === "string") ? { view: options } : options || {};
 
   // If a view was provided in options, serve it.
-  // Otherwise try to guess an appropriate view, or if that doesn't
+  // Otherwise try to guess an appropriate view, or if that doesn"t
   // work, just send JSON.
   if (options.view) {
     return res.view(options.view, { data: data });

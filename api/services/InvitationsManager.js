@@ -1,8 +1,8 @@
-var crypto = require('crypto'),
-    jade = require('jade'),
-    path = require('path'),
-    juice = require('juice2'),
-    sass = require('node-sass');
+var crypto = require("crypto"),
+    jade = require("jade"),
+    path = require("path"),
+    juice = require("juice2"),
+    sass = require("node-sass");
 
 module.exports = (function() {
 
@@ -26,14 +26,14 @@ module.exports = (function() {
 
     function sendMail(err, html) {
       if(err) {
-        sails.log('[InvitationsManager][send] failed juicing');
-        return callback('failed juice', null);
+        sails.log("[InvitationsManager][send] failed juicing");
+        return callback("failed juice", null);
       }
 
       var params = {
-        from: 'no-reply@loftili.com',
-        to: process.env['TEST_EMAIL'] ? process.env['TEST_EMAIL'] : to,
-        subject: '[loftili] you\'ve been invited!',
+        from: "no-reply@loftili.com",
+        to: process.env["TEST_EMAIL"] ? process.env["TEST_EMAIL"] : to,
+        subject: "[loftili] you\"ve been invited!",
         html: html
       };
 
@@ -42,18 +42,18 @@ module.exports = (function() {
 
     function created(err, invite) {
       if(err) { 
-        sails.log('[InvitationsManager][send] unable to create or find the record based on params');
+        sails.log("[InvitationsManager][send] unable to create or find the record based on params");
         return callback(err, null);
       }
 
       created_invite = invite;
 
-      sails.log('[InvitationsManager][send] using MailCompiler for html email');
-      MailCompiler.compile('invite.jade', {token: created_invite.token}, sendMail);
+      sails.log("[InvitationsManager][send] using MailCompiler for html email");
+      MailCompiler.compile("invite.jade", {token: created_invite.token}, sendMail);
     }
 
     function generated(err, buffer) {
-      var token = buffer.toString('hex').substring(0, 10),
+      var token = buffer.toString("hex").substring(0, 10),
           params = {
             from: from,
             to: to,
@@ -62,15 +62,15 @@ module.exports = (function() {
 
       function alreadyExists(err, invitation) {
         if(err) { 
-          sails.log('[InvitationsManager][send] unable to create or find the record based on params');
+          sails.log("[InvitationsManager][send] unable to create or find the record based on params");
           return callback(err, null);
         }
 
         if(invitation.length > 0) {
-          sails.log('[InvitationsManager][send] found existing invitation');
+          sails.log("[InvitationsManager][send] found existing invitation");
           return callback(null, invitation);
         } else {
-          sails.log('[InvitationsManager][send] unable to find existing invitation, creating a new one');
+          sails.log("[InvitationsManager][send] unable to find existing invitation, creating a new one");
           Invitation.findOrCreate(params, params, created);
         }
       }

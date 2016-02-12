@@ -1,12 +1,12 @@
-var redis = require('redis');
+var redis = require("redis");
 
 module.exports = (function() {
 
   var RedisConnection = {};
 
   RedisConnection.getClient = function(ready_fn) {
-    var port = process.env['REDIS_PORT'] || 6379,
-        hostname = process.env['REDIS_HOST'] || '127.0.0.1',
+    var port = process.env["REDIS_PORT"] || 6379,
+        hostname = process.env["REDIS_HOST"] || "127.0.0.1",
         connection = redis.createClient(port, hostname, {
           max_attempts: 1
         }),
@@ -14,7 +14,7 @@ module.exports = (function() {
         failed_connecting = false;
 
     function error(err) {
-      sails.log('[REDIS ERROR] ' + err);
+      sails.log("[REDIS ERROR] " + err);
       client.error = err;
 
       if(!failed_connecting)
@@ -27,8 +27,8 @@ module.exports = (function() {
       ready_fn(null);
     }
 
-    connection.on('error', error);
-    connection.on('ready', ready);
+    connection.on("error", error);
+    connection.on("ready", ready);
 
     client.connection = connection;
 

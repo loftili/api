@@ -2,20 +2,20 @@ module.exports = (function() {
 
   var DeviceStreamMapping = {};
 
-  DeviceStreamMapping.tableName = 'device_stream_mapping';
+  DeviceStreamMapping.tableName = "device_stream_mapping";
 
   DeviceStreamMapping.attributes = {
 
     device: {
-      model: 'device'
+      model: "device"
     },
 
     stream: {
-      model: 'stream'
+      model: "stream"
     },
 
     alpha: {
-      type: 'boolean'
+      type: "boolean"
     }
 
   };

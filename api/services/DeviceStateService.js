@@ -1,13 +1,13 @@
-var Logger = require('./Logger');
+var Logger = require("./Logger");
 
 
 module.exports = (function() {
 
   var DeviceStateService = {},
-      log = Logger('DeviceStateService');
+      log = Logger("DeviceStateService");
 
   function stateKey(device_id) {
-    return ['device', device_id, 'state'].join(':');
+    return ["device", device_id, "state"].join(":");
   }
 
   DeviceStateService.find = function(device_id, callback) {
@@ -27,7 +27,7 @@ module.exports = (function() {
       }
 
       if(!state_info) {
-        return callback('no state info available');
+        return callback("no state info available");
       }
 
       found_info = state_info;
@@ -74,9 +74,9 @@ module.exports = (function() {
       }
 
       function doMove() {
-        // we're joining a stream without an alpha.
+        // we"re joining a stream without an alpha.
         if(!new_streams_alpha) {
-          log('stream ['+stream_id+'] was without an alpha, assigning device['+device_id+']');
+          log("stream ["+stream_id+"] was without an alpha, assigning device["+device_id+"]");
           device_mapping.alpha = true;
         } else {
           device_mapping.alpha = false;
@@ -89,9 +89,9 @@ module.exports = (function() {
       function replaceAlpha(err, old_mappings) {
         if(err) callback(err);
 
-        // the stream we're leaving only had us subscribed to it, just go ahead and move
+        // the stream we"re leaving only had us subscribed to it, just go ahead and move
         if(old_mappings.length === 1) {
-          log('device['+device_id+'] is leaving stream['+stream_id+'] which only had a single device, no need to replace');
+          log("device["+device_id+"] is leaving stream["+stream_id+"] which only had a single device, no need to replace");
           return doMove();
         }
 
@@ -103,14 +103,14 @@ module.exports = (function() {
       }
 
       if(!device_mapping) {
-        log('no device mapping found for device['+device_id+'] but the stream had mappings');
+        log("no device mapping found for device["+device_id+"] but the stream had mappings");
         return DeviceStreamMapping.create({stream: stream_id, device: device_id, alpha: false}).exec(finished);
       }
 
-      // oh shit, we're leaving a stream we're the alpha of, assign a new one
+      // oh shit, we"re leaving a stream we"re the alpha of, assign a new one
       if(device_mapping.alpha === true) {
         var current_stream = device_mapping.stream;
-        log('alpha device['+device_id+'] is leaving it\'s stream['+current_stream+'] - assigning a new alpha...');
+        log("alpha device["+device_id+"] is leaving it\"s stream["+current_stream+"] - assigning a new alpha...");
         return DeviceStreamMapping.find({stream: current_stream}).exec(replaceAlpha);
       }
 
@@ -136,13 +136,13 @@ module.exports = (function() {
       if(state_info.hasOwnProperty(state_key)) state_map.push([state_key, state_info[state_key]]);
     }
 
-    state_map.push(['timestamp', new Date().getTime()]);
+    state_map.push(["timestamp", new Date().getTime()]);
 
     function finish(err) {
       if(err) {
-        log('[DeviceStateService][update] errored durring redis - error['+err+']');
+        log("[DeviceStateService][update] errored durring redis - error["+err+"]");
         client.connection.quit();
-        return callback('redis error');
+        return callback("redis error");
       }
 
       finished_count++;

@@ -2,22 +2,22 @@ module.exports = (function() {
 
   var StreamPermission = {};
 
-  StreamPermission.tableName = 'stream_user_mapping';
+  StreamPermission.tableName = "stream_user_mapping";
 
   StreamPermission.attributes = {
 
     user: {
-      model: 'user',
+      model: "user",
       required: true
     },
 
     stream: {
-      model: 'stream',
+      model: "stream",
       required: true
     },
 
     level: {
-      type: 'integer',
+      type: "integer",
       required: true
     }
 

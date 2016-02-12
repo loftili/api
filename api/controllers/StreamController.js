@@ -1,9 +1,9 @@
-var Logger = require('../services/Logger');
+var Logger = require("../services/Logger");
 
 module.exports = (function() {
 
   var StreamController = {},
-      log = Logger('StreamController');
+      log = Logger("StreamController");
 
   StreamController.move = function(req, res) {
     var user = parseInt(req.session.userid, 10),
@@ -16,13 +16,13 @@ module.exports = (function() {
 
     function canMove(err, can_move) {
       if(err) {
-        log('unable to move tracks around user['+user+'] stream['+stream_id+']');
+        log("unable to move tracks around user["+user+"] stream["+stream_id+"]");
         return res.forbidden();
       }
 
       function moved(err, new_queue) {
         if(err) {
-          log('errored moving: ' + err);
+          log("errored moving: " + err);
           return res.badRequest(err);
         }
 
@@ -73,7 +73,7 @@ module.exports = (function() {
       return res.notFound();
     }
 
-    Stream.findOne(stream).populate('permissions').exec(foundStream);
+    Stream.findOne(stream).populate("permissions").exec(foundStream);
   };
 
   StreamController.enqueue = function(req, res) {
@@ -121,18 +121,18 @@ module.exports = (function() {
     }
 
     function attempt(err, track) {
-      if(err) return res.badRequest('unable to queue[0]');
+      if(err) return res.badRequest("unable to queue[0]");
       track_id = track.id;
-      Stream.findOne(stream).populate('permissions').exec(foundStream);
+      Stream.findOne(stream).populate("permissions").exec(foundStream);
     }
 
 
     if(needs_sync) {
-      log('attempting to enqueue track needing sync');
+      log("attempting to enqueue track needing sync");
       return TrackManagementService.sync(provider, provider_id, attempt);
     }
 
-    Stream.findOne(stream).populate('permissions').exec(foundStream);
+    Stream.findOne(stream).populate("permissions").exec(foundStream);
   };
 
   StreamController.find = function(req, res) {
@@ -162,15 +162,15 @@ module.exports = (function() {
     }
 
     if(!query) 
-      return Stream.find().populate('permissions').exec(found)
+      return Stream.find().populate("permissions").exec(found)
 
     Stream.find({
       or: [{
-        title: { 'contains': query }
+        title: { "contains": query }
       }, {
-        description: { 'contains': query }
+        description: { "contains": query }
       }]
-    }).populate('permissions').exec(found);
+    }).populate("permissions").exec(found);
   };
 
   StreamController.create = function(req, res) {
@@ -209,7 +209,7 @@ module.exports = (function() {
 
     function destroyed(err) {
       if(err) return res.serverError(err);
-      return res.status(200).send('');
+      return res.status(200).send("");
     }
 
     function foundPermission(err) {
@@ -225,7 +225,7 @@ module.exports = (function() {
 
     function finished(err, stream) {
       if(err) {
-        log('failed updating - ' + err);
+        log("failed updating - " + err);
         return res.serverError(err);
       }
 
@@ -237,7 +237,7 @@ module.exports = (function() {
       if(!stream) return res.notFound();
       var changed = false;
 
-      log('updating stream: ['+JSON.stringify(req.body)+']');
+      log("updating stream: ["+JSON.stringify(req.body)+"]");
       for(var i = 0; i < Stream.writable.length; i++) {
         var a = Stream.writable[i];
         if(req.body[a] === undefined) continue;
@@ -248,7 +248,7 @@ module.exports = (function() {
       if(changed)
         stream.save(finished);
       else
-        return res.status(204).send('');
+        return res.status(204).send("");
     }
 
     return Stream.findOne(id).exec(found);
@@ -283,7 +283,7 @@ module.exports = (function() {
       return res.notFound();
     }
 
-    return Stream.findOne(id).populate('permissions').exec(found);
+    return Stream.findOne(id).populate("permissions").exec(found);
   };
 
   return StreamController;

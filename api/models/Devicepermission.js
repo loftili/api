@@ -2,22 +2,22 @@ module.exports = (function() {
 
   var DevicePermission = {};
 
-  DevicePermission.tableName = 'device_user_mapping';
+  DevicePermission.tableName = "device_user_mapping";
 
   DevicePermission.attributes = {
 
     user: {
-      model: 'user',
+      model: "user",
       required: true
     },
 
     device: {
-      model: 'device',
+      model: "device",
       required: true
     },
 
     level: {
-      type: 'integer',
+      type: "integer",
       required: true
     }
 

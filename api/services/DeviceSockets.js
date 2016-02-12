@@ -1,4 +1,4 @@
-var Logger = require('./Logger');
+var Logger = require("./Logger");
 
 module.exports = (function() {
 
@@ -7,9 +7,9 @@ module.exports = (function() {
       users = [],
       uuid = (function() {
         var i = 0;
-        return (function() { return ['_', ++i, '_'].join(''); });
+        return (function() { return ["_", ++i, "_"].join(""); });
       })(),
-      log = Logger('::DeviceSockets'),
+      log = Logger("::DeviceSockets"),
       STATE_RESET = {
         connected: false
       };
@@ -35,7 +35,7 @@ module.exports = (function() {
   };
 
   DeviceSockets.users.remove = function(user_id, callback) {
-    log('removing user socket');
+    log("removing user socket");
     var i = 0, l = users.length, f = -1;
 
     for(i; i < l; i++) {
@@ -46,7 +46,7 @@ module.exports = (function() {
     if(f < 0) return callback();
 
     users.splice(f, 1);
-    log('successfully removed socket for user: ' + user_id);
+    log("successfully removed socket for user: " + user_id);
     callback();
   };
 
@@ -55,7 +55,7 @@ module.exports = (function() {
 
     function send(user) {
       log("broadcasting message["+message+"] to user["+user.user+"]");
-      user.socket.emit('update', message);
+      user.socket.emit("update", message);
     }
 
     for(i; i < l; i++) {
@@ -95,13 +95,17 @@ module.exports = (function() {
       function finish() {
         DeviceSockets.users.broadcast(device_id, "DEVICE_DISCONNECTED");
 
-        if(callback && typeof(callback) === 'function')
+        if(callback && typeof(callback) === "function")
           callback();
       }
 
       log("removing socket at ["+n+"] and updating state");
       connected.splice(n, 1);
       DeviceStateService.update(device_id, STATE_RESET, finish);
+    }
+
+    function receiveData(data) {
+      log("received data from device["+device_id+"]");
     }
 
     log("adding socket ["+id+"] for device["+device_id+"] and setting state");
@@ -116,10 +120,8 @@ module.exports = (function() {
     DeviceStateService.update(device_id, {connected: true}, noop);
     DeviceSockets.users.broadcast(device_id, "DEVICE_CONNECTED");
 
-    socket.on('close', remove);
-    socket.on('data', function() {
-      log('received data from someone');
-    });
+    socket.on("close", remove);
+    socket.on("data", receiveData);
   };
 
   DeviceSockets.remove = function(device_id, callback) {
@@ -136,10 +138,10 @@ module.exports = (function() {
     }
 
     if(!f)
-      return callback('couldnt find matching device socket', false);
+      return callback("couldnt find matching device socket", false);
 
     function finish() {
-      log('successfully removed device socket');
+      log("successfully removed device socket");
       callback(false, true);
     }
 
@@ -160,12 +162,12 @@ module.exports = (function() {
     }
 
     if(!d) {
-      log('device socket not found - failed writing');
-      return callback('missing device', false);
+      log("device socket not found - failed writing");
+      return callback("missing device", false);
     }
 
     d.socket.write(message);
-    return callback(null, 'ok');
+    return callback(null, "ok");
   };
 
   DeviceSockets.isConnected = function(device_id) {

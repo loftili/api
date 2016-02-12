@@ -1,9 +1,9 @@
-var Logger = require('../services/Logger');
+var Logger = require("../services/Logger");
 
 module.exports = (function() {
 
   var DeviceHistoryController = {},
-      log = Logger('DeviceHistoryController');
+      log = Logger("DeviceHistoryController");
 
   DeviceHistoryController.find = function(req, res, next) {
     var device_id = parseInt(req.params.id, 10),
@@ -13,7 +13,7 @@ module.exports = (function() {
       var tracks = [];
 
       if(err) {
-        log('failed getting history: ' + err);
+        log("failed getting history: " + err);
         return res.serverError(err);
       }
 
@@ -33,25 +33,25 @@ module.exports = (function() {
 
     function hasPermission(has_permission, err) {
       if(!has_permission) {
-        log('failed getting permisions: ' + err);
-        return res.status(404).send('');
+        log("failed getting permisions: " + err);
+        return res.status(404).send("");
       }
 
       DeviceHistory.find({
         where: {
           device: device_id
         },
-        sort: 'createdAt DESC',
+        sort: "createdAt DESC",
         limit: 20
-      }).populate('track').exec(foundHistory);
+      }).populate("track").exec(foundHistory);
     }
 
     if(device_id >= 0 && user_id >= 0) {
-      log('looking up device permisions for user['+user_id+'] device['+device_id+']');
+      log("looking up device permisions for user["+user_id+"] device["+device_id+"]");
       return DevicePermissionManager.validate(device_id, user_id, hasPermission);
     } 
 
-    return res.badRequest('invalid params');
+    return res.badRequest("invalid params");
   };
 
   return DeviceHistoryController;

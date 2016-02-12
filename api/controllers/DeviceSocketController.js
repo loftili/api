@@ -1,9 +1,9 @@
-var Logger = require('../services/Logger');
+var Logger = require("../services/Logger");
 
 module.exports = (function() {
 
   var DeviceSocketController = {},
-      log = Logger('DeviceSocketController');
+      log = Logger("DeviceSocketController");
 
   DeviceSocketController.destroy = function(req, res) {
     var device_id = parseInt(req.params.id, 10);
@@ -12,10 +12,10 @@ module.exports = (function() {
       if(err) 
         return res.badRequest(err);
 
-      return res.status(202).send('');
+      return res.status(202).send("");
     }
 
-    log('attempting to remove socket for device['+device_id+']');
+    log("attempting to remove socket for device["+device_id+"]");
     DeviceSockets.remove(device_id, finish);
   };
 
@@ -36,7 +36,7 @@ module.exports = (function() {
 
     if(!(user_id > 0)) return res.forbidden();
 
-    if(!(device_id > 0)) return res.badRequest('');
+    if(!(device_id > 0)) return res.badRequest("");
 
 
     function hasPermission(err, permissions) {
@@ -46,21 +46,21 @@ module.exports = (function() {
       }
 
       if(!permissions || permissions.length < 1) {
-        log('WARN user['+user_id+'] attempted to list to device['+device_id+'] without pemission');
+        log("WARN user["+user_id+"] attempted to list to device["+device_id+"] without pemission");
         return res.notFound();
       }
 
       DeviceSockets.users.add(user_id, device_id, req.socket);
-      log('user['+user_id+'] now listening to device['+device_id+']');
+      log("user["+user_id+"] now listening to device["+device_id+"]");
     }
 
-    Devicepermission.find({device: device_id, user: user_id}).exec(hasPermission);
+    DevicePermission.find({device: device_id, user: user_id}).exec(hasPermission);
   };
 
   DeviceSocketController.open = function(req, res) {
     var query = req.query,
-        serial = req.headers['x-loftili-device-serial'],
-        token = req.headers['x-loftili-device-token'],
+        serial = req.headers["x-loftili-device-serial"],
+        token = req.headers["x-loftili-device-token"],
         device;
 
     function found(err, matching_serials) {
@@ -71,13 +71,13 @@ module.exports = (function() {
       device = serial.devices[0];
 
       if(device.token !== token)
-        return res.badRequest('invalid device creds [1]');
+        return res.badRequest("invalid device creds [1]");
 
       DeviceSockets.add(req.socket, device.id);
     }
 
-    log('looking for serials matching: ' + serial);
-    DeviceSerial.find({serial_number: serial}).populate('devices').exec(found);
+    log("looking for serials matching: " + serial);
+    DeviceSerial.find({serial_number: serial}).populate("devices").exec(found);
   };
 
   return DeviceSocketController;

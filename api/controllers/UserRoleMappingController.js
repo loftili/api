@@ -13,7 +13,7 @@ module.exports = (function() {
     }
 
     UserRoleMapping.find({user: user_id})
-      .populate('user').populate('role').exec(found);
+      .populate("user").populate("role").exec(found);
   };
 
   return UserRoleMappingController;
